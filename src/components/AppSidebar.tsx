@@ -1,20 +1,32 @@
-import { Home, Users, FlaskConical, UserCog, FileText, MapPin, Building2, ClipboardList, LogOut } from 'lucide-react';
-import { NavLink } from 'react-router-dom';
+import { useState } from 'react';
+import { NavLink, useLocation } from 'react-router-dom';
 import {
-  Sidebar,
-  SidebarContent,
-  SidebarGroup,
-  SidebarGroupContent,
-  SidebarGroupLabel,
-  SidebarMenu,
-  SidebarMenuButton,
-  SidebarMenuItem,
-  SidebarHeader,
-  SidebarFooter,
-  useSidebar,
-} from '@/components/ui/sidebar';
+  Drawer,
+  List,
+  ListItem,
+  ListItemButton,
+  ListItemIcon,
+  ListItemText,
+  Box,
+  Typography,
+  IconButton,
+  Divider,
+  Avatar,
+} from '@mui/material';
+import {
+  Home,
+  Users,
+  FlaskConical,
+  UserCog,
+  FileText,
+  MapPin,
+  Building2,
+  ClipboardList,
+  LogOut,
+  Menu,
+  ChevronLeft,
+} from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
-import { Button } from '@/components/ui/button';
 
 const menuItems = [
   { title: 'Dashboard', url: '/dashboard', icon: Home },
@@ -27,61 +39,117 @@ const menuItems = [
   { title: 'Ubicaciones', url: '/ubicaciones', icon: MapPin },
 ];
 
-export function AppSidebar() {
-  const { state } = useSidebar();
+const drawerWidth = 260;
+
+interface AppSidebarProps {
+  open: boolean;
+  onToggle: () => void;
+}
+
+export function AppSidebar({ open, onToggle }: AppSidebarProps) {
   const { signOut } = useAuth();
+  const location = useLocation();
 
   return (
-    <Sidebar collapsible="icon" className="border-r">
-      <SidebarHeader className="border-b p-4">
-        <div className="flex items-center gap-2">
-          <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary">
-            <Building2 className="h-5 w-5 text-primary-foreground" />
-          </div>
-          {state !== 'collapsed' && (
-            <div>
-              <h2 className="text-sm font-semibold">UES Valle</h2>
-              <p className="text-xs text-muted-foreground">Sistema Administrativo</p>
-            </div>
-          )}
-        </div>
-      </SidebarHeader>
+    <Drawer
+      variant="permanent"
+      sx={{
+        width: open ? drawerWidth : 72,
+        flexShrink: 0,
+        '& .MuiDrawer-paper': {
+          width: open ? drawerWidth : 72,
+          boxSizing: 'border-box',
+          transition: 'width 0.2s',
+          overflowX: 'hidden',
+          borderRight: '1px solid',
+          borderColor: 'divider',
+        },
+      }}
+    >
+      <Box sx={{ p: 2, display: 'flex', alignItems: 'center', gap: 2 }}>
+        <Avatar sx={{ bgcolor: 'primary.main' }}>
+          <Building2 size={24} />
+        </Avatar>
+        {open && (
+          <Box sx={{ flex: 1 }}>
+            <Typography variant="subtitle2" fontWeight="bold">
+              UES Valle
+            </Typography>
+            <Typography variant="caption" color="text.secondary">
+              Sistema Administrativo
+            </Typography>
+          </Box>
+        )}
+        <IconButton onClick={onToggle} size="small">
+          {open ? <ChevronLeft size={20} /> : <Menu size={20} />}
+        </IconButton>
+      </Box>
 
-      <SidebarContent>
-        <SidebarGroup>
-          <SidebarGroupLabel>Navegación</SidebarGroupLabel>
-          <SidebarGroupContent>
-            <SidebarMenu>
-              {menuItems.map((item) => (
-                <SidebarMenuItem key={item.title}>
-                  <SidebarMenuButton asChild>
-                    <NavLink
-                      to={item.url}
-                      className={({ isActive }) =>
-                        isActive ? 'bg-sidebar-accent text-sidebar-accent-foreground' : ''
-                      }
-                    >
-                      <item.icon className="h-4 w-4" />
-                      {state !== 'collapsed' && <span>{item.title}</span>}
-                    </NavLink>
-                  </SidebarMenuButton>
-                </SidebarMenuItem>
-              ))}
-            </SidebarMenu>
-          </SidebarGroupContent>
-        </SidebarGroup>
-      </SidebarContent>
+      <Divider />
 
-      <SidebarFooter className="border-t p-4">
-        <Button
-          variant="ghost"
+      <List sx={{ flex: 1, py: 2 }}>
+        {menuItems.map((item) => {
+          const IconComponent = item.icon;
+          const isActive = location.pathname === item.url;
+          return (
+            <ListItem key={item.title} disablePadding sx={{ px: 1 }}>
+              <ListItemButton
+                component={NavLink}
+                to={item.url}
+                selected={isActive}
+                sx={{
+                  borderRadius: 1,
+                  justifyContent: open ? 'initial' : 'center',
+                  minHeight: 48,
+                  '&.Mui-selected': {
+                    bgcolor: 'primary.main',
+                    color: 'primary.contrastText',
+                    '&:hover': {
+                      bgcolor: 'primary.dark',
+                    },
+                  },
+                }}
+              >
+                <ListItemIcon
+                  sx={{
+                    minWidth: 0,
+                    mr: open ? 2 : 'auto',
+                    justifyContent: 'center',
+                    color: isActive ? 'inherit' : 'text.secondary',
+                  }}
+                >
+                  <IconComponent size={20} />
+                </ListItemIcon>
+                {open && <ListItemText primary={item.title} />}
+              </ListItemButton>
+            </ListItem>
+          );
+        })}
+      </List>
+
+      <Divider />
+
+      <Box sx={{ p: 1 }}>
+        <ListItemButton
           onClick={signOut}
-          className="w-full justify-start"
+          sx={{
+            borderRadius: 1,
+            justifyContent: open ? 'initial' : 'center',
+            minHeight: 48,
+          }}
         >
-          <LogOut className="h-4 w-4" />
-          {state !== 'collapsed' && <span className="ml-2">Cerrar Sesión</span>}
-        </Button>
-      </SidebarFooter>
-    </Sidebar>
+          <ListItemIcon
+            sx={{
+              minWidth: 0,
+              mr: open ? 2 : 'auto',
+              justifyContent: 'center',
+            }}
+          >
+            <LogOut size={20} />
+          </ListItemIcon>
+          {open && <ListItemText primary="Cerrar Sesión" />}
+        </ListItemButton>
+      </Box>
+    </Drawer>
   );
 }

@@ -1,26 +1,21 @@
 import { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from '@/components/ui/table';
-import {
+  Box,
+  Button,
+  TextField,
+  Typography,
   Dialog,
-  DialogContent,
-  DialogHeader,
   DialogTitle,
-  DialogTrigger,
-  DialogFooter,
-} from '@/components/ui/dialog';
-import { Label } from '@/components/ui/label';
+  DialogContent,
+  DialogActions,
+  Paper,
+  IconButton,
+  CircularProgress,
+  InputAdornment,
+} from '@mui/material';
+import { DataGrid, GridColDef, GridActionsCellItem } from '@mui/x-data-grid';
 import { Plus, Search, Edit, Trash2 } from 'lucide-react';
 import { toast } from 'sonner';
 
@@ -162,158 +157,163 @@ export default function Prestadores() {
     }
   };
 
-  return (
-    <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-3xl font-bold">Prestadores</h1>
-          <p className="text-muted-foreground">Gestión de prestadores de servicios</p>
-        </div>
-        <Dialog open={dialogOpen} onOpenChange={(open) => {
-          setDialogOpen(open);
-          if (!open) resetForm();
-        }}>
-          <DialogTrigger asChild>
-            <Button>
-              <Plus className="mr-2 h-4 w-4" />
-              Nuevo Prestador
-            </Button>
-          </DialogTrigger>
-          <DialogContent className="max-w-2xl">
-            <DialogHeader>
-              <DialogTitle>
-                {editingPrestador ? 'Editar Prestador' : 'Nuevo Prestador'}
-              </DialogTitle>
-            </DialogHeader>
-            <form onSubmit={handleSubmit} className="space-y-4">
-              <div className="grid gap-4 md:grid-cols-2">
-                <div className="space-y-2">
-                  <Label htmlFor="nombre">Nombre *</Label>
-                  <Input
-                    id="nombre"
-                    value={formData.nombre}
-                    onChange={(e) => setFormData({ ...formData, nombre: e.target.value })}
-                    required
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="nit">NIT</Label>
-                  <Input
-                    id="nit"
-                    value={formData.nit}
-                    onChange={(e) => setFormData({ ...formData, nit: e.target.value })}
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="telefono">Teléfono</Label>
-                  <Input
-                    id="telefono"
-                    value={formData.telefono}
-                    onChange={(e) => setFormData({ ...formData, telefono: e.target.value })}
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="id_sspd">ID SSPD</Label>
-                  <Input
-                    id="id_sspd"
-                    value={formData.id_sspd}
-                    onChange={(e) => setFormData({ ...formData, id_sspd: e.target.value })}
-                  />
-                </div>
-                <div className="space-y-2 md:col-span-2">
-                  <Label htmlFor="direccion">Dirección</Label>
-                  <Input
-                    id="direccion"
-                    value={formData.direccion}
-                    onChange={(e) => setFormData({ ...formData, direccion: e.target.value })}
-                  />
-                </div>
-                <div className="space-y-2 md:col-span-2">
-                  <Label htmlFor="id_autoridad_sanitaria">ID Autoridad Sanitaria</Label>
-                  <Input
-                    id="id_autoridad_sanitaria"
-                    value={formData.id_autoridad_sanitaria}
-                    onChange={(e) => setFormData({ ...formData, id_autoridad_sanitaria: e.target.value })}
-                  />
-                </div>
-              </div>
-              <DialogFooter>
-                <Button type="submit">
-                  {editingPrestador ? 'Actualizar' : 'Crear'}
-                </Button>
-              </DialogFooter>
-            </form>
-          </DialogContent>
-        </Dialog>
-      </div>
+  const columns: GridColDef[] = [
+    { field: 'nombre', headerName: 'Nombre', flex: 1, minWidth: 200 },
+    { field: 'nit', headerName: 'NIT', width: 150 },
+    { field: 'telefono', headerName: 'Teléfono', width: 150 },
+    { field: 'id_sspd', headerName: 'ID SSPD', width: 150 },
+    {
+      field: 'actions',
+      type: 'actions',
+      headerName: 'Acciones',
+      width: 100,
+      getActions: (params) => [
+        <GridActionsCellItem
+          icon={<Edit size={18} />}
+          label="Editar"
+          onClick={() => handleEdit(params.row)}
+        />,
+        <GridActionsCellItem
+          icon={<Trash2 size={18} />}
+          label="Eliminar"
+          onClick={() => handleDelete(params.row.id_prestador)}
+        />,
+      ],
+    },
+  ];
 
-      <Card>
-        <CardHeader>
-          <CardTitle>Lista de Prestadores</CardTitle>
-          <div className="relative">
-            <Search className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
-            <Input
-              placeholder="Buscar por nombre o NIT..."
-              className="pl-8"
-              value={search}
-              onChange={(e) => setSearch(e.target.value)}
-            />
-          </div>
-        </CardHeader>
-        <CardContent>
-          {isLoading ? (
-            <div className="flex justify-center p-8">
-              <div className="h-8 w-8 animate-spin rounded-full border-4 border-primary border-t-transparent"></div>
-            </div>
-          ) : (
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>Nombre</TableHead>
-                  <TableHead>NIT</TableHead>
-                  <TableHead>Teléfono</TableHead>
-                  <TableHead>ID SSPD</TableHead>
-                  <TableHead className="text-right">Acciones</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {prestadores && prestadores.length > 0 ? (
-                  prestadores.map((prestador) => (
-                    <TableRow key={prestador.id_prestador}>
-                      <TableCell className="font-medium">{prestador.nombre}</TableCell>
-                      <TableCell>{prestador.nit || '-'}</TableCell>
-                      <TableCell>{prestador.telefono || '-'}</TableCell>
-                      <TableCell>{prestador.id_sspd || '-'}</TableCell>
-                      <TableCell className="text-right">
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          onClick={() => handleEdit(prestador)}
-                        >
-                          <Edit className="h-4 w-4" />
-                        </Button>
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          onClick={() => handleDelete(prestador.id_prestador)}
-                        >
-                          <Trash2 className="h-4 w-4" />
-                        </Button>
-                      </TableCell>
-                    </TableRow>
-                  ))
-                ) : (
-                  <TableRow>
-                    <TableCell colSpan={5} className="text-center text-muted-foreground">
-                      No se encontraron prestadores
-                    </TableCell>
-                  </TableRow>
-                )}
-              </TableBody>
-            </Table>
-          )}
-        </CardContent>
-      </Card>
-    </div>
+  return (
+    <Box>
+      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', mb: 4 }}>
+        <Box>
+          <Typography variant="h3" component="h1" fontWeight="bold" gutterBottom>
+            Prestadores
+          </Typography>
+          <Typography variant="body1" color="text.secondary">
+            Gestión de prestadores de servicios
+          </Typography>
+        </Box>
+        <Button
+          variant="contained"
+          startIcon={<Plus size={20} />}
+          onClick={() => setDialogOpen(true)}
+        >
+          Nuevo Prestador
+        </Button>
+      </Box>
+
+      <Paper sx={{ p: 3 }}>
+        <Box sx={{ mb: 3 }}>
+          <TextField
+            fullWidth
+            placeholder="Buscar por nombre o NIT..."
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            InputProps={{
+              startAdornment: (
+                <InputAdornment position="start">
+                  <Search size={20} />
+                </InputAdornment>
+              ),
+            }}
+          />
+        </Box>
+
+        <Box sx={{ height: 600, width: '100%' }}>
+          <DataGrid
+            rows={prestadores || []}
+            columns={columns}
+            loading={isLoading}
+            getRowId={(row) => row.id_prestador}
+            pageSizeOptions={[10, 25, 50]}
+            initialState={{
+              pagination: { paginationModel: { pageSize: 10 } },
+            }}
+            disableRowSelectionOnClick
+            sx={{
+              '& .MuiDataGrid-cell:focus': {
+                outline: 'none',
+              },
+            }}
+          />
+        </Box>
+      </Paper>
+
+      <Dialog 
+        open={dialogOpen} 
+        onClose={() => {
+          setDialogOpen(false);
+          resetForm();
+        }}
+        maxWidth="md"
+        fullWidth
+      >
+        <DialogTitle>
+          {editingPrestador ? 'Editar Prestador' : 'Nuevo Prestador'}
+        </DialogTitle>
+        <form onSubmit={handleSubmit}>
+          <DialogContent>
+            <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', sm: 'repeat(2, 1fr)' }, gap: 2 }}>
+              <TextField
+                label="Nombre"
+                fullWidth
+                required
+                value={formData.nombre}
+                onChange={(e) => setFormData({ ...formData, nombre: e.target.value })}
+                margin="normal"
+              />
+              <TextField
+                label="NIT"
+                fullWidth
+                value={formData.nit}
+                onChange={(e) => setFormData({ ...formData, nit: e.target.value })}
+                margin="normal"
+              />
+              <TextField
+                label="Teléfono"
+                fullWidth
+                value={formData.telefono}
+                onChange={(e) => setFormData({ ...formData, telefono: e.target.value })}
+                margin="normal"
+              />
+              <TextField
+                label="ID SSPD"
+                fullWidth
+                value={formData.id_sspd}
+                onChange={(e) => setFormData({ ...formData, id_sspd: e.target.value })}
+                margin="normal"
+              />
+              <TextField
+                label="Dirección"
+                fullWidth
+                value={formData.direccion}
+                onChange={(e) => setFormData({ ...formData, direccion: e.target.value })}
+                margin="normal"
+                sx={{ gridColumn: '1 / -1' }}
+              />
+              <TextField
+                label="ID Autoridad Sanitaria"
+                fullWidth
+                value={formData.id_autoridad_sanitaria}
+                onChange={(e) => setFormData({ ...formData, id_autoridad_sanitaria: e.target.value })}
+                margin="normal"
+                sx={{ gridColumn: '1 / -1' }}
+              />
+            </Box>
+          </DialogContent>
+          <DialogActions sx={{ px: 3, pb: 2 }}>
+            <Button onClick={() => {
+              setDialogOpen(false);
+              resetForm();
+            }}>
+              Cancelar
+            </Button>
+            <Button type="submit" variant="contained">
+              {editingPrestador ? 'Actualizar' : 'Crear'}
+            </Button>
+          </DialogActions>
+        </form>
+      </Dialog>
+    </Box>
   );
 }

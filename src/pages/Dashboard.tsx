@@ -1,6 +1,12 @@
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { 
+  Box, 
+  Card, 
+  CardContent, 
+  Typography, 
+  CircularProgress
+} from '@mui/material';
 import { Users, FlaskConical, FileText, Building2 } from 'lucide-react';
 
 export default function Dashboard() {
@@ -28,64 +34,75 @@ export default function Dashboard() {
       title: 'Prestadores',
       value: stats?.prestadores || 0,
       icon: Users,
-      color: 'text-primary',
+      color: '#3b82f6',
     },
     {
       title: 'Muestreos',
       value: stats?.muestreos || 0,
       icon: FlaskConical,
-      color: 'text-secondary',
+      color: '#10b981',
     },
     {
       title: 'Reportes',
       value: stats?.reportes || 0,
       icon: FileText,
-      color: 'text-accent',
+      color: '#f59e0b',
     },
     {
       title: 'Laboratorios',
       value: stats?.laboratorios || 0,
       icon: Building2,
-      color: 'text-muted-foreground',
+      color: '#6b7280',
     },
   ];
 
   return (
-    <div className="space-y-6">
-      <div>
-        <h1 className="text-3xl font-bold">Dashboard</h1>
-        <p className="text-muted-foreground">Vista general del sistema</p>
-      </div>
+    <Box>
+      <Box sx={{ mb: 4 }}>
+        <Typography variant="h3" component="h1" fontWeight="bold" gutterBottom>
+          Dashboard
+        </Typography>
+        <Typography variant="body1" color="text.secondary">
+          Vista general del sistema
+        </Typography>
+      </Box>
 
-      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-        {cards.map((card) => (
-          <Card key={card.title}>
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">{card.title}</CardTitle>
-              <card.icon className={`h-5 w-5 ${card.color}`} />
-            </CardHeader>
-            <CardContent>
-              {isLoading ? (
-                <div className="h-8 w-20 animate-pulse rounded bg-muted"></div>
-              ) : (
-                <div className="text-2xl font-bold">{card.value}</div>
-              )}
-            </CardContent>
-          </Card>
-        ))}
-      </div>
+      <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', sm: 'repeat(2, 1fr)', md: 'repeat(4, 1fr)' }, gap: 3, mb: 4 }}>
+        {cards.map((card) => {
+          const IconComponent = card.icon;
+          return (
+            <Card key={card.title}>
+              <CardContent>
+                <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', mb: 2 }}>
+                  <Typography variant="body2" color="text.secondary">
+                    {card.title}
+                  </Typography>
+                  <IconComponent size={20} color={card.color} />
+                </Box>
+                {isLoading ? (
+                  <CircularProgress size={24} />
+                ) : (
+                  <Typography variant="h4" component="div" fontWeight="bold">
+                    {card.value}
+                  </Typography>
+                )}
+              </CardContent>
+            </Card>
+          );
+        })}
+      </Box>
 
       <Card>
-        <CardHeader>
-          <CardTitle>Bienvenido a UES Valle</CardTitle>
-        </CardHeader>
         <CardContent>
-          <p className="text-muted-foreground">
+          <Typography variant="h6" component="h2" gutterBottom>
+            Bienvenido a UES Valle
+          </Typography>
+          <Typography variant="body2" color="text.secondary">
             Sistema de gestión administrativa para la supervisión y control de prestadores de
             servicios de acueducto y alcantarillado en el Valle del Cauca.
-          </p>
+          </Typography>
         </CardContent>
       </Card>
-    </div>
+    </Box>
   );
 }
