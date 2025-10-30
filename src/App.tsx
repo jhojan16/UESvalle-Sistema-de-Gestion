@@ -10,6 +10,10 @@ import Login from "./pages/Login";
 import Dashboard from "./pages/Dashboard";
 import Prestadores from "./pages/Prestadores";
 import NotFound from "./pages/NotFound";
+import Muestreos from "./pages/Muestreos";
+import Tecnico from "./pages/Tecnico";
+import Laboratorio from "./pages/Laboratorio";
+import Solicitante from "./pages/Solicitantes";
 
 const queryClient = new QueryClient();
 
@@ -48,10 +52,7 @@ const App = () => (
               element={
                 <ProtectedRoute>
                   <Layout>
-                    <div className="text-center p-8">
-                      <h2 className="text-2xl font-bold">Muestreos</h2>
-                      <p className="text-muted-foreground mt-2">Página en desarrollo</p>
-                    </div>
+                    <Muestreos />
                   </Layout>
                 </ProtectedRoute>
               }
@@ -61,10 +62,7 @@ const App = () => (
               element={
                 <ProtectedRoute>
                   <Layout>
-                    <div className="text-center p-8">
-                      <h2 className="text-2xl font-bold">Técnicos</h2>
-                      <p className="text-muted-foreground mt-2">Página en desarrollo</p>
-                    </div>
+                    <Tecnico /> 
                   </Layout>
                 </ProtectedRoute>
               }
@@ -74,10 +72,7 @@ const App = () => (
               element={
                 <ProtectedRoute>
                   <Layout>
-                    <div className="text-center p-8">
-                      <h2 className="text-2xl font-bold">Laboratorios</h2>
-                      <p className="text-muted-foreground mt-2">Página en desarrollo</p>
-                    </div>
+                    <Laboratorio />
                   </Layout>
                 </ProtectedRoute>
               }
@@ -99,11 +94,8 @@ const App = () => (
               path="/solicitantes"
               element={
                 <ProtectedRoute>
-                  <Layout>
-                    <div className="text-center p-8">
-                      <h2 className="text-2xl font-bold">Solicitantes</h2>
-                      <p className="text-muted-foreground mt-2">Página en desarrollo</p>
-                    </div>
+                  <Layout>  
+                    <Solicitante />
                   </Layout>
                 </ProtectedRoute>
               }
