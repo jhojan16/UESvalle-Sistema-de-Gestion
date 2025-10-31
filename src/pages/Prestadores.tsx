@@ -16,7 +16,8 @@ import {
   InputAdornment,
 } from '@mui/material';
 import { DataGrid, GridColDef, GridActionsCellItem } from '@mui/x-data-grid';
-import { Plus, Search, Edit, Trash2 } from 'lucide-react';
+import { Plus, Search, Edit, Trash2, Eye } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 import { toast } from 'sonner';
 
 type Prestador = {
@@ -43,6 +44,7 @@ export default function Prestadores() {
   });
 
   const queryClient = useQueryClient();
+    const navigate = useNavigate();
 
   const { data: prestadores, isLoading } = useQuery({
     queryKey: ['prestadores', search],
@@ -166,8 +168,14 @@ export default function Prestadores() {
       field: 'actions',
       type: 'actions',
       headerName: 'Acciones',
-      width: 100,
+      width: 150,
       getActions: (params) => [
+        <GridActionsCellItem
+          icon={<Eye size={18} />}
+          label="Ver Detalle"
+          onClick={() => navigate(`/prestadores/${params.row.id_prestador}`)}
+          showInMenu={false}
+        />,
         <GridActionsCellItem
           icon={<Edit size={18} />}
           label="Editar"

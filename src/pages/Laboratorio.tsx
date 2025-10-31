@@ -39,7 +39,7 @@ export default function Laboratorios() {
         estado: '',
         telefono: '',
         email: '',
-        id_ubicacion_lab: '',
+        direccion: '',
     });
 
     const queryClient = useQueryClient();
@@ -74,7 +74,12 @@ export default function Laboratorios() {
     // ✅ Crear laboratorio
     const createMutation = useMutation({
         mutationFn: async (data: typeof formData) => {
-            const { error } = await supabase.from('laboratorio').insert([data]);
+            const { error } = await supabase.from('laboratorio').insert([{
+                nombre: data.nombre,
+                estado: data.estado,
+                telefono: data.telefono,
+                email: data.email,
+            }]);
             if (error) throw error;
         },
         onSuccess: () => {
@@ -91,11 +96,40 @@ export default function Laboratorios() {
     // ✅ Actualizar laboratorio
     const updateMutation = useMutation({
         mutationFn: async ({ id, data }: { id: number; data: typeof formData }) => {
-            const { error } = await supabase
+            // Obtener el laboratorio para saber su id_ubicacion_lab
+            const { data: labData, error: fetchError } = await supabase
                 .from('laboratorio')
-                .update(data)
+                .select('id_ubicacion_lab')
+                .eq('id_laboratorio', id)
+                .single();
+            
+            if (fetchError) throw fetchError;
+
+            // Actualizar datos del laboratorio
+            const { error: labError } = await supabase
+                .from('laboratorio')
+                .update({
+                    nombre: data.nombre,
+                    estado: data.estado,
+                    telefono: data.telefono,
+                    email: data.email,
+                })
                 .eq('id_laboratorio', id);
-            if (error) throw error;
+            
+            if (labError) throw labError;
+
+            // Si tiene ubicación asociada, actualizar solo la dirección
+            if (labData.id_ubicacion_lab) {
+                const { error: ubicError } = await supabase
+                    .from('ubicacion_laboratorio')
+                    .update({
+                        direccion: data.direccion,
+                    })
+                    .eq('id_ubicacion_lab', labData.id_ubicacion_lab);
+                
+                if (ubicError) throw ubicError;
+            }
+            console.log(labData);
         },
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: ['laboratorios'] });
@@ -130,7 +164,7 @@ export default function Laboratorios() {
             estado: '',
             telefono: '',
             email: '',
-            id_ubicacion_lab: '',
+            direccion: '',
         });
         setEditingLab(null);
     };
@@ -151,7 +185,7 @@ export default function Laboratorios() {
             estado: lab.estado || '',
             telefono: lab.telefono || '',
             email: lab.email || '',
-            id_ubicacion_lab: lab.id_ubicacion_lab?.toString() || '',
+            direccion: lab.ubicacion_laboratorio?.direccion || '',
         });
         setDialogOpen(true);
     };
@@ -176,7 +210,7 @@ export default function Laboratorios() {
             renderCell: (params) => {
                 const ubicacion = params.row?.ubicacion_laboratorio;
                 if (!ubicacion) return 'Sin ubicación';
-                return `${ubicacion.municipio}, ${ubicacion.direccion}`;
+                return `${ubicacion.municipio || ''}, ${ubicacion.direccion || ''}`;
             },
         },
         {
@@ -307,17 +341,14 @@ export default function Laboratorios() {
                                 margin="normal"
                             />
                             <TextField
-                                label="Ubicación"
+                                label="Dirección"
                                 fullWidth
-                                value={
-                                    editingLab?.ubicacion_laboratorio
-                                        ? `${editingLab.ubicacion_laboratorio.direccion ?? ''}`
-                                        : 'Sin ubicación'
-                                }
+                                value={formData.direccion}
+                                onChange={(e) => setFormData({ ...formData, direccion: e.target.value })}
                                 margin="normal"
-                                
+                                disabled={!editingLab}
+                                helperText={!editingLab ? 'Solo editable al actualizar' : ''}
                             />
-
                         </Box>
                     </DialogContent>
                     <DialogActions sx={{ px: 3, pb: 2 }}>

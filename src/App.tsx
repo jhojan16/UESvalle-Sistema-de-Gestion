@@ -13,6 +13,7 @@ import NotFound from "./pages/NotFound";
 import Muestreos from "./pages/Muestreos";
 import Tecnico from "./pages/Tecnico";
 import Laboratorio from "./pages/Laboratorio";
+import PrestadorDetalle from "./pages/PrestadorDetalle";
 import Solicitante from "./pages/Solicitantes";
 
 const queryClient = new QueryClient();
@@ -43,6 +44,16 @@ const App = () => (
                 <ProtectedRoute>
                   <Layout>
                     <Prestadores />
+                  </Layout>
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/prestadores/:id"
+              element={
+                <ProtectedRoute>
+                  <Layout>
+                    <PrestadorDetalle />
                   </Layout>
                 </ProtectedRoute>
               }
