@@ -222,44 +222,43 @@ export type Database = {
         }
         Relationships: []
       }
-      reportes: {
+      reporte: {
         Row: {
           codigo: string
           created_at: string | null
-          departamento: string | null
-          enlace_informe: string | null
           estado: string | null
           fecha_creacion: string | null
-          id: number
-          municipio: string | null
-          prestador: string | null
+          id_reporte: number
+          id_prestador: number | null
           punto: string | null
         }
         Insert: {
           codigo: string
           created_at?: string | null
-          departamento?: string | null
-          enlace_informe?: string | null
           estado?: string | null
           fecha_creacion?: string | null
-          id?: number
-          municipio?: string | null
-          prestador?: string | null
+          id_reporte?: number
+          id_prestador?: number | null
           punto?: string | null
         }
         Update: {
-          codigo?: string
+          codigo: string
           created_at?: string | null
-          departamento?: string | null
-          enlace_informe?: string | null
           estado?: string | null
           fecha_creacion?: string | null
-          id?: number
-          municipio?: string | null
-          prestador?: string | null
+          id_reporte?: number
+          id_prestador?: number | null
           punto?: string | null
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "representante_id_prestador_fkey"
+            columns: ["id_prestador"]
+            isOneToOne: false
+            referencedRelation: "prestador"
+            referencedColumns: ["id_prestador"]
+          }
+        ]
       }
       representante: {
         Row: {

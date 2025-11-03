@@ -26,7 +26,7 @@ export default function Dashboard() {
       const [prestadores, muestreos, reportes, laboratorios] = await Promise.all([
         supabase.from('prestador').select('*', { count: 'exact', head: true }),
         supabase.from('muestreo').select('*', { count: 'exact', head: true }),
-        supabase.from('reportes').select('*', { count: 'exact', head: true }),
+        supabase.from('reporte').select('*', { count: 'exact', head: true }),
         supabase.from('laboratorio').select('*', { count: 'exact', head: true }),
       ]);
 

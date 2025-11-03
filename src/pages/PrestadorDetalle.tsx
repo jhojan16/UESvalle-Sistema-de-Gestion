@@ -53,12 +53,12 @@ export default function PrestadorDetalle() {
             const { data, error } = await supabase
                 .from('prestador')
                 .select(`
-          *,
-          ubicacion (
-            departamento,
-            municipio,
-            vereda
-          )
+            *,
+            ubicacion (
+                departamento,
+                municipio,
+                vereda
+            )
         `)
                 .eq('id_prestador', prestadorId)
                 .single();
@@ -84,6 +84,21 @@ export default function PrestadorDetalle() {
         enabled: !!prestadorId,
     });
 
+    // Representantes del prestador
+    const { data: reporte = [] } = useQuery({
+        queryKey: ['reporte', prestadorId],
+        queryFn: async () => {
+            const { data, error } = await supabase
+                .from('reporte')
+                .select('codigo, punto, estado, fecha_creacion, id_reporte')
+                .eq('id_prestador', prestadorId)
+                .order('created_at', { ascending: false });
+            if (error) throw error;
+            return data;
+        },
+        enabled: !!prestadorId,
+    });
+
     // Muestreos con laboratorio y solicitante
     const { data: muestreos = [] } = useQuery({
         queryKey: ['muestreos', prestadorId],
@@ -91,17 +106,17 @@ export default function PrestadorDetalle() {
             const { data, error } = await supabase
                 .from('muestreo')
                 .select(`
-          *,
-          laboratorio (
-            nombre,
-            telefono,
-            email
-          ),
-          solicitante (
-            nombre,
-            estado
-          )
-        `)
+            *,
+            laboratorio (
+                nombre,
+                telefono,
+                email
+            ),
+            solicitante (
+                nombre,
+                estado
+            )
+            `)
                 .eq('id_prestador', prestadorId)
                 .order('created_at', { ascending: false });
 
@@ -111,21 +126,7 @@ export default function PrestadorDetalle() {
         enabled: !!prestadorId,
     });
 
-    // Reportes relacionados al prestador
-    const { data: reportes = [] } = useQuery({
-        queryKey: ['reportes', id],
-        queryFn: async () => {
-            const { data, error } = await supabase
-                .from('reportes')
-                .select('*')
-                .eq('prestador', prestador?.nombre)
-                .order('fecha_creacion', { ascending: false });
-
-            if (error) throw error;
-            return data;
-        },
-        enabled: !!prestador?.nombre,
-    });
+    
 
     if (loadingPrestador) {
         return (
@@ -180,8 +181,6 @@ export default function PrestadorDetalle() {
     const reportesColumns: GridColDef[] = [
         { field: 'codigo', headerName: 'Código', width: 150 },
         { field: 'punto', headerName: 'Punto', flex: 1, minWidth: 150 },
-        { field: 'municipio', headerName: 'Municipio', width: 150 },
-        { field: 'departamento', headerName: 'Departamento', width: 150 },
         {
             field: 'estado',
             headerName: 'Estado',
@@ -302,7 +301,7 @@ export default function PrestadorDetalle() {
                 <Tabs value={tabValue} onChange={(_, newValue) => setTabValue(newValue)}>
                     <Tab label={`Representantes (${representantes.length})`} />
                     <Tab label={`Muestreos (${muestreos.length})`} />
-                    <Tab label={`Reportes (${reportes.length})`} />
+                    <Tab label={`Reportes (${reporte.length})`} />
                 </Tabs>
 
                 <TabPanel value={tabValue} index={0}>
@@ -338,9 +337,9 @@ export default function PrestadorDetalle() {
                 <TabPanel value={tabValue} index={2}>
                     <Box sx={{ height: 400, width: '100%' }}>
                         <DataGrid
-                            rows={reportes}
+                            rows={reporte}
                             columns={reportesColumns}
-                            getRowId={(row) => row.id}
+                            getRowId={(row) => row.id_reporte}
                             pageSizeOptions={[10, 25, 50]}
                             initialState={{
                                 pagination: { paginationModel: { pageSize: 10 } },

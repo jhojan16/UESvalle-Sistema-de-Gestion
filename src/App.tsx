@@ -15,6 +15,7 @@ import Tecnico from "./pages/Tecnico";
 import Laboratorio from "./pages/Laboratorio";
 import PrestadorDetalle from "./pages/PrestadorDetalle";
 import Solicitante from "./pages/Solicitantes";
+import Reportes from "./pages/Reportes";
 
 const queryClient = new QueryClient();
 
@@ -92,13 +93,11 @@ const App = () => (
               path="/reportes"
               element={
                 <ProtectedRoute>
-                  <Layout>
-                    <div className="text-center p-8">
-                      <h2 className="text-2xl font-bold">Reportes</h2>
-                      <p className="text-muted-foreground mt-2">Página en desarrollo</p>
-                    </div>
+                  <Layout>  
+                    <Reportes />
                   </Layout>
                 </ProtectedRoute>
+
               }
             />
             <Route
