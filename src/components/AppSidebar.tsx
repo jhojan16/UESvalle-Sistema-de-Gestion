@@ -25,6 +25,7 @@ import {
   LogOut,
   Menu,
   ChevronLeft,
+  ArrowBigDownDash 
 } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 
@@ -36,7 +37,7 @@ const menuItems = [
   { title: 'Reportes', url: '/reportes', icon: FileText },
   { title: 'Solicitantes', url: '/solicitantes', icon: ClipboardList },
   { title: 'Muestreos', url: '/muestreos', icon: FlaskConical },
-  { title: 'Ubicaciones', url: '/ubicaciones', icon: MapPin },
+  { title: 'Exportar', url: '/exportar', icon: ArrowBigDownDash },
 ];
 
 const drawerWidth = 260;

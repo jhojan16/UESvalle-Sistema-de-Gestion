@@ -169,8 +169,6 @@ export default function Laboratorios() {
                     display: "flex",
                     flexDirection: "column",
                     alignItems: "center",
-                    
-
                 }}
             >
                 <Container
@@ -178,7 +176,6 @@ export default function Laboratorios() {
                     disableGutters
                     className=" flex flex-col justify-center rounded-lg items-center w-full"
                 >
-
                     {/* ✅ Cards */}
                     <Grid
                         container
@@ -201,9 +198,9 @@ export default function Laboratorios() {
                                     className="flex flex-row justify-center"
                                 >
                                     <Card
-                                        className="mt-4 p-4 rounded-xl flex flex-col shadow-lg hover:shadow-2xl transition-all"
+                                        className="mt-4 p-4 rounded-xl flex flex-col shadow-lg hover:shadow-2xl transition-all border"
                                         sx={{
-                                            width: 450,
+                                            width: 400,
                                             height: "auto",
                                             display: "flex",
                                             flexDirection: "column",
@@ -250,7 +247,6 @@ export default function Laboratorios() {
                                                 Dirección: {lab.ubicacion_laboratorio?.direccion || "Sin dirección"}
                                             </Typography>
                                         </CardContent>
-
                                         {/* Acciones */}
                                         <CardActions sx={{ justifyContent: "flex-end" }}>
                                             <IconButton color="primary" onClick={() => handleEdit(lab)}>

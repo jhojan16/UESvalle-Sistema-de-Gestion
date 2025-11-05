@@ -1,213 +1,263 @@
-import { useState, useMemo } from "react";
-import { useQuery } from "@tanstack/react-query";
+import { useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import {
     Box,
-    Typography,
-    TextField,
-    Paper,
     Button,
+    Typography,
     CircularProgress,
-    InputAdornment,
-    Chip,
+    Paper,
+    Alert,
 } from "@mui/material";
+import { FileDown, Eye, Database } from "lucide-react";
 import { DataGrid, GridColDef } from "@mui/x-data-grid";
-import { Search, FileDown } from "lucide-react";
-import * as XLSX from "xlsx";
-import { saveAs } from "file-saver";
 
-export default function VistaExportar() {
-    const [search, setSearch] = useState("");
-    const [paginationModel, setPaginationModel] = useState({
-        page: 0,
-        pageSize: 50, // Aumentado para mejor rendimiento
-    });
+export default function ExportarVista() {
+    const [loading, setLoading] = useState(false);
+    const [previewData, setPreviewData] = useState<string[][]>([]);
+    const [previewColumns, setPreviewColumns] = useState<GridColDef[]>([]);
+    const [previewRows, setPreviewRows] = useState<Record<string, string>[]>([]);
+    const [hasLoadedPreview, setHasLoadedPreview] = useState(false);
 
-    // ✅ Llamada a la función merge()
-    const { data, isLoading, error } = useQuery({
-        queryKey: ["merge"],
-        queryFn: async () => {
-            const { data, error } = await supabase.rpc("merge");
-            if (error) throw error;
-            return data || [];
-        },
-        staleTime: 5 * 60 * 1000, // Cache por 5 minutos
-        refetchOnWindowFocus: false, // No recargar al cambiar de ventana
-    });
-
-    const mergedData = data || [];
-
-    // ✅ Filtrado optimizado con useMemo
-    const filteredData = useMemo(() => {
-        if (!search.trim()) return mergedData;
-
-        const searchLower = search.toLowerCase();
-        return mergedData.filter((row) => {
-            const values = Object.values(row).join(" ").toLowerCase();
-            return values.includes(searchLower);
-        });
-    }, [mergedData, search]);
-
-    // ✅ Columnas dinámicas memoizadas
-    const columns: GridColDef[] = useMemo(() => {
-        if (mergedData.length === 0) return [];
-
-        return Object.keys(mergedData[0]).map((key) => ({
-            field: key,
-            headerName: key.replace(/_/g, " ").toUpperCase(),
-            flex: 1,
-            minWidth: 150,
-            // Optimización: renderizar como texto simple
-            renderCell: (params) => params.value?.toString() || '',
-        }));
-    }, [mergedData]);
-
-    // ✅ Exportar a Excel optimizado
-    const exportToExcel = () => {
-        if (!mergedData.length) return;
-
+    // 🔹 Vista previa (solo algunas filas)
+    const fetchPreview = async () => {
+        setLoading(true);
         try {
-            const ws = XLSX.utils.json_to_sheet(mergedData);
-            const wb = XLSX.utils.book_new();
-            XLSX.utils.book_append_sheet(wb, ws, "Datos");
-            const buffer = XLSX.write(wb, { bookType: "xlsx", type: "array" });
-            const blob = new Blob([buffer], {
-                type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+            const { data, error } = await supabase.functions.invoke("export_csv_full", {
+                body: { preview: true },
             });
-            saveAs(blob, `datos_completos_${new Date().toISOString().split('T')[0]}.xlsx`);
+            
+            if (error) {
+                console.error(error);
+                alert("Error al cargar vista previa: " + error.message);
+                setLoading(false);
+                return;
+            }
+
+            // Si la función retorna CSV, conviértelo a JSON para mostrarlo en el DataGrid
+            const lines: string[] = data.split("\n").filter(Boolean);
+            
+            if (lines.length === 0) {
+                setPreviewColumns([]);
+                setPreviewRows([]);
+                setPreviewData([]);
+                setHasLoadedPreview(true);
+                setLoading(false);
+                return;
+            }
+
+            // Primer fila = headers
+            const rawHeaders = lines[0].split(",").map((h) => h.trim());
+            
+            // Sanear nombres de campo para DataGrid
+            const sanitize = (s: string) =>
+                s
+                    .replace(/\s+/g, "_")
+                    .replace(/[^a-zA-Z0-9_]/g, "")
+                    .toLowerCase();
+            
+            const headers = rawHeaders.map((h, i) => ({ 
+                key: sanitize(h) || `col_${i}`, 
+                label: h 
+            }));
+
+            const dataRows = lines.slice(1, 21).map((line) => line.split(","));
+            
+            const rows = dataRows.map((cells, idx) => {
+                const obj: Record<string, string> & { id: number } = { id: idx } as Record<string, string> & { id: number };
+                headers.forEach((h, i) => {
+                    obj[h.key] = (cells[i] ?? "").toString();
+                });
+                return obj;
+            });
+
+            const columns: GridColDef[] = headers.map((h) => ({ 
+                field: h.key, 
+                headerName: h.label, 
+                flex: 1, 
+                minWidth: 150 
+            }));
+
+            setPreviewColumns(columns);
+            setPreviewRows(rows);
+            setPreviewData(dataRows);
+            setHasLoadedPreview(true);
         } catch (error) {
-            console.error('Error al exportar:', error);
+            console.error("Error en vista previa:", error);
+            alert("Error inesperado al cargar vista previa");
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    // 🔹 Descargar el CSV completo
+    const handleDownload = async () => {
+        setLoading(true);
+        try {
+            const { data, error } = await supabase.functions.invoke("export_csv_full");
+            
+            if (error) {
+                console.error(error);
+                alert("Error al exportar: " + error.message);
+                setLoading(false);
+                return;
+            }
+
+            // Crear archivo descargable
+            const blob = new Blob([data], { type: "text/csv;charset=utf-8;" });
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement("a");
+            a.href = url;
+            a.download = `exportacion_${new Date().toISOString().split('T')[0]}.csv`;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            window.URL.revokeObjectURL(url);
+        } catch (error) {
+            console.error("Error en descarga:", error);
+            alert("Error inesperado al descargar");
+        } finally {
+            setLoading(false);
         }
     };
 
     return (
-        <Box sx={{
-            textAlign: 'left',
-            width: '100%',
-            maxWidth: '100%',
-            height: '100%',
-            display: 'flex',
-            flexDirection: 'column',
-        }}>
-            {/* Encabezado */}
-            <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", mb: 3, flexShrink: 0 }}>
-                <Box>
-                    <Typography variant="h3" fontWeight="bold" gutterBottom>
-                        Exportar Información
-                    </Typography>
-                    <Typography color="text.secondary">
-                        Vista previa y exportación de todos los datos relacionados
-                    </Typography>
-                    {!isLoading && (
-                        <Box sx={{ display: 'flex', gap: 1, mt: 2 }}>
-                            <Chip
-                                label={`Total: ${mergedData.length} registros`}
-                                color="primary"
-                                size="small"
-                            />
-                            {search && (
-                                <Chip
-                                    label={`Filtrados: ${filteredData.length}`}
-                                    color="secondary"
-                                    size="small"
-                                />
-                            )}
-                        </Box>
-                    )}
-                </Box>
+        <Box>
+            {/* Header */}
+            <Box sx={{ mb: 4 }}>
+                <Typography variant="h3" component="h1" fontWeight="bold" gutterBottom>
+                    Exportar Datos
+                </Typography>
+                <Typography variant="body1" color="text.secondary">
+                    Visualiza una muestra de los datos antes de exportar el archivo completo
+                </Typography>
+            </Box>
 
+            {/* Botones de acción */}
+            <Box sx={{ display: "flex", gap: 2, mb: 3 }}>
                 <Button
                     variant="contained"
-                    startIcon={<FileDown size={20} />}
-                    onClick={exportToExcel}
-                    disabled={!mergedData.length}
+                    startIcon={<FileDown />}
+                    onClick={handleDownload}
+                    disabled={loading}
+                    size="large"
                 >
-                    Exportar Excel
+                    Descargar CSV Completo
                 </Button>
             </Box>
 
-            {/* Filtros */}
-            <Paper sx={{ p: 3, mb: 3, flexShrink: 0 }}>
-                <TextField
-                    fullWidth
-                    placeholder="Buscar entre todos los campos..."
-                    value={search}
-                    onChange={(e) => setSearch(e.target.value)}
-                    InputProps={{
-                        startAdornment: (
-                            <InputAdornment position="start">
-                                <Search size={20} />
-                            </InputAdornment>
-                        ),
-                    }}
-                />
-            </Paper>
+            {/* Alerta informativa */}
+            {!hasLoadedPreview && !loading && (
+                <Alert severity="info" sx={{ mb: 3 }}>
+                    Haz clic en "Ver Vista Previa" para visualizar una muestra de los datos antes de descargar.
+                </Alert>
+            )}
 
-            {/* Vista previa con scroll */}
-            <Paper sx={{ p: 3, flexGrow: 1, display: 'flex', flexDirection: 'column', minHeight: 0 }}>
-                {isLoading ? (
-                    <Box sx={{ display: "flex", justifyContent: "center", py: 10 }}>
-                        <CircularProgress />
+            {/* Contenedor de la vista previa */}
+            <Paper sx={{ p: 3, minHeight: 500 }}>
+                {loading ? (
+                    // Estado de carga
+                    <Box 
+                        sx={{ 
+                            display: "flex", 
+                            flexDirection: "column",
+                            justifyContent: "center", 
+                            alignItems: "center",
+                            minHeight: 400,
+                            gap: 2
+                        }}
+                    >
+                        <CircularProgress size={60} />
+                        <Typography variant="body1" color="text.secondary">
+                            Cargando datos...
+                        </Typography>
                     </Box>
-                ) : error ? (
-                    <Typography color="error">
-                        Error cargando datos: {error.message}
-                    </Typography>
-                ) : filteredData.length > 0 ? (
-                    <Box sx={{ flexGrow: 1, minHeight: 0 }}>
-                        <DataGrid
-                            rows={filteredData}
-                            columns={columns}
-                            getRowId={(row) => row.uid ?? row.id_prestador ?? row.codigo ?? Math.random()}
-                            disableRowSelectionOnClick
-                            disableColumnFilter
-                            disableColumnMenu
-                            disableDensitySelector
-                            pagination
-                            paginationMode="client"
-                            paginationModel={paginationModel}
-                            onPaginationModelChange={setPaginationModel}
-
-                            rowHeight={52}
-                            columnHeaderHeight={56}
-                            loading={isLoading}
-                            sx={{
-                                height: '100%',
-                                border: 'none',
-                                '& .MuiDataGrid-cell': {
-                                    borderBottom: '1px solid',
-                                    borderColor: 'divider',
-                                },
-                                '& .MuiDataGrid-cell:focus': {
-                                    outline: 'none'
-                                },
-                                '& .MuiDataGrid-cell:focus-within': {
-                                    outline: 'none'
-                                },
-                                '& .MuiDataGrid-columnHeaders': {
-                                    backgroundColor: 'action.hover',
-                                    fontWeight: 'bold',
-                                    borderBottom: '2px solid',
-                                    borderColor: 'divider',
-                                },
-                                '& .MuiDataGrid-footerContainer': {
-                                    borderTop: '1px solid',
-                                    borderColor: 'divider',
-                                },
-                                '& .MuiDataGrid-virtualScroller': {
-                                    backgroundColor: 'background.paper',
-                                },
-                                '& .MuiDataGrid-row:hover': {
-                                    backgroundColor: 'action.hover',
-                                },
-                            }}
-                        />
+                ) : hasLoadedPreview && previewRows.length > 0 ? (
+                    // Vista previa con datos
+                    <Box>
+                        <Box sx={{ mb: 2, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                            <Typography variant="h6" fontWeight="bold">
+                                Vista Previa - Primeras 20 Filas
+                            </Typography>
+                            <Typography variant="body2" color="text.secondary">
+                                {previewRows.length} filas mostradas
+                            </Typography>
+                        </Box>
+                        <Box sx={{ height: 600, width: '100%' }}>
+                            <DataGrid
+                                rows={previewRows}
+                                columns={previewColumns}
+                                pageSizeOptions={[10, 20]}
+                                initialState={{ 
+                                    pagination: { 
+                                        paginationModel: { pageSize: 10, page: 0 } 
+                                    } 
+                                }}
+                                disableRowSelectionOnClick
+                                density="comfortable"
+                                sx={{
+                                    '& .MuiDataGrid-cell:focus': { 
+                                        outline: 'none' 
+                                    },
+                                    '& .MuiDataGrid-cell:focus-within': { 
+                                        outline: 'none' 
+                                    },
+                                    '& .MuiDataGrid-columnHeaders': {
+                                        backgroundColor: 'action.hover',
+                                        fontWeight: 'bold',
+                                    },
+                                }}
+                            />
+                        </Box>
+                    </Box>
+                ) : hasLoadedPreview && previewRows.length === 0 ? (
+                    // Sin datos después de cargar
+                    <Box 
+                        sx={{ 
+                            display: "flex", 
+                            flexDirection: "column",
+                            justifyContent: "center", 
+                            alignItems: "center",
+                            minHeight: 400,
+                            gap: 2
+                        }}
+                    >
+                        <Database size={64} color="lightgray" />
+                        <Typography variant="h6" color="text.secondary">
+                            No hay datos disponibles
+                        </Typography>
+                        <Typography variant="body2" color="text.secondary">
+                            No se encontraron registros para mostrar
+                        </Typography>
                     </Box>
                 ) : (
-                    <Box sx={{ textAlign: 'center', py: 10 }}>
-                        <Typography color="text.secondary">
-                            {search ? 'No se encontraron resultados para tu búsqueda' : 'No hay datos para mostrar'}
+                    // Estado inicial - sin vista previa cargada
+                    <Box 
+                        sx={{ 
+                            display: "flex", 
+                            flexDirection: "column",
+                            justifyContent: "center", 
+                            alignItems: "center",
+                            minHeight: 400,
+                            gap: 2,
+                            textAlign: 'center'
+                        }}
+                    >
+                        <Database size={80} color="lightgray" />
+                        <Typography variant="h6" color="text.secondary">
+                            Sin Vista Previa
                         </Typography>
+                        <Typography variant="body2" color="text.secondary" sx={{ maxWidth: 500 }}>
+                            Haz clic en "Ver Vista Previa" para visualizar una muestra de los datos,
+                            o descarga directamente el archivo CSV completo.
+                        </Typography>
+                        <Button 
+                            variant="outlined" 
+                            startIcon={<Eye />}
+                            onClick={fetchPreview}
+                            sx={{ mt: 2 }}
+                        >
+                            Cargar Vista Previa
+                        </Button>
                     </Box>
                 )}
             </Paper>

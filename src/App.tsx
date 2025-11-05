@@ -17,6 +17,7 @@ import PrestadorDetalle from "./pages/PrestadorDetalle";
 import Solicitante from "./pages/Solicitantes";
 import Reportes from "./pages/Reportes";
 import VistaExportar from "./pages/VistaExportar";
+import {CircularProgress, Typography} from "@mui/material";
 
 const queryClient = new QueryClient();
 
@@ -75,7 +76,11 @@ const App = () => (
               element={
                 <ProtectedRoute>
                   <Layout>
-                    <Muestreos />
+                    <div className="text-center p-10">
+                      <h2 className="text-2xl font-bold">Muestreos</h2>
+                      <Typography variant="body1" color="initial"> pagina en desarrollo</Typography>
+                      <CircularProgress size={20} className="mt-5"/>
+                    </div>
                   </Layout>
                 </ProtectedRoute>
               }
@@ -99,7 +104,6 @@ const App = () => (
                     <Reportes />
                   </Layout>
                 </ProtectedRoute>
-
               }
             />
             <Route
@@ -113,7 +117,7 @@ const App = () => (
               }
             />
             <Route
-              path="/ubicaciones"
+              path="/exportar"
               element={
                 <ProtectedRoute>
                   <Layout>
@@ -129,5 +133,4 @@ const App = () => (
     </TooltipProvider>
   </QueryClientProvider>
 );
-
 export default App;
