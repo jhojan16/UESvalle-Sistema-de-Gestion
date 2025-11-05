@@ -79,6 +79,7 @@ const App = () => (
                     <div className="text-center p-10">
                       <h2 className="text-2xl font-bold">Muestreos</h2>
                       <Typography variant="body1" color="initial"> pagina en desarrollo</Typography>
+                      <Typography variant="body2" color="initial"> Seguimos trabajando para la comunidad</Typography>
                       <CircularProgress size={20} className="mt-5"/>
                     </div>
                   </Layout>
