@@ -44,13 +44,13 @@ export default function Prestadores() {
   });
 
   const queryClient = useQueryClient();
-    const navigate = useNavigate();
+  const navigate = useNavigate();
 
   const { data: prestadores, isLoading } = useQuery({
     queryKey: ['prestadores', search],
     queryFn: async () => {
       let query = supabase.from('prestador').select('*').order('nombre');
-      
+
       if (search) {
         query = query.or(`nombre.ilike.%${search}%,nit.ilike.%${search}%`);
       }
@@ -160,15 +160,15 @@ export default function Prestadores() {
   };
 
   const columns: GridColDef[] = [
-    { field: 'nombre', headerName: 'Nombre', flex: 1, minWidth: 200 },
-    { field: 'nit', headerName: 'NIT', width: 150 },
-    { field: 'telefono', headerName: 'Teléfono', width: 150 },
-    { field: 'id_sspd', headerName: 'ID SSPD', width: 150 },
+    { field: 'nombre', headerName: 'Nombre', flex: 0.5 },
+    { field: 'nit', headerName: 'NIT', flex: 0.3 },
+    { field: 'telefono', headerName: 'Teléfono', flex: 0.3 },
+    { field: 'id_sspd', headerName: 'ID SSPD', flex: 0.3 },
     {
       field: 'actions',
       type: 'actions',
       headerName: 'Acciones',
-      width: 150,
+      flex: 0.3,
       getActions: (params) => [
         <GridActionsCellItem
           icon={<Eye size={18} />}
@@ -209,7 +209,6 @@ export default function Prestadores() {
           Nuevo Prestador
         </Button>
       </Box>
-
       <Paper sx={{ p: 3 }}>
         <Box sx={{ mb: 3 }}>
           <TextField
@@ -226,8 +225,7 @@ export default function Prestadores() {
             }}
           />
         </Box>
-
-        <Box sx={{ height: 600, width: '100%' }}>
+        <Box >
           <DataGrid
             rows={prestadores || []}
             columns={columns}
@@ -238,17 +236,17 @@ export default function Prestadores() {
               pagination: { paginationModel: { pageSize: 10 } },
             }}
             disableRowSelectionOnClick
+            disableColumnResize
             sx={{
               '& .MuiDataGrid-cell:focus': {
                 outline: 'none',
-              },
+              }
             }}
           />
         </Box>
       </Paper>
-
-      <Dialog 
-        open={dialogOpen} 
+      <Dialog
+        open={dialogOpen}
         onClose={() => {
           setDialogOpen(false);
           resetForm();

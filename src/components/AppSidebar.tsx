@@ -31,11 +31,11 @@ import { useAuth } from '@/contexts/AuthContext';
 const menuItems = [
   { title: 'Dashboard', url: '/dashboard', icon: Home },
   { title: 'Prestadores', url: '/prestadores', icon: Users },
-  { title: 'Muestreos', url: '/muestreos', icon: FlaskConical },
-  { title: 'Técnicos', url: '/tecnicos', icon: UserCog },
   { title: 'Laboratorios', url: '/laboratorios', icon: Building2 },
+  { title: 'Técnicos', url: '/tecnicos', icon: UserCog },
   { title: 'Reportes', url: '/reportes', icon: FileText },
   { title: 'Solicitantes', url: '/solicitantes', icon: ClipboardList },
+  { title: 'Muestreos', url: '/muestreos', icon: FlaskConical },
   { title: 'Ubicaciones', url: '/ubicaciones', icon: MapPin },
 ];
 

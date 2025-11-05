@@ -245,6 +245,7 @@ export default function Solicitantes() {
                             pagination: { paginationModel: { pageSize: 10 } },
                         }}
                         disableRowSelectionOnClick
+                        disableColumnResize
                         sx={{
                             '& .MuiDataGrid-cell:focus': { outline: 'none' },
                         }}

@@ -16,6 +16,7 @@ import Laboratorio from "./pages/Laboratorio";
 import PrestadorDetalle from "./pages/PrestadorDetalle";
 import Solicitante from "./pages/Solicitantes";
 import Reportes from "./pages/Reportes";
+import VistaExportar from "./pages/VistaExportar";
 
 const queryClient = new QueryClient();
 
@@ -60,6 +61,16 @@ const App = () => (
               }
             />
             <Route
+              path="/laboratorios"
+              element={
+                <ProtectedRoute>
+                  <Layout>
+                    <Laboratorio />
+                  </Layout>
+                </ProtectedRoute>
+              }
+            />
+            <Route
               path="/muestreos"
               element={
                 <ProtectedRoute>
@@ -79,16 +90,7 @@ const App = () => (
                 </ProtectedRoute>
               }
             />
-            <Route
-              path="/laboratorios"
-              element={
-                <ProtectedRoute>
-                  <Layout>
-                    <Laboratorio />
-                  </Layout>
-                </ProtectedRoute>
-              }
-            />
+            
             <Route
               path="/reportes"
               element={
@@ -115,10 +117,7 @@ const App = () => (
               element={
                 <ProtectedRoute>
                   <Layout>
-                    <div className="text-center p-8">
-                      <h2 className="text-2xl font-bold">Ubicaciones</h2>
-                      <p className="text-muted-foreground mt-2">Página en desarrollo</p>
-                    </div>
+                    <VistaExportar/>
                   </Layout>
                 </ProtectedRoute>
               }

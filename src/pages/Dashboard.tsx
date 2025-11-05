@@ -39,6 +39,8 @@ export default function Dashboard() {
     },
   });
 
+
+
   // Consulta para ubicaciones de prestadores
   const { data: ubicacionesData, isLoading: isLoadingUbicaciones } = useQuery({
     queryKey: ['prestadores-ubicaciones'],
@@ -171,7 +173,7 @@ export default function Dashboard() {
 
       {/* Tarjetas de estadísticas */}
 
-      
+
       <Box sx={{
         display: 'grid',
         gridTemplateColumns: { xs: '1fr', sm: 'repeat(2, 1fr)', md: 'repeat(4, 1fr)' },
@@ -203,7 +205,7 @@ export default function Dashboard() {
         })}
       </Box>
 
-      
+
 
       {/* Gráficos de distribución geográfica */}
       <Grid container spacing={3} sx={{ mb: 4 }}>
@@ -220,7 +222,7 @@ export default function Dashboard() {
             </Typography>
           </CardContent>
         </Card>
-        
+
         {/* Gráfico por Departamento */}
         <Grid item xs={12} md={6}>
           <Card>
@@ -326,7 +328,7 @@ export default function Dashboard() {
           </Card>
         </Grid>
 
-        
+
       </Grid>
 
 

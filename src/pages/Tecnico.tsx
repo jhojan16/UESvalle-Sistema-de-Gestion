@@ -230,6 +230,7 @@ export default function Tecnicos() {
                             pagination: { paginationModel: { pageSize: 10 } },
                         }}
                         disableRowSelectionOnClick
+                        disableColumnResize
                         sx={{
                             '& .MuiDataGrid-cell:focus': {
                                 outline: 'none',

@@ -214,13 +214,13 @@ export default function PrestadorDetalle() {
 
                 <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', md: 'repeat(2, 1fr)' }, gap: 3, mt: 2 }}>
                     <Box>
-                        <Card variant="outlined">
+                        <Card variant="outlined" sx={{height: 250}}>
                             <CardContent>
                                 <Typography variant="h6" gutterBottom color="primary">
                                     Información General
                                 </Typography>
                                 <Divider sx={{ mb: 2 }} />
-                                <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1.5 }}>
+                                <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1.5}}>
                                     <Box display="flex" alignItems="center" gap={1}>
                                         <Building2 size={18} />
                                         <Typography variant="body2" color="text.secondary">NIT:</Typography>
@@ -254,7 +254,7 @@ export default function PrestadorDetalle() {
                     </Box>
 
                     <Box>
-                        <Card variant="outlined">
+                        <Card variant="outlined" sx={{height: 250}}>
                             <CardContent>
                                 <Typography variant="h6" gutterBottom color="primary">
                                     Ubicación
@@ -333,7 +333,6 @@ export default function PrestadorDetalle() {
                         />
                     </Box>
                 </TabPanel>
-
                 <TabPanel value={tabValue} index={2}>
                     <Box sx={{ height: 400, width: '100%' }}>
                         <DataGrid

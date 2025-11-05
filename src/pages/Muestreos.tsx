@@ -167,23 +167,6 @@ export default function Muestreos() {
                             ),
                         }}
                     />
-                    <FormControl sx={{ minWidth: 120 }}>
-                        <InputLabel>Por página</InputLabel>
-                        <Select
-                            value={paginationModel.pageSize}
-                            label="Por página"
-                            onChange={(e) => setPaginationModel({ 
-                                page: 0, 
-                                pageSize: Number(e.target.value) 
-                            })}
-                        >
-                            <MenuItem value={10}>10</MenuItem>
-                            <MenuItem value={25}>25</MenuItem>
-                            <MenuItem value={50}>50</MenuItem>
-                            <MenuItem value={100}>100</MenuItem>
-                            <MenuItem value={200}>200</MenuItem>
-                        </Select>
-                    </FormControl>
                 </Box>
 
                 {/* ✅ Tabla con paginación del servidor */}
