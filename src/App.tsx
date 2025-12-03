@@ -10,7 +10,7 @@ import Login from "./pages/Login";
 import Dashboard from "./pages/Dashboard";
 import Prestadores from "./pages/Prestadores";
 import NotFound from "./pages/NotFound";
-import Muestreos from "./pages/Muestreos";
+import Muestras from "./pages/Muestras";
 import Tecnico from "./pages/Tecnico";
 import Laboratorio from "./pages/Laboratorio";
 import PrestadorDetalle from "./pages/PrestadorDetalle";
@@ -72,16 +72,11 @@ const App = () => (
               }
             />
             <Route
-              path="/muestreos"
+              path="/muestras"
               element={
                 <ProtectedRoute>
                   <Layout>
-                    <div className="text-center p-10">
-                      <h2 className="text-2xl font-bold">Muestreos</h2>
-                      <Typography variant="body1" color="initial"> pagina en desarrollo</Typography>
-                      <Typography variant="body2" color="initial"> Seguimos trabajando para la comunidad</Typography>
-                      <CircularProgress size={20} className="mt-5"/>
-                    </div>
+                    <Muestras/>
                   </Layout>
                 </ProtectedRoute>
               }

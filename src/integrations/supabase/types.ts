@@ -1,3 +1,5 @@
+// Supabase generated types - FULL SCHEMA UPDATED
+
 export type Json =
   | string
   | number
@@ -7,37 +9,314 @@ export type Json =
   | Json[]
 
 export type Database = {
-  // Allows to automatically instantiate createClient with right options
-  // instead of createClient<Database, { PostgrestVersion: 'XX' }>(URL, KEY)
   __InternalSupabase: {
     PostgrestVersion: "13.0.5"
   }
   public: {
     Tables: {
-      fuente: {
+      analisis_muestra: {
         Row: {
-          clase: string | null
-          created_at: string | null
-          id_fuente: number
-          id_ubicacion: number | null
-          nombre: string
-          tipo: string | null
+          id_analisis_muestra: number
+          tipo_analisis: string
+          caracteristica: string | null
+          metodo: string | null
+          resultado: number | null
+          unidades: string | null
+          valores_aceptados: string | null
+          diagnostico: string | null
+          id_muestra: number | null
         }
         Insert: {
-          clase?: string | null
-          created_at?: string | null
-          id_fuente?: number
-          id_ubicacion?: number | null
-          nombre: string
-          tipo?: string | null
+          id_analisis_muestra?: number
+          tipo_analisis: string
+          caracteristica?: string | null
+          metodo?: string | null
+          resultado?: number | null
+          unidades?: string | null
+          valores_aceptados?: string | null
+          diagnostico?: string | null
+          id_muestra?: number | null
         }
         Update: {
-          clase?: string | null
-          created_at?: string | null
+          id_analisis_muestra?: number
+          tipo_analisis?: string
+          caracteristica?: string | null
+          metodo?: string | null
+          resultado?: number | null
+          unidades?: string | null
+          valores_aceptados?: string | null
+          diagnostico?: string | null
+          id_muestra?: number | null
+        }
+        Relationships: []
+      }
+
+      MuestraResumen: {
+        Row: {
+          id_muestra: number
+          cantidad_analisis: number
+          tipos_analisis: string[]
+          ultimo_analisis?: string
+        }
+      }
+
+      anexo: {
+        Row: {
+          id_reporte1: number
+          inspeccion_ocular: string | null
+          tipo_inspeccion_ocular: string | null
+          fecha_inspeccion_ocular: string | null
+          fecha_entidades: string | null
+          departamento: string | null
+          municipio: string | null
+          vereda: string | null
+          autoridad_sanitaria: string | null
+          id_mapa: number | null
+          fecha_reunion_entidades: string | null
+        }
+        Insert: {
+          id_reporte1?: number
+          inspeccion_ocular?: string | null
+          tipo_inspeccion_ocular?: string | null
+          fecha_inspeccion_ocular?: string | null
+          fecha_entidades?: string | null
+          departamento?: string | null
+          municipio?: string | null
+          vereda?: string | null
+          autoridad_sanitaria?: string | null
+          id_mapa?: number | null
+          fecha_reunion_entidades?: string | null
+        }
+        Update: {
+          id_reporte1?: number
+          inspeccion_ocular?: string | null
+          tipo_inspeccion_ocular?: string | null
+          fecha_inspeccion_ocular?: string | null
+          fecha_entidades?: string | null
+          departamento?: string | null
+          municipio?: string | null
+          vereda?: string | null
+          autoridad_sanitaria?: string | null
+          id_mapa?: number | null
+          fecha_reunion_entidades?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "anexo_id_mapa_fkey"
+            columns: ["id_mapa"]
+            isOneToOne: false
+            referencedRelation: "mapa_riesgo"
+            referencedColumns: ["id_mapa"]
+          }
+        ]
+      }
+
+      anexo2: {
+        Row: {
+          id_reporte2: number
+          consecutivo_mapa_riesgo: string | null
+          anterior_mapa_riesgo: string | null
+          id_mapa: number | null
+        }
+        Insert: {
+          id_reporte2?: number
+          consecutivo_mapa_riesgo?: string | null
+          anterior_mapa_riesgo?: string | null
+          id_mapa?: number | null
+        }
+        Update: {
+          id_reporte2?: number
+          consecutivo_mapa_riesgo?: string | null
+          anterior_mapa_riesgo?: string | null
+          id_mapa?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "anexo2_id_mapa_fkey"
+            columns: ["id_mapa"]
+            isOneToOne: false
+            referencedRelation: "mapa_riesgo"
+            referencedColumns: ["id_mapa"]
+          }
+        ]
+      }
+
+      bocatoma: {
+        Row: {
+          id_bocatoma: number
+          fecha: string | null
+          caract_fisica: string | null
+          caract_quimica: string | null
+          caract_microbiologicas: string | null
+          caract_especiales: string | null
+          descartadas: string | null
+          id_reporte2: number | null
+        }
+        Insert: {
+          id_bocatoma?: number
+          fecha?: string | null
+          caract_fisica?: string | null
+          caract_quimica?: string | null
+          caract_microbiologicas?: string | null
+          caract_especiales?: string | null
+          descartadas?: string | null
+          id_reporte2?: number | null
+        }
+        Update: {
+          id_bocatoma?: number
+          fecha?: string | null
+          caract_fisica?: string | null
+          caract_quimica?: string | null
+          caract_microbiologicas?: string | null
+          caract_especiales?: string | null
+          descartadas?: string | null
+          id_reporte2?: number | null
+        }
+        Relationships: []
+      }
+
+      caracteristica: {
+        Row: {
+          id_caracteristica: number
+          caracteristica_seguimiento: string | null
+          frecuencia_pp: string | null
+          minimo_muestras_pp: string | null
+          frecuencia_as: string | null
+          minimo_muestras_as: string | null
+          id_reporte3: number | null
+        }
+        Insert: {
+          id_caracteristica?: number
+          caracteristica_seguimiento?: string | null
+          frecuencia_pp?: string | null
+          minimo_muestras_pp?: string | null
+          frecuencia_as?: string | null
+          minimo_muestras_as?: string | null
+          id_reporte3?: number | null
+        }
+        Update: {
+          id_caracteristica?: number
+          caracteristica_seguimiento?: string | null
+          frecuencia_pp?: string | null
+          minimo_muestras_pp?: string | null
+          frecuencia_as?: string | null
+          minimo_muestras_as?: string | null
+          id_reporte3?: number | null
+        }
+        Relationships: []
+      }
+
+      caracteristica_priorizada: {
+        Row: {
+          id_caracteristica: number
+          actividad_contaminante: string | null
+          caract_fisica: string | null
+          caract_quimica: string | null
+          caract_microbiologica: string | null
+          caract_especial: string | null
+          observaciones: string | null
+          id_reporte1: number | null
+        }
+        Insert: {
+          id_caracteristica?: number
+          actividad_contaminante?: string | null
+          caract_fisica?: string | null
+          caract_quimica?: string | null
+          caract_microbiologica?: string | null
+          caract_especial?: string | null
+          observaciones?: string | null
+          id_reporte1?: number | null
+        }
+        Update: {
+          id_caracteristica?: number
+          actividad_contaminante?: string | null
+          caract_fisica?: string | null
+          caract_quimica?: string | null
+          caract_microbiologica?: string | null
+          caract_especial?: string | null
+          observaciones?: string | null
+          id_reporte1?: number | null
+        }
+        Relationships: []
+      }
+
+      documento_fuente: {
+        Row: {
+          id_documento: number
+          fuente_info: string | null
+          nombre_documento: string | null
+          tipo_documento: string | null
+          autor: string | null
+          fecha_publicacion: string | null
+          id_reporte1: number | null
+        }
+        Insert: {
+          id_documento?: number
+          fuente_info?: string | null
+          nombre_documento?: string | null
+          tipo_documento?: string | null
+          autor?: string | null
+          fecha_publicacion?: string | null
+          id_reporte1?: number | null
+        }
+        Update: {
+          id_documento?: number
+          fuente_info?: string | null
+          nombre_documento?: string | null
+          tipo_documento?: string | null
+          autor?: string | null
+          fecha_publicacion?: string | null
+          id_reporte1?: number | null
+        }
+        Relationships: []
+      }
+
+      entidad_participante: {
+        Row: {
+          id_entidad: number
+          entidad: string | null
+          dependencia: string | null
+          cargo: string | null
+          id_reporte1: number | null
+        }
+        Insert: {
+          id_entidad?: number
+          entidad?: string | null
+          dependencia?: string | null
+          cargo?: string | null
+          id_reporte1?: number | null
+        }
+        Update: {
+          id_entidad?: number
+          entidad?: string | null
+          dependencia?: string | null
+          cargo?: string | null
+          id_reporte1?: number | null
+        }
+        Relationships: []
+      }
+
+      fuente: {
+        Row: {
+          id_fuente: number
+          nombre: string
+          clase: string | null
+          tipo: string | null
+          id_ubicacion: number | null
+        }
+        Insert: {
           id_fuente?: number
-          id_ubicacion?: number | null
-          nombre?: string
+          nombre: string
+          clase?: string | null
           tipo?: string | null
+          id_ubicacion?: number | null
+        }
+        Update: {
+          id_fuente?: number
+          nombre?: string
+          clase?: string | null
+          tipo?: string | null
+          id_ubicacion?: number | null
         }
         Relationships: [
           {
@@ -46,36 +325,109 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "ubicacion"
             referencedColumns: ["id_ubicacion"]
-          },
+          }
         ]
       }
-      laboratorio: {
+
+      inspeccion: {
         Row: {
-          created_at: string | null
-          email: string | null
+          id_inspeccion: number
+          id_inspeccion_sivicap: number | null
+          fecha_inspeccion: string | null
+          autoridad_inspeccion: string | null
+          fecha_visita_anterior: string | null
+          nombre_visita_anterior: string | null
+          copia_visita_anterior: string | null
+          concepto: string | null
+          plazo_ejecucion_inspeccion: string | null
+          plan_mejoramiento: string | null
+          habitantes_municipio: number | null
+          viviendas: number | null
+          viviendas_urbano: number | null
+          iraba_inspeccion: number | null
+          indice_tratamiento: number | null
+          indice_continuidad: number | null
+          bps: number | null
           estado: string | null
-          id_laboratorio: number
-          id_ubicacion_lab: number | null
-          nombre: string
-          telefono: string | null
+          id_prestador: number | null
         }
         Insert: {
-          created_at?: string | null
-          email?: string | null
+          id_inspeccion: number
+          id_inspeccion_sivicap?: number | null
+          fecha_inspeccion?: string | null
+          autoridad_inspeccion?: string | null
+          fecha_visita_anterior?: string | null
+          nombre_visita_anterior?: string | null
+          copia_visita_anterior?: string | null
+          concepto?: string | null
+          plazo_ejecucion_inspeccion?: string | null
+          plan_mejoramiento?: string | null
+          habitantes_municipio?: number | null
+          viviendas?: number | null
+          viviendas_urbano?: number | null
+          iraba_inspeccion?: number | null
+          indice_tratamiento?: number | null
+          indice_continuidad?: number | null
+          bps?: number | null
           estado?: string | null
-          id_laboratorio?: number
-          id_ubicacion_lab?: number | null
-          nombre: string
-          telefono?: string | null
+          id_prestador?: number | null
         }
         Update: {
-          created_at?: string | null
-          email?: string | null
+          id_inspeccion?: number
+          id_inspeccion_sivicap?: number | null
+          fecha_inspeccion?: string | null
+          autoridad_inspeccion?: string | null
+          fecha_visita_anterior?: string | null
+          nombre_visita_anterior?: string | null
+          copia_visita_anterior?: string | null
+          concepto?: string | null
+          plazo_ejecucion_inspeccion?: string | null
+          plan_mejoramiento?: string | null
+          habitantes_municipio?: number | null
+          viviendas?: number | null
+          viviendas_urbano?: number | null
+          iraba_inspeccion?: number | null
+          indice_tratamiento?: number | null
+          indice_continuidad?: number | null
+          bps?: number | null
           estado?: string | null
+          id_prestador?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "inspeccion_id_prestador_fkey"
+            columns: ["id_prestador"]
+            isOneToOne: false
+            referencedRelation: "prestador"
+            referencedColumns: ["id_prestador"]
+          }
+        ]
+      }
+
+      laboratorio: {
+        Row: {
+          id_laboratorio: number
+          nombre: string
+          estado: string | null
+          telefono: string | null
+          email: string | null
+          id_ubicacion_lab: number | null
+        }
+        Insert: {
           id_laboratorio?: number
-          id_ubicacion_lab?: number | null
-          nombre?: string
+          nombre: string
+          estado?: string | null
           telefono?: string | null
+          email?: string | null
+          id_ubicacion_lab?: number | null
+        }
+        Update: {
+          id_laboratorio?: number
+          nombre?: string
+          estado?: string | null
+          telefono?: string | null
+          email?: string | null
+          id_ubicacion_lab?: number | null
         }
         Relationships: [
           {
@@ -84,106 +436,178 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "ubicacion_laboratorio"
             referencedColumns: ["id_ubicacion_lab"]
-          },
+          }
         ]
       }
-      muestreo: {
+
+      mapa_riesgo: {
         Row: {
-          codigo: string
-          created_at: string | null
-          descripcion: string | null
-          id_laboratorio: number | null
-          id_muestreo: number
+          id_mapa: number
           id_prestador: number | null
-          id_solicitante: number | null
-          nombre: string
+          id_punto_captacion: number | null
         }
         Insert: {
-          codigo: string
-          created_at?: string | null
-          descripcion?: string | null
-          id_laboratorio?: number | null
-          id_muestreo?: number
+          id_mapa: number
           id_prestador?: number | null
-          id_solicitante?: number | null
-          nombre: string
+          id_punto_captacion?: number | null
         }
         Update: {
-          codigo?: string
-          created_at?: string | null
-          descripcion?: string | null
-          id_laboratorio?: number | null
-          id_muestreo?: number
+          id_mapa?: number
           id_prestador?: number | null
-          id_solicitante?: number | null
-          nombre?: string
+          id_punto_captacion?: number | null
         }
         Relationships: [
           {
-            foreignKeyName: "muestreo_id_laboratorio_fkey"
-            columns: ["id_laboratorio"]
+            foreignKeyName: "mapa_riesgo_id_punto_captacion_fkey"
+            columns: ["id_punto_captacion"]
             isOneToOne: false
-            referencedRelation: "laboratorio"
-            referencedColumns: ["id_laboratorio"]
+            referencedRelation: "punto_captacion"
+            referencedColumns: ["id_punto_captacion"]
           },
           {
-            foreignKeyName: "muestreo_id_prestador_fkey"
+            foreignKeyName: "mapa_riesgo_id_prestador_fkey"
+            columns: ["id_prestador"]
+            isOneToOne: false
+            referencedRelation: "prestador"
+            referencedColumns: ["id_prestador"]
+          }
+        ]
+      }
+
+      muestra: {
+        Row: {
+          id_muestra: number
+          muestra_no: string
+          contramuestra_pp: string | null
+          id_prestador: number | null
+          id_laboratorio: number | null
+          id_solicitante: number | null
+          fecha_toma: string | null
+          fecha_recepcion_lab: string | null
+          fecha_analisis_lab: string | null
+          desinfectante: string | null
+          coagulante: string | null
+          analisis_solicitados: string | null
+          resultados_para: string | null
+          observaciones: string | null
+          nota: string | null
+          irca_basico: number | null
+          irca_especial: number | null
+          irca: number | null
+          nivel_riesgo: string | null
+          id_muestreo: number | null
+          codigo_laboratorio: string | null
+          tipo_muestra: string | null
+        }
+        Insert: {
+          id_muestra?: number
+          muestra_no: string
+          contramuestra_pp?: string | null
+          id_prestador?: number | null
+          id_laboratorio?: number | null
+          id_solicitante?: number | null
+          fecha_toma?: string | null
+          fecha_recepcion_lab?: string | null
+          fecha_analisis_lab?: string | null
+          desinfectante?: string | null
+          coagulante?: string | null
+          analisis_solicitados?: string | null
+          resultados_para?: string | null
+          observaciones?: string | null
+          nota?: string | null
+          irca_basico?: number | null
+          irca_especial?: number | null
+          irca?: number | null
+          nivel_riesgo?: string | null
+          id_muestreo?: number | null
+          codigo_laboratorio?: string | null
+          tipo_muestra?: string | null
+        }
+        Update: {
+          id_muestra?: number
+          muestra_no?: string
+          contramuestra_pp?: string | null
+          id_prestador?: number | null
+          id_laboratorio?: number | null
+          id_solicitante?: number | null
+          fecha_toma?: string | null
+          fecha_recepcion_lab?: string | null
+          fecha_analisis_lab?: string | null
+          desinfectante?: string | null
+          coagulante?: string | null
+          analisis_solicitados?: string | null
+          resultados_para?: string | null
+          observaciones?: string | null
+          nota?: string | null
+          irca_basico?: number | null
+          irca_especial?: number | null
+          irca?: number | null
+          nivel_riesgo?: string | null
+          id_muestreo?: number | null
+          codigo_laboratorio?: string | null
+          tipo_muestra?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "muestra_id_prestador_fkey"
             columns: ["id_prestador"]
             isOneToOne: false
             referencedRelation: "prestador"
             referencedColumns: ["id_prestador"]
           },
           {
-            foreignKeyName: "muestreo_id_solicitante_fkey"
-            columns: ["id_solicitante"]
+            foreignKeyName: "muestra_id_laboratorio_fkey"
+            columns: ["id_laboratorio"]
             isOneToOne: false
-            referencedRelation: "solicitante"
-            referencedColumns: ["id_solicitante"]
+            referencedRelation: "laboratorio"
+            referencedColumns: ["id_laboratorio"]
           },
+          {
+            foreignKeyName: "muestra_id_muestreo_fkey"
+            columns: ["id_muestreo"]
+            isOneToOne: false
+            referencedRelation: "punto_muestreo"
+            referencedColumns: ["id_muestreo"]
+          }
         ]
       }
+
       prestador: {
         Row: {
-          codigo_anterior: number | null
-          codigo_sistema: number | null
-          created_at: string | null
-          direccion: string | null
-          id_autoridad_sanitaria: string | null
           id_prestador: number
-          id_sspd: string | null
-          id_ubicacion: number | null
           nit: string | null
-          nombre: string
-          nombre_sistema: string | null
+          id_autoridad_sanitaria: string | null
+          nombre: string | null
+          direccion: string | null
           telefono: string | null
+          id_ubicacion: number | null
+          codigo_sistema: number | null
+          codigo_anterior: number | null
+          nombre_sistema: string | null
         }
         Insert: {
-          codigo_anterior?: number | null
-          codigo_sistema?: number | null
-          created_at?: string | null
-          direccion?: string | null
-          id_autoridad_sanitaria?: string | null
           id_prestador?: number
-          id_sspd?: string | null
-          id_ubicacion?: number | null
           nit?: string | null
-          nombre: string
-          nombre_sistema?: string | null
+          id_autoridad_sanitaria?: string | null
+          nombre?: string | null
+          direccion?: string | null
           telefono?: string | null
+          id_ubicacion?: number | null
+          codigo_sistema?: number | null
+          codigo_anterior?: number | null
+          nombre_sistema?: string | null
         }
         Update: {
-          codigo_anterior?: number | null
-          codigo_sistema?: number | null
-          created_at?: string | null
-          direccion?: string | null
-          id_autoridad_sanitaria?: string | null
           id_prestador?: number
-          id_sspd?: string | null
-          id_ubicacion?: number | null
           nit?: string | null
-          nombre?: string
-          nombre_sistema?: string | null
+          id_autoridad_sanitaria?: string | null
+          nombre?: string | null
+          direccion?: string | null
           telefono?: string | null
+          id_ubicacion?: number | null
+          codigo_sistema?: number | null
+          codigo_anterior?: number | null
+          nombre_sistema?: string | null
         }
         Relationships: [
           {
@@ -192,63 +616,178 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "ubicacion"
             referencedColumns: ["id_ubicacion"]
-          },
+          }
         ]
       }
+
       profiles: {
         Row: {
-          created_at: string | null
-          email: string | null
           id: string
           nombre: string | null
+          email: string | null
           rol: string | null
+          created_at: string | null
           updated_at: string | null
         }
         Insert: {
-          created_at?: string | null
-          email?: string | null
           id: string
           nombre?: string | null
+          email?: string | null
           rol?: string | null
+          created_at?: string | null
           updated_at?: string | null
         }
         Update: {
-          created_at?: string | null
-          email?: string | null
           id?: string
           nombre?: string | null
+          email?: string | null
           rol?: string | null
+          created_at?: string | null
           updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "profiles_id_fkey"
+            columns: ["id"]
+            isOneToOne: false
+            referencedRelation: "auth.users"
+            referencedColumns: ["id"]
+          }
+        ]
+      }
+
+      punto_captacion: {
+        Row: {
+          id_punto_captacion: number
+          tipo_captacion: string
+          fuente_captacion: string | null
+          georeferenciacion: string | null
+          departamento: string | null
+          municipio: string | null
+          vereda: string | null
+        }
+        Insert: {
+          id_punto_captacion?: number
+          tipo_captacion: string
+          fuente_captacion?: string | null
+          georeferenciacion?: string | null
+          departamento?: string | null
+          municipio?: string | null
+          vereda?: string | null
+        }
+        Update: {
+          id_punto_captacion?: number
+          tipo_captacion?: string
+          fuente_captacion?: string | null
+          georeferenciacion?: string | null
+          departamento?: string | null
+          municipio?: string | null
+          vereda?: string | null
         }
         Relationships: []
       }
-      reporte: {
+
+      punto_muestreo: {
         Row: {
+          id_muestreo: number
           codigo: string
-          created_at: string | null
-          estado: string | null
-          fecha_creacion: string | null
-          id_reporte: number
-          id_prestador: number | null
-          punto: string | null
+          nombre: string | null
+          descripcion: string | null
+          departamento: string | null
+          municipio: string | null
+          vereda: string | null
+          latitud: string | null
+          longitud: string | null
+          direccion: string | null
         }
         Insert: {
+          id_muestreo?: number
           codigo: string
-          created_at?: string | null
-          estado?: string | null
-          fecha_creacion?: string | null
-          id_reporte?: number
-          id_prestador?: number | null
-          punto?: string | null
+          nombre?: string | null
+          descripcion?: string | null
+          departamento?: string | null
+          municipio?: string | null
+          vereda?: string | null
+          latitud?: string | null
+          longitud?: string | null
+          direccion?: string | null
         }
         Update: {
-          codigo: string
-          created_at?: string | null
-          estado?: string | null
-          fecha_creacion?: string | null
-          id_reporte?: number
+          id_muestreo?: number
+          codigo?: string
+          nombre?: string | null
+          descripcion?: string | null
+          departamento?: string | null
+          municipio?: string | null
+          vereda?: string | null
+          latitud?: string | null
+          longitud?: string | null
+          direccion?: string | null
+        }
+        Relationships: []
+      }
+
+      red: {
+        Row: {
+          id_red: number
+          fecha: string | null
+          caract_fisicas: string | null
+          caract_quimicas: string | null
+          caract_microbiologicas: string | null
+          caract_especiales: string | null
+          descartadas: string | null
+          medidas_sanitarias: string | null
+          observaciones: string | null
+          id_reporte2: number | null
+        }
+        Insert: {
+          id_red?: number
+          fecha?: string | null
+          caract_fisicas?: string | null
+          caract_quimicas?: string | null
+          caract_microbiologicas?: string | null
+          caract_especiales?: string | null
+          descartadas?: string | null
+          medidas_sanitarias?: string | null
+          observaciones?: string | null
+          id_reporte2?: number | null
+        }
+        Update: {
+          id_red?: number
+          fecha?: string | null
+          caract_fisicas?: string | null
+          caract_quimicas?: string | null
+          caract_microbiologicas?: string | null
+          caract_especiales?: string | null
+          descartadas?: string | null
+          medidas_sanitarias?: string | null
+          observaciones?: string | null
+          id_reporte2?: number | null
+        }
+        Relationships: []
+      }
+
+      representante: {
+        Row: {
+          id_representante: number
+          nombre: string
+          cargo: string | null
+          email: string | null
+          id_prestador: number | null
+        }
+        Insert: {
+          id_representante?: number
+          nombre: string
+          cargo?: string | null
+          email?: string | null
           id_prestador?: number | null
-          punto?: string | null
+        }
+        Update: {
+          id_representante?: number
+          nombre?: string
+          cargo?: string | null
+          email?: string | null
+          id_prestador?: number | null
         }
         Relationships: [
           {
@@ -260,62 +799,161 @@ export type Database = {
           }
         ]
       }
-      representante: {
+
+      resolucion: {
         Row: {
-          cargo: string | null
-          created_at: string | null
-          email: string | null
-          id_prestador: number | null
-          id_representante: number
-          nombre: string
+          id_resolucion: number
+          numero_resolucion: string | null
+          fecha_expedicion: string | null
+          archivo_resolucion: string | null
+          id_reporte2: number | null
         }
         Insert: {
-          cargo?: string | null
-          created_at?: string | null
-          email?: string | null
-          id_prestador?: number | null
-          id_representante?: number
-          nombre: string
+          id_resolucion?: number
+          numero_resolucion?: string | null
+          fecha_expedicion?: string | null
+          archivo_resolucion?: string | null
+          id_reporte2?: number | null
         }
         Update: {
-          cargo?: string | null
-          created_at?: string | null
-          email?: string | null
-          id_prestador?: number | null
-          id_representante?: number
-          nombre?: string
+          id_resolucion?: number
+          numero_resolucion?: string | null
+          fecha_expedicion?: string | null
+          archivo_resolucion?: string | null
+          id_reporte2?: number | null
+        }
+        Relationships: []
+      }
+
+      riesgo: {
+        Row: {
+          id_riesgo: number
+          actividad: string | null
+          entidad: string | null
+          evidencia: string | null
+          fecha: string | null
+          cumple: string | null
+          id_reporte3: number | null
+        }
+        Insert: {
+          id_riesgo?: number
+          actividad?: string | null
+          entidad?: string | null
+          evidencia?: string | null
+          fecha?: string | null
+          cumple?: string | null
+          id_reporte3?: number | null
+        }
+        Update: {
+          id_riesgo?: number
+          actividad?: string | null
+          entidad?: string | null
+          evidencia?: string | null
+          fecha?: string | null
+          cumple?: string | null
+          id_reporte3?: number | null
+        }
+        Relationships: []
+      }
+
+      seguimiento: {
+        Row: {
+          id_reporte3: number
+          consecutivo_mapa_riesgo: string | null
+          fecha_creacion: string | null
+          fecha_actualizacion: string | null
+          id_mapa: number | null
+        }
+        Insert: {
+          id_reporte3?: number
+          consecutivo_mapa_riesgo?: string | null
+          fecha_creacion?: string | null
+          fecha_actualizacion?: string | null
+          id_mapa?: number | null
+        }
+        Update: {
+          id_reporte3?: number
+          consecutivo_mapa_riesgo?: string | null
+          fecha_creacion?: string | null
+          fecha_actualizacion?: string | null
+          id_mapa?: number | null
         }
         Relationships: [
           {
-            foreignKeyName: "representante_id_prestador_fkey"
-            columns: ["id_prestador"]
+            foreignKeyName: "seguimiento_id_mapa_fkey"
+            columns: ["id_mapa"]
             isOneToOne: false
-            referencedRelation: "prestador"
-            referencedColumns: ["id_prestador"]
-          },
+            referencedRelation: "mapa_riesgo"
+            referencedColumns: ["id_mapa"]
+          }
         ]
       }
-      solicitante: {
+
+      seguimiento_inspeccion: {
         Row: {
-          created_at: string | null
-          estado: string | null
-          id_solicitante: number
-          id_ubicacion_sol: number | null
-          nombre: string
+          id_inspeccion: number
+          nombre_archivo: string | null
+          acta: string | null
+          fecha_acta: string | null
         }
         Insert: {
-          created_at?: string | null
-          estado?: string | null
-          id_solicitante?: number
-          id_ubicacion_sol?: number | null
-          nombre: string
+          id_inspeccion?: number
+          nombre_archivo?: string | null
+          acta?: string | null
+          fecha_acta?: string | null
         }
         Update: {
-          created_at?: string | null
-          estado?: string | null
+          id_inspeccion?: number
+          nombre_archivo?: string | null
+          acta?: string | null
+          fecha_acta?: string | null
+        }
+        Relationships: []
+      }
+
+      seguridad: {
+        Row: {
+          id_seguridad: number
+          medida: string | null
+          fecha: string | null
+          observacion: string | null
+          id_reporte3: number | null
+        }
+        Insert: {
+          id_seguridad?: number
+          medida?: string | null
+          fecha?: string | null
+          observacion?: string | null
+          id_reporte3?: number | null
+        }
+        Update: {
+          id_seguridad?: number
+          medida?: string | null
+          fecha?: string | null
+          observacion?: string | null
+          id_reporte3?: number | null
+        }
+        Relationships: []
+      }
+
+      solicitante: {
+        Row: {
+          id_solicitante: number
+          nombre: string
+          estado: string | null
+          id_ubicacion_sol: number | null
+        }
+        Insert: {
           id_solicitante?: number
+          nombre: string
+          estado?: string | null
           id_ubicacion_sol?: number | null
+        }
+        Update: {
+          id_solicitante?: number
           nombre?: string
+          estado?: string | null
+          id_ubicacion_sol?: number | null
         }
         Relationships: [
           {
@@ -324,51 +962,42 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "ubicacion_solicitante"
             referencedColumns: ["id_ubicacion_sol"]
-          },
+          }
         ]
       }
+
       tecnico: {
         Row: {
-          created_at: string | null
-          email: string | null
-          id_laboratorio: number | null
           id_tecnico: number
-          id_ubicacion_tec: number | null
           identificacion: number | null
           nombre: string
-          profesion: string | null
           telefono: string | null
+          profesion: string | null
+          email: string | null
+          id_ubicacion_tec: number | null
+          id_laboratorio: number | null
         }
         Insert: {
-          created_at?: string | null
-          email?: string | null
-          id_laboratorio?: number | null
           id_tecnico?: number
-          id_ubicacion_tec?: number | null
           identificacion?: number | null
           nombre: string
-          profesion?: string | null
           telefono?: string | null
+          profesion?: string | null
+          email?: string | null
+          id_ubicacion_tec?: number | null
+          id_laboratorio?: number | null
         }
         Update: {
-          created_at?: string | null
-          email?: string | null
-          id_laboratorio?: number | null
           id_tecnico?: number
-          id_ubicacion_tec?: number | null
           identificacion?: number | null
           nombre?: string
-          profesion?: string | null
           telefono?: string | null
+          profesion?: string | null
+          email?: string | null
+          id_ubicacion_tec?: number | null
+          id_laboratorio?: number | null
         }
         Relationships: [
-          {
-            foreignKeyName: "tecnico_id_laboratorio_fkey"
-            columns: ["id_laboratorio"]
-            isOneToOne: false
-            referencedRelation: "laboratorio"
-            referencedColumns: ["id_laboratorio"]
-          },
           {
             foreignKeyName: "tecnico_id_ubicacion_tec_fkey"
             columns: ["id_ubicacion_tec"]
@@ -376,98 +1005,97 @@ export type Database = {
             referencedRelation: "ubicacion_tecnico"
             referencedColumns: ["id_ubicacion_tec"]
           },
+          {
+            foreignKeyName: "tecnico_id_laboratorio_fkey"
+            columns: ["id_laboratorio"]
+            isOneToOne: false
+            referencedRelation: "laboratorio"
+            referencedColumns: ["id_laboratorio"]
+          }
         ]
       }
+
       ubicacion: {
         Row: {
-          created_at: string | null
-          departamento: string
           id_ubicacion: number
+          departamento: string
           municipio: string
           vereda: string | null
         }
         Insert: {
-          created_at?: string | null
-          departamento: string
           id_ubicacion?: number
+          departamento: string
           municipio: string
           vereda?: string | null
         }
         Update: {
-          created_at?: string | null
-          departamento?: string
           id_ubicacion?: number
+          departamento?: string
           municipio?: string
           vereda?: string | null
         }
         Relationships: []
       }
+
       ubicacion_laboratorio: {
         Row: {
-          created_at: string | null
-          departamento: string
-          direccion: string | null
           id_ubicacion_lab: number
+          departamento: string
           municipio: string
+          direccion: string | null
         }
         Insert: {
-          created_at?: string | null
-          departamento: string
-          direccion?: string | null
           id_ubicacion_lab?: number
+          departamento: string
           municipio: string
+          direccion?: string | null
         }
         Update: {
-          created_at?: string | null
-          departamento?: string
-          direccion?: string | null
           id_ubicacion_lab?: number
+          departamento?: string
           municipio?: string
+          direccion?: string | null
         }
         Relationships: []
       }
+
       ubicacion_solicitante: {
         Row: {
-          created_at: string | null
-          departamento: string
           id_ubicacion_sol: number
+          departamento: string
           municipio: string
         }
         Insert: {
-          created_at?: string | null
-          departamento: string
           id_ubicacion_sol?: number
+          departamento: string
           municipio: string
         }
         Update: {
-          created_at?: string | null
-          departamento?: string
           id_ubicacion_sol?: number
+          departamento?: string
           municipio?: string
         }
         Relationships: []
       }
+
       ubicacion_tecnico: {
         Row: {
-          created_at: string | null
-          departamento: string
-          direccion: string | null
           id_ubicacion_tec: number
+          departamento: string
           municipio: string
+          direccion: string | null
         }
         Insert: {
-          created_at?: string | null
-          departamento: string
-          direccion?: string | null
           id_ubicacion_tec?: number
+          departamento: string
           municipio: string
+          direccion?: string | null
         }
         Update: {
-          created_at?: string | null
-          departamento?: string
-          direccion?: string | null
           id_ubicacion_tec?: number
+          departamento?: string
           municipio?: string
+          direccion?: string | null
         }
         Relationships: []
       }
@@ -487,122 +1115,122 @@ export type Database = {
   }
 }
 
-type DatabaseWithoutInternals = Omit<Database, "__InternalSupabase">
+export type DatabaseWithoutInternals = Omit<Database, "__InternalSupabase">
 
 type DefaultSchema = DatabaseWithoutInternals[Extract<keyof Database, "public">]
 
 export type Tables<
   DefaultSchemaTableNameOrOptions extends
-    | keyof (DefaultSchema["Tables"] & DefaultSchema["Views"])
-    | { schema: keyof DatabaseWithoutInternals },
+  | keyof (DefaultSchema["Tables"] & DefaultSchema["Views"])
+  | { schema: keyof DatabaseWithoutInternals },
   TableName extends DefaultSchemaTableNameOrOptions extends {
     schema: keyof DatabaseWithoutInternals
   }
-    ? keyof (DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"] &
-        DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Views"])
-    : never = never,
+  ? keyof (DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"] &
+    DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Views"])
+  : never = never,
 > = DefaultSchemaTableNameOrOptions extends {
   schema: keyof DatabaseWithoutInternals
 }
   ? (DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"] &
-      DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Views"])[TableName] extends {
+    DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Views"])[TableName] extends {
       Row: infer R
     }
-    ? R
-    : never
+  ? R
+  : never
   : DefaultSchemaTableNameOrOptions extends keyof (DefaultSchema["Tables"] &
-        DefaultSchema["Views"])
-    ? (DefaultSchema["Tables"] &
-        DefaultSchema["Views"])[DefaultSchemaTableNameOrOptions] extends {
-        Row: infer R
-      }
-      ? R
-      : never
-    : never
+    DefaultSchema["Views"])
+  ? (DefaultSchema["Tables"] &
+    DefaultSchema["Views"])[DefaultSchemaTableNameOrOptions] extends {
+      Row: infer R
+    }
+  ? R
+  : never
+  : never
 
 export type TablesInsert<
   DefaultSchemaTableNameOrOptions extends
-    | keyof DefaultSchema["Tables"]
-    | { schema: keyof DatabaseWithoutInternals },
+  | keyof DefaultSchema["Tables"]
+  | { schema: keyof DatabaseWithoutInternals },
   TableName extends DefaultSchemaTableNameOrOptions extends {
     schema: keyof DatabaseWithoutInternals
   }
-    ? keyof DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"]
-    : never = never,
+  ? keyof DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"]
+  : never = never,
 > = DefaultSchemaTableNameOrOptions extends {
   schema: keyof DatabaseWithoutInternals
 }
   ? DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"][TableName] extends {
-      Insert: infer I
-    }
-    ? I
-    : never
+    Insert: infer I
+  }
+  ? I
+  : never
   : DefaultSchemaTableNameOrOptions extends keyof DefaultSchema["Tables"]
-    ? DefaultSchema["Tables"][DefaultSchemaTableNameOrOptions] extends {
-        Insert: infer I
-      }
-      ? I
-      : never
-    : never
+  ? DefaultSchema["Tables"][DefaultSchemaTableNameOrOptions] extends {
+    Insert: infer I
+  }
+  ? I
+  : never
+  : never
 
 export type TablesUpdate<
   DefaultSchemaTableNameOrOptions extends
-    | keyof DefaultSchema["Tables"]
-    | { schema: keyof DatabaseWithoutInternals },
+  | keyof DefaultSchema["Tables"]
+  | { schema: keyof DatabaseWithoutInternals },
   TableName extends DefaultSchemaTableNameOrOptions extends {
     schema: keyof DatabaseWithoutInternals
   }
-    ? keyof DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"]
-    : never = never,
+  ? keyof DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"]
+  : never = never,
 > = DefaultSchemaTableNameOrOptions extends {
   schema: keyof DatabaseWithoutInternals
 }
   ? DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"][TableName] extends {
-      Update: infer U
-    }
-    ? U
-    : never
+    Update: infer U
+  }
+  ? U
+  : never
   : DefaultSchemaTableNameOrOptions extends keyof DefaultSchema["Tables"]
-    ? DefaultSchema["Tables"][DefaultSchemaTableNameOrOptions] extends {
-        Update: infer U
-      }
-      ? U
-      : never
-    : never
+  ? DefaultSchema["Tables"][DefaultSchemaTableNameOrOptions] extends {
+    Update: infer U
+  }
+  ? U
+  : never
+  : never
 
 export type Enums<
   DefaultSchemaEnumNameOrOptions extends
-    | keyof DefaultSchema["Enums"]
-    | { schema: keyof DatabaseWithoutInternals },
+  | keyof DefaultSchema["Enums"]
+  | { schema: keyof DatabaseWithoutInternals },
   EnumName extends DefaultSchemaEnumNameOrOptions extends {
     schema: keyof DatabaseWithoutInternals
   }
-    ? keyof DatabaseWithoutInternals[DefaultSchemaEnumNameOrOptions["schema"]]["Enums"]
-    : never = never,
+  ? keyof DatabaseWithoutInternals[DefaultSchemaEnumNameOrOptions["schema"]]["Enums"]
+  : never = never,
 > = DefaultSchemaEnumNameOrOptions extends {
   schema: keyof DatabaseWithoutInternals
 }
   ? DatabaseWithoutInternals[DefaultSchemaEnumNameOrOptions["schema"]]["Enums"][EnumName]
   : DefaultSchemaEnumNameOrOptions extends keyof DefaultSchema["Enums"]
-    ? DefaultSchema["Enums"][DefaultSchemaEnumNameOrOptions]
-    : never
+  ? DefaultSchema[DefaultSchemaEnumNameOrOptions]
+  : never
 
 export type CompositeTypes<
   PublicCompositeTypeNameOrOptions extends
-    | keyof DefaultSchema["CompositeTypes"]
-    | { schema: keyof DatabaseWithoutInternals },
+  | keyof DefaultSchema["CompositeTypes"]
+  | { schema: keyof DatabaseWithoutInternals },
   CompositeTypeName extends PublicCompositeTypeNameOrOptions extends {
     schema: keyof DatabaseWithoutInternals
   }
-    ? keyof DatabaseWithoutInternals[PublicCompositeTypeNameOrOptions["schema"]]["CompositeTypes"]
-    : never = never,
+  ? keyof DatabaseWithoutInternals[PublicCompositeTypeNameOrOptions["schema"]]["CompositeTypes"]
+  : never = never,
 > = PublicCompositeTypeNameOrOptions extends {
   schema: keyof DatabaseWithoutInternals
 }
   ? DatabaseWithoutInternals[PublicCompositeTypeNameOrOptions["schema"]]["CompositeTypes"][CompositeTypeName]
   : PublicCompositeTypeNameOrOptions extends keyof DefaultSchema["CompositeTypes"]
-    ? DefaultSchema["CompositeTypes"][PublicCompositeTypeNameOrOptions]
-    : never
+  ? DefaultSchema[PublicCompositeTypeNameOrOptions]
+  : never
 
 export const Constants = {
   public: {

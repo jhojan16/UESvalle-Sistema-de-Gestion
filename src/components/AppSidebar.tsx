@@ -34,9 +34,10 @@ const menuItems = [
   { title: 'Prestadores', url: '/prestadores', icon: Users },
   { title: 'Laboratorios', url: '/laboratorios', icon: Building2 },
   { title: 'Técnicos', url: '/tecnicos', icon: UserCog },
-  { title: 'Reportes', url: '/reportes', icon: FileText },
   { title: 'Solicitantes', url: '/solicitantes', icon: ClipboardList },
-  { title: 'Muestreos', url: '/muestreos', icon: FlaskConical },
+  { title: 'Muestras', url: '/muestras', icon: FileText },
+  { title: 'Inspeccion Sanitaria', url: '/inspeccion', icon: FlaskConical },
+  { title: 'Mapa de riesgo', url: '/mapa', icon: FlaskConical },
   { title: 'Exportar', url: '/exportar', icon: ArrowBigDownDash },
 ];
 
