@@ -12,31 +12,42 @@ import {
     DialogTitle,
     DialogContent,
     IconButton,
-    Grid,
     Chip,
     Divider,
 } from '@mui/material';
+import { Grid } from '@mui/material';
 import { DataGrid, GridColDef, GridActionsCellItem } from '@mui/x-data-grid';
 import { Search, Eye, X } from 'lucide-react';
 
-type AnalisisMuestra = {
-    id_analisis_muestra: number;
-    tipo_analisis: string;
-    caracteristica: string | null;
-    metodo: string | null;
-    resultado: number | null;
-    unidades: string | null;
-    valores_aceptados: string | null;
-    diagnostico: string | null;
-    id_muestra: number | null;
-    muestra_no: string;
-    fecha_toma: string;
-    irca: number | null;
+type muestra = {
+    id_muestra: number
+    muestra_no: string
+    contramuestra_pp: string | null
+    id_prestador: number | null
+    id_laboratorio: number | null
+    id_solicitante: number | null
+    fecha_toma: string | null
+    fecha_recepcion_lab: string | null
+    fecha_analisis_lab: string | null
+    desinfectante: string | null
+    coagulante: string | null
+    analisis_solicitados: string | null
+    resultados_para: string | null
+    observaciones: string | null
+    nota: string | null
+    irca_basico: number | null
+    irca_especial: number | null
+    irca: number | null
+    nivel_riesgo: string | null
+    id_muestreo: number | null
+    codigo_laboratorio: string | null
+    tipo_muestra: string | null
+
 };
 
 export default function VistaAnalisisMuestras() {
     const [search, setSearch] = useState('');
-    const [selectedAnalisis, setSelectedAnalisis] = useState<AnalisisMuestra | null>(null);
+    const [selectedAnalisis, setSelectedAnalisis] = useState<muestra | null>(null);
     const [dialogOpen, setDialogOpen] = useState(false);
     const [paginationModel, setPaginationModel] = useState({
         page: 0,
@@ -53,7 +64,7 @@ export default function VistaAnalisisMuestras() {
                 .order('fecha_toma', { ascending: false });
 
             if (error) throw error;
-            return data as AnalisisMuestra[];
+            return data as muestra[];
         },
         staleTime: 5 * 60 * 1000, // Cache por 5 minutos
         refetchOnWindowFocus: false,
@@ -113,34 +124,6 @@ export default function VistaAnalisisMuestras() {
             headerAlign: 'center',
             renderCell: (params) => {
                 const irca = params.value;
-                if (irca === null || irca === undefined) return '-';
-
-                // Clasificación IRCA
-                let color: 'success' | 'info' | 'warning' | 'error' = 'success';
-                let nivel = 'Sin Riesgo';
-
-                if (irca <= 5) {
-                    color = 'success';
-                    nivel = 'Sin Riesgo';
-                } else if (irca <= 14) {
-                    color = 'info';
-                    nivel = 'Bajo';
-                } else if (irca <= 35) {
-                    color = 'warning';
-                    nivel = 'Medio';
-                } else {
-                    color = 'error';
-                    nivel = 'Alto';
-                }
-
-                return (
-                    <Box sx={{ textAlign: 'center' }}>
-                        <Typography variant="body2" fontWeight="bold">
-                            {irca}
-                        </Typography>
-                        <Chip label={nivel} color={color} size="small" sx={{ mt: 0.5 }} />
-                    </Box>
-                );
             },
         },
         {
@@ -160,15 +143,6 @@ export default function VistaAnalisisMuestras() {
             ],
         },
     ];
-
-    // ✅ Función para obtener color del diagnóstico
-    const getDiagnosticoColor = (diagnostico: string | null) => {
-        if (!diagnostico) return 'default';
-        const lower = diagnostico.toLowerCase();
-        if (lower.includes('aceptable') || lower.includes('conforme')) return 'success';
-        if (lower.includes('no aceptable') || lower.includes('no conforme')) return 'error';
-        return 'warning';
-    };
 
     return (
         <Box>
@@ -249,7 +223,7 @@ export default function VistaAnalisisMuestras() {
                     setDialogOpen(false);
                     setSelectedAnalisis(null);
                 }}
-                maxWidth="md"
+                maxWidth="xl"
                 fullWidth
             >
                 <DialogTitle>
@@ -284,87 +258,111 @@ export default function VistaAnalisisMuestras() {
                                 <Divider sx={{ mb: 2 }} />
 
                                 <Grid container spacing={2}>
-                                    <Grid item xs={12} sm={6}>
-                                        <Typography variant="caption" color="text.secondary">
-                                            ID Análisis
-                                        </Typography>
-                                        <Typography variant="body1" fontWeight="medium">
-                                            #{selectedAnalisis.id_analisis_muestra}
-                                        </Typography>
-                                    </Grid>
 
-                                    <Grid item xs={12} sm={6}>
+                                    <Grid size={{ xs: 12, md: 2 }}>
                                         <Typography variant="caption" color="text.secondary">
                                             ID Muestra
                                         </Typography>
-                                        <Typography variant="body1" fontWeight="medium">
-                                            {selectedAnalisis.id_muestra || 'N/A'}
+                                        <Typography >
+                                            {selectedAnalisis.id_muestra ?? 'N/A'}
                                         </Typography>
                                     </Grid>
 
-                                    <Grid item xs={12} sm={6}>
+                                    <Grid size={{ xs: 12, md: 2 }}>
                                         <Typography variant="caption" color="text.secondary">
                                             Número de Muestra
                                         </Typography>
-                                        <Chip
-                                            label={selectedAnalisis.muestra_no || 'Sin número'}
-                                            color="primary"
-                                            size="small"
-                                            sx={{ mt: 0.5 }}
-                                        />
-                                    </Grid>
+                                        <Typography>
+                                            {selectedAnalisis.muestra_no ?? 'Sin número'}
+                                        </Typography>
 
-                                    <Grid item xs={12} sm={6}>
+                                    </Grid>
+                                    <Grid size={{ xs: 12, md: 2 }}>
                                         <Typography variant="caption" color="text.secondary">
-                                            Fecha de Toma
+                                            Contramuestra
                                         </Typography>
-                                        <Typography variant="body1" fontWeight="medium">
-                                            {selectedAnalisis.fecha_toma
-                                                ? new Date(selectedAnalisis.fecha_toma).toLocaleDateString('es-CO', {
-                                                    year: 'numeric',
-                                                    month: 'long',
-                                                    day: 'numeric',
-                                                })
-                                                : 'No especificada'}
+                                        <Typography >
+                                            {selectedAnalisis.contramuestra_pp ?? 'No especificado'}
                                         </Typography>
                                     </Grid>
-
-                                    <Grid item xs={12} sm={6}>
+                                    <Grid size={{ xs: 12, md: 2 }}>
                                         <Typography variant="caption" color="text.secondary">
                                             IRCA (Índice de Riesgo)
                                         </Typography>
-                                        <Box sx={{ mt: 0.5 }}>
-                                            {selectedAnalisis.irca !== null && selectedAnalisis.irca !== undefined ? (
-                                                <Box sx={{ display: 'flex', gap: 1, alignItems: 'center' }}>
-                                                    <Typography variant="h5" fontWeight="bold">
-                                                        {selectedAnalisis.irca}
-                                                    </Typography>
-                                                    <Chip
-                                                        label={
-                                                            selectedAnalisis.irca <= 5
-                                                                ? 'Sin Riesgo'
-                                                                : selectedAnalisis.irca <= 14
-                                                                    ? 'Riesgo Bajo'
-                                                                    : selectedAnalisis.irca <= 35
-                                                                        ? 'Riesgo Medio'
-                                                                        : 'Riesgo Alto'
-                                                        }
-                                                        color={
-                                                            selectedAnalisis.irca <= 5
-                                                                ? 'success'
-                                                                : selectedAnalisis.irca <= 14
-                                                                    ? 'info'
-                                                                    : selectedAnalisis.irca <= 35
-                                                                        ? 'warning'
-                                                                        : 'error'
-                                                        }
-                                                        size="small"
-                                                    />
-                                                </Box>
-                                            ) : (
-                                                <Typography variant="body1">No disponible</Typography>
-                                            )}
-                                        </Box>
+                                        <Typography>
+                                            {selectedAnalisis.irca}
+                                        </Typography>
+                                    </Grid>
+                                    <Grid size={{ xs: 12, md: 2 }}>
+                                        <Typography variant="caption" color="text.secondary">
+                                            IRCA basico
+                                        </Typography>
+                                        <Typography>
+                                            {selectedAnalisis.irca_basico ?? "No especificado"}
+                                        </Typography>
+                                    </Grid>
+
+                                    <Grid size={{ xs: 12, md: 2 }}>
+                                        <Typography variant="caption" color="text.secondary">
+                                            IRCA especial
+                                        </Typography>
+                                        <Typography>
+                                            {selectedAnalisis.irca_especial ?? 'No especificado'}
+                                        </Typography>
+                                    </Grid>
+
+                                    <Grid size={{ xs: 12, md: 2 }}>
+                                        <Typography variant="caption" color="text.secondary">
+                                            Fecha toma
+                                        </Typography>
+                                        <Typography variant="body1">
+                                            {selectedAnalisis.fecha_toma || 'No especificado'}
+                                        </Typography>
+                                    </Grid>
+
+                                    <Grid size={{ xs: 12, md: 2 }}>
+                                        <Typography variant="caption" color="text.secondary">
+                                            Fecha recepción
+                                        </Typography>
+                                        <Typography>
+                                            {selectedAnalisis.fecha_recepcion_lab || "No especificado"}
+                                        </Typography>
+                                    </Grid>
+
+                                    <Grid size={{ xs: 12, md: 2 }}>
+                                        <Typography variant="caption" color="text.secondary">
+                                            Fecha analisis
+                                        </Typography>
+                                        <Typography>
+                                            {selectedAnalisis.fecha_analisis_lab || 'N/A'}
+                                        </Typography>
+                                    </Grid>
+
+                                    <Grid size={{ xs: 12, md: 2 }}>
+                                        <Typography variant="caption" color="text.secondary">
+                                            Coagulante
+                                        </Typography>
+                                        <Typography>
+                                            {selectedAnalisis.coagulante || 'No especificado'}
+                                        </Typography>
+                                    </Grid>
+
+                                    <Grid size={{ xs: 12, md: 2 }}>
+                                        <Typography variant="caption" color="text.secondary">
+                                            Resultados para
+                                        </Typography>
+                                        <Typography>
+                                            {selectedAnalisis.resultados_para || 'No especificado'}
+                                        </Typography>
+                                    </Grid>
+
+                                    <Grid size={{ xs: 12, md: 2 }}>
+                                        <Typography variant="caption" color="text.secondary">
+                                            Tipo
+                                        </Typography>
+                                        <Typography>
+                                            {selectedAnalisis.tipo_muestra || 'No especificado'}
+                                        </Typography>
                                     </Grid>
                                 </Grid>
                             </Paper>
@@ -376,22 +374,22 @@ export default function VistaAnalisisMuestras() {
                                 </Typography>
                                 <Divider sx={{ mb: 2 }} />
 
-                                <Grid container spacing={2}>
-                                    <Grid item xs={12}>
+                                <Grid container spacing={10}>
+                                    <Grid item xs={12} sm={6}>
                                         <Typography variant="caption" color="text.secondary">
-                                            Tipo de Análisis
+                                            Característica
                                         </Typography>
-                                        <Typography variant="body1" fontWeight="medium">
-                                            {selectedAnalisis.tipo_analisis}
+                                        <Typography>
+                                            {selectedAnalisis.caracteristica || 'No especificada'}
                                         </Typography>
                                     </Grid>
 
                                     <Grid item xs={12} sm={6}>
                                         <Typography variant="caption" color="text.secondary">
-                                            Característica
+                                            Método
                                         </Typography>
                                         <Typography variant="body1">
-                                            {selectedAnalisis.caracteristica || 'No especificada'}
+                                            {selectedAnalisis.metodo || 'No especificado'}
                                         </Typography>
                                     </Grid>
 
@@ -408,7 +406,7 @@ export default function VistaAnalisisMuestras() {
                                         <Typography variant="caption" color="text.secondary">
                                             Resultado
                                         </Typography>
-                                        <Typography variant="h6" fontWeight="bold" color="primary">
+                                        <Typography>
                                             {selectedAnalisis.resultado !== null
                                                 ? selectedAnalisis.resultado
                                                 : 'N/A'}
@@ -419,7 +417,7 @@ export default function VistaAnalisisMuestras() {
                                         <Typography variant="caption" color="text.secondary">
                                             Unidades
                                         </Typography>
-                                        <Typography variant="body1">
+                                        <Typography>
                                             {selectedAnalisis.unidades || 'N/A'}
                                         </Typography>
                                     </Grid>
@@ -428,7 +426,7 @@ export default function VistaAnalisisMuestras() {
                                         <Typography variant="caption" color="text.secondary">
                                             Valores Aceptados
                                         </Typography>
-                                        <Typography variant="body1">
+                                        <Typography>
                                             {selectedAnalisis.valores_aceptados || 'No especificado'}
                                         </Typography>
                                     </Grid>
@@ -437,14 +435,80 @@ export default function VistaAnalisisMuestras() {
                                         <Typography variant="caption" color="text.secondary">
                                             Diagnóstico
                                         </Typography>
-                                        <Box sx={{ mt: 0.5 }}>
-                                            <Chip
-                                                label={selectedAnalisis.diagnostico || 'Sin diagnóstico'}
-                                                color={getDiagnosticoColor(selectedAnalisis.diagnostico)}
-                                                size="medium"
-                                            />
-                                        </Box>
+                                        <Typography>
+                                            {selectedAnalisis.diagnostico || 'No especificado'}
+                                        </Typography>
                                     </Grid>
+
+                                    <Grid item xs={12} sm={6}>
+                                        <Typography variant="caption" color="text.secondary">
+                                            Característica
+                                        </Typography>
+                                        <Typography>
+                                            {selectedAnalisis.caracteristica || 'No especificada'}
+                                        </Typography>
+                                    </Grid>
+
+                                    <Grid item xs={12} sm={6}>
+                                        <Typography variant="caption" color="text.secondary">
+                                            Método
+                                        </Typography>
+                                        <Typography variant="body1">
+                                            {selectedAnalisis.metodo || 'No especificado'}
+                                        </Typography>
+                                    </Grid>
+
+                                    <Grid item xs={12} sm={6}>
+                                        <Typography variant="caption" color="text.secondary">
+                                            Método
+                                        </Typography>
+                                        <Typography variant="body1">
+                                            {selectedAnalisis.metodo || 'No especificado'}
+                                        </Typography>
+                                    </Grid>
+
+                                    <Grid item xs={12} sm={4}>
+                                        <Typography variant="caption" color="text.secondary">
+                                            Resultado
+                                        </Typography>
+                                        <Typography>
+                                            {selectedAnalisis.resultado !== null
+                                                ? selectedAnalisis.resultado
+                                                : 'N/A'}
+                                        </Typography>
+                                    </Grid>
+
+                                    <Grid item xs={12} sm={4}>
+                                        <Typography variant="caption" color="text.secondary">
+                                            Unidades
+                                        </Typography>
+                                        <Typography>
+                                            {selectedAnalisis.unidades || 'N/A'}
+                                        </Typography>
+                                    </Grid>
+
+                                    <Grid item xs={12} sm={4}>
+                                        <Typography variant="caption" color="text.secondary">
+                                            Valores Aceptados
+                                        </Typography>
+                                        <Typography>
+                                            {selectedAnalisis.valores_aceptados || 'No especificado'}
+                                        </Typography>
+                                    </Grid>
+
+                                    <Grid item xs={12}>
+                                        <Typography variant="caption" color="text.secondary">
+                                            Diagnóstico
+                                        </Typography>
+                                        <Typography>
+                                            {selectedAnalisis.diagnostico || 'No especificado'}
+                                        </Typography>
+                                    </Grid>
+
+
+
+
+
                                 </Grid>
                             </Paper>
                         </Box>
