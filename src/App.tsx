@@ -17,6 +17,7 @@ import PrestadorDetalle from "./pages/PrestadorDetalle";
 import Solicitante from "./pages/Solicitantes";
 import Reportes from "./pages/Reportes";
 import VistaExportar from "./pages/VistaExportar";
+import MapaPuntosCaptacion from "./pages/MapaRiesgo"
 import {CircularProgress, Typography} from "@mui/material";
 
 const queryClient = new QueryClient();
@@ -93,11 +94,11 @@ const App = () => (
             />
             
             <Route
-              path="/reportes"
+              path="/mapa"
               element={
                 <ProtectedRoute>
                   <Layout>  
-                    <Reportes />
+                    <MapaPuntosCaptacion />
                   </Layout>
                 </ProtectedRoute>
               }
