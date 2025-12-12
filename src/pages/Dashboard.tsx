@@ -25,8 +25,8 @@ export default function Dashboard() {
     queryFn: async () => {
       const [prestadores, muestreos, reportes, laboratorios] = await Promise.all([
         supabase.from('prestador').select('*', { count: 'exact', head: true }),
-        supabase.from('muestreo').select('*', { count: 'exact', head: true }),
-        supabase.from('reporte').select('*', { count: 'exact', head: true }),
+        supabase.from('muestra').select('*', { count: 'exact', head: true }),
+        supabase.from('mapa_riesgo').select('*', { count: 'exact', head: true }),
         supabase.from('laboratorio').select('*', { count: 'exact', head: true }),
       ]);
 
@@ -101,13 +101,13 @@ export default function Dashboard() {
       color: '#3b82f6',
     },
     {
-      title: 'Muestreos',
+      title: 'Muestras',
       value: stats?.muestreos || 0,
       icon: FlaskConical,
       color: '#10b981',
     },
     {
-      title: 'Reportes',
+      title: 'Mapa de riesgo',
       value: stats?.reportes || 0,
       icon: FileText,
       color: '#f59e0b',

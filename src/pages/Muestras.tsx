@@ -142,6 +142,20 @@ export default function VistaAnalisisMuestras() {
                 });
             },
         },
+        {   
+            field: 'tipo_muestra',
+            headerName: 'Tipo muestra',
+            flex: 0.5,
+            minWidth: 100,
+            align: 'center',
+            headerAlign: 'center',
+            renderCell: (params) => {
+                const tipo = params.value;
+                return tipo
+            },
+
+        },
+
         {
             field: 'irca',
             headerName: 'IRCA',
@@ -183,7 +197,6 @@ export default function VistaAnalisisMuestras() {
                     Gestión y consulta de análisis de calidad del agua
                 </Typography>
             </Box>
-
             {/* Búsqueda */}
             <Paper sx={{ p: 3, mb: 3 }}>
                 <TextField
@@ -232,7 +245,6 @@ export default function VistaAnalisisMuestras() {
                             '& .MuiDataGrid-columnHeaders': {
                                 backgroundColor: 'action.hover',
                                 fontWeight: 'bold',
-                                borderBottom: '2px solid',
                                 borderColor: 'divider',
                             },
                             '& .MuiDataGrid-footerContainer': {
@@ -488,7 +500,7 @@ export default function VistaAnalisisMuestras() {
                             {/* Detalles del laboratorio */}
                             <Paper variant="outlined" sx={{ p: 3, mb: 3 }}>
                                 <Typography variant="h6" fontWeight="bold" gutterBottom>
-                                    Prestador
+                                    Laboratorio
                                 </Typography>
                                 <Divider sx={{ mb: 2 }} />
                                 <Grid container spacing={10}>

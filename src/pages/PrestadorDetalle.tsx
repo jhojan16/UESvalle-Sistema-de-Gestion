@@ -84,41 +84,32 @@ export default function PrestadorDetalle() {
         enabled: !!prestadorId,
     });
 
-    // Representantes del prestador
+    // mapa de riesgo del prestador
     const { data: reporte = [] } = useQuery({
-        queryKey: ['reporte', prestadorId],
+        queryKey: ['mapa_riesgo', prestadorId],
         queryFn: async () => {
             const { data, error } = await supabase
-                .from('reporte')
-                .select('codigo, punto, estado, fecha_creacion, id_reporte')
+                .from('mapa_riesgo')
+                .select(`id_mapa, id_prestador,
+                    punto_captacion (id_punto_captacion, tipo_captacion, fuente_captacion, municipio)
+                    `)
                 .eq('id_prestador', prestadorId)
-                .order('created_at', { ascending: false });
             if (error) throw error;
             return data;
+
         },
         enabled: !!prestadorId,
     });
+    console.log(reporte);
 
     // Muestreos con laboratorio y solicitante
     const { data: muestreos = [] } = useQuery({
-        queryKey: ['muestreos', prestadorId],
+        queryKey: ['muestra', prestadorId],
         queryFn: async () => {
             const { data, error } = await supabase
-                .from('muestreo')
-                .select(`
-            *,
-            laboratorio (
-                nombre,
-                telefono,
-                email
-            ),
-            solicitante (
-                nombre,
-                estado
-            )
-            `)
+                .from('muestra')
+                .select('id_muestra, muestra_no, irca, nivel_riesgo, tipo_muestra')
                 .eq('id_prestador', prestadorId)
-                .order('created_at', { ascending: false });
 
             if (error) throw error;
             return data;
@@ -156,44 +147,21 @@ export default function PrestadorDetalle() {
     ];
 
     const muestreosColumns: GridColDef[] = [
-        { field: 'codigo', headerName: 'Código', width: 150 },
-        { field: 'nombre', headerName: 'Nombre', flex: 1, minWidth: 200 },
-        {
-            field: 'laboratorio',
-            headerName: 'Laboratorio',
-            width: 200,
-            renderCell: (params: any) => params.row.laboratorio?.nombre || 'N/A'
-        },
-        {
-            field: 'solicitante',
-            headerName: 'Solicitante',
-            width: 200,
-            renderCell: (params: any) => params.row.solicitante?.nombre || 'N/A'
-        },
-        {
-            field: 'created_at',
-            headerName: 'Fecha',
-            width: 150,
-            renderCell: (params: any) => new Date(params.row.created_at).toLocaleDateString()
-        },
+        { field: 'muestra_no', headerName: 'Código', width: 150 },
+        { field: 'irca', headerName: 'Irca', flex: 1, minWidth: 200 },
+        {field: 'nivel_riesgo', headerName: 'Nivel de riesgo', width: 200,},
+        {field: 'tipo_muestra', headerName: 'Tipo muestra',width: 200,},
     ];
 
     const reportesColumns: GridColDef[] = [
-        { field: 'codigo', headerName: 'Código', width: 150 },
-        { field: 'punto', headerName: 'Punto', flex: 1, minWidth: 150 },
-        {
-            field: 'estado',
-            headerName: 'Estado',
-            width: 130,
-            renderCell: (params) => (
-                <Chip
-                    label={params.value}
-                    color={params.value === 'completado' ? 'success' : 'warning'}
-                    size="small"
-                />
-            )
-        },
-        { field: 'fecha_creacion', headerName: 'Fecha', width: 150 },
+        { field: 'id_mapa', headerName: 'Mapa de riesgo', width: 150 },
+        { field: 'fuente_captacion', headerName: 'Fuente Captación', flex: 1, minWidth: 130, 
+            renderCell:(params) => params.row.punto_captacion?.fuente_captacion },
+        {field: 'tipo_captacion', headerName: 'Tipo captación', width: 130,
+            renderCell:(params) => params.row.punto_captacion?.tipo_captacion},
+        {field: 'municipio', headerName: 'Municipio', width: 130,
+            renderCell:(params) => params.row.punto_captacion?.municipio},
+        
     ];
 
     return (
@@ -300,8 +268,8 @@ export default function PrestadorDetalle() {
             <Paper sx={{ p: 3 }}>
                 <Tabs value={tabValue} onChange={(_, newValue) => setTabValue(newValue)}>
                     <Tab label={`Representantes (${representantes.length})`} />
-                    <Tab label={`Muestreos (${muestreos.length})`} />
-                    <Tab label={`Reportes (${reporte.length})`} />
+                    <Tab label={`Muestreas (${muestreos.length})`} />
+                    <Tab label={`Mapa riesgo (${reporte.length})`} />
                 </Tabs>
 
                 <TabPanel value={tabValue} index={0}>
@@ -324,7 +292,7 @@ export default function PrestadorDetalle() {
                         <DataGrid
                             rows={muestreos}
                             columns={muestreosColumns}
-                            getRowId={(row) => row.id_muestreo}
+                            getRowId={(row) => row.id_muestra}
                             pageSizeOptions={[10, 25, 50]}
                             initialState={{
                                 pagination: { paginationModel: { pageSize: 10 } },
@@ -338,7 +306,7 @@ export default function PrestadorDetalle() {
                         <DataGrid
                             rows={reporte}
                             columns={reportesColumns}
-                            getRowId={(row) => row.id_reporte}
+                            getRowId={(row) => row.id_mapa}
                             pageSizeOptions={[10, 25, 50]}
                             initialState={{
                                 pagination: { paginationModel: { pageSize: 10 } },

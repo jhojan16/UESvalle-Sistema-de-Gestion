@@ -14,10 +14,11 @@ import Muestras from "./pages/Muestras";
 import Tecnico from "./pages/Tecnico";
 import Laboratorio from "./pages/Laboratorio";
 import PrestadorDetalle from "./pages/PrestadorDetalle";
-import Solicitante from "./pages/Solicitantes";
+import Solicitantes from "./pages/Solicitantes";
 import Reportes from "./pages/Reportes";
 import VistaExportar from "./pages/VistaExportar";
 import MapaPuntosCaptacion from "./pages/MapaRiesgo"
+import InspeccionesView from "@/pages/Inspeccion";
 import {CircularProgress, Typography} from "@mui/material";
 
 const queryClient = new QueryClient();
@@ -83,6 +84,16 @@ const App = () => (
               }
             />
             <Route
+              path="/solicitantes"
+              element={
+                <ProtectedRoute>
+                  <Layout>
+                    <Solicitantes/>
+                  </Layout>
+                </ProtectedRoute>
+              }
+            />
+            <Route
               path="/tecnicos"
               element={
                 <ProtectedRoute>
@@ -104,11 +115,11 @@ const App = () => (
               }
             />
             <Route
-              path="/solicitantes"
+              path="/inspeccion"
               element={
                 <ProtectedRoute>
                   <Layout>  
-                    <Solicitante />
+                    <InspeccionesView />
                   </Layout>
                 </ProtectedRoute>
               }
