@@ -268,7 +268,7 @@ export default function PrestadorDetalle() {
             <Paper sx={{ p: 3 }}>
                 <Tabs value={tabValue} onChange={(_, newValue) => setTabValue(newValue)}>
                     <Tab label={`Representantes (${representantes.length})`} />
-                    <Tab label={`Muestreas (${muestreos.length})`} />
+                    <Tab label={`Muestras (${muestreos.length})`} />
                     <Tab label={`Mapa riesgo (${reporte.length})`} />
                 </Tabs>
 

@@ -4,6 +4,7 @@ import "leaflet/dist/leaflet.css";
 import { supabase } from "../integrations/supabase/client";
 import L from "leaflet";
 import markerIcon from "leaflet/dist/images/marker-icon.png";
+import { Box, LinearProgress, Typography } from "@mui/material";
 
 // Tipos para las consultas de Supabase
 type MapasRiesgoBase = {
@@ -367,7 +368,14 @@ export default function MapaPuntosCaptacion() {
         setSelectedMapa(mapa);
     };
 
-    if (loading) return <p className="text-center py-4">Cargando mapa…</p>;
+    if (loading) return (
+        <Box sx={{ p: 4, textAlign: 'center', minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+            <Box sx={{ width: '100%', maxWidth: 400 }}>
+                <LinearProgress sx={{ height: 6, borderRadius: 3, bgcolor: '#e2e8f0' }} />
+                <Typography sx={{ mt: 2, color: '#4a5568' }}>Cargando Mapas de riesgo...</Typography>
+            </Box>
+        </Box>
+    );
 
     return (
         <div className="flex flex-row w-full h-[95vh] gap-4">
@@ -398,15 +406,6 @@ export default function MapaPuntosCaptacion() {
                                         <p><b>Mapa de Riesgo #</b> {p.id_mapa}</p>
                                         <p><b>Tipo:</b> {p.punto_captacion?.tipo_captacion ?? "N/A"}</p>
                                         <p><b>Prestador:</b> {p.prestador?.nombre ?? "N/A"}</p>
-                                        {p.anexos && p.anexos.length > 0 && (
-                                            <p><b>Anexos:</b> {p.anexos.length}</p>
-                                        )}
-                                        {p.anexos2 && p.anexos2.length > 0 && (
-                                            <p><b>Anexos2:</b> {p.anexos2.length}</p>
-                                        )}
-                                        {p.seguimientos && p.seguimientos.length > 0 && (
-                                            <p><b>Seguimientos:</b> {p.seguimientos.length}</p>
-                                        )}
                                     </div>
                                 </Popup>
                             </Marker>

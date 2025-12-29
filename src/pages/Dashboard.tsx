@@ -23,11 +23,12 @@ export default function Dashboard() {
   const { data: stats, isLoading } = useQuery({
     queryKey: ['dashboard-stats'],
     queryFn: async () => {
-      const [prestadores, muestreos, reportes, laboratorios] = await Promise.all([
+      const [prestadores, muestreos, reportes, laboratorios, inspeccion] = await Promise.all([
         supabase.from('prestador').select('*', { count: 'exact', head: true }),
         supabase.from('muestra').select('*', { count: 'exact', head: true }),
         supabase.from('mapa_riesgo').select('*', { count: 'exact', head: true }),
         supabase.from('laboratorio').select('*', { count: 'exact', head: true }),
+        supabase.from('inspeccion').select('*', { count: 'exact', head: true }),
       ]);
 
       return {
@@ -35,6 +36,7 @@ export default function Dashboard() {
         muestreos: muestreos.count || 0,
         reportes: reportes.count || 0,
         laboratorios: laboratorios.count || 0,
+        inspeccion: inspeccion.count || 0,
       };
     },
   });
@@ -113,8 +115,8 @@ export default function Dashboard() {
       color: '#f59e0b',
     },
     {
-      title: 'Laboratorios',
-      value: stats?.laboratorios || 0,
+      title: 'Inspecciones',
+      value: stats?.inspeccion || 0,
       icon: Building2,
       color: '#6b7280',
     },
