@@ -5,6 +5,8 @@ import { supabase } from "../integrations/supabase/client";
 import L from "leaflet";
 import markerIcon from "leaflet/dist/images/marker-icon.png";
 import { Box, LinearProgress, Typography } from "@mui/material";
+import markerIcon2x from "leaflet/dist/images/marker-icon-2x.png";
+import markerShadow from "leaflet/dist/images/marker-shadow.png";
 
 // Tipos para las consultas de Supabase
 type MapasRiesgoBase = {
@@ -187,9 +189,11 @@ type MapaRiesgoCompleto = {
     resoluciones?: ResolucionData[];
 };
 
-// Fix a los íconos de Leaflet
+delete (L.Icon.Default.prototype as any)._getIconUrl;
 L.Icon.Default.mergeOptions({
     iconUrl: markerIcon,
+    iconRetinaUrl: markerIcon2x,
+    shadowUrl: markerShadow,
 });
 
 export default function MapaPuntosCaptacion() {

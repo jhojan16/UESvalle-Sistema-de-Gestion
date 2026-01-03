@@ -15,11 +15,10 @@ import Tecnico from "./pages/Tecnico";
 import Laboratorio from "./pages/Laboratorio";
 import PrestadorDetalle from "./pages/PrestadorDetalle";
 import Solicitantes from "./pages/Solicitantes";
-import Reportes from "./pages/Reportes";
 import VistaExportar from "./pages/VistaExportar";
 import MapaPuntosCaptacion from "./pages/MapaRiesgo"
 import InspeccionesView from "@/pages/Inspeccion";
-import {CircularProgress, Typography} from "@mui/material";
+import CargaMasivaVista from "@/pages/VistaUpload"
 
 const queryClient = new QueryClient();
 
@@ -130,6 +129,16 @@ const App = () => (
                 <ProtectedRoute>
                   <Layout>
                     <VistaExportar/>
+                  </Layout>
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/Subir"
+              element={
+                <ProtectedRoute>
+                  <Layout>
+                    <CargaMasivaVista/>
                   </Layout>
                 </ProtectedRoute>
               }

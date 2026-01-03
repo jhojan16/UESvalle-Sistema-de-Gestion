@@ -26,7 +26,8 @@ import {
   LogOut,
   Menu,
   ChevronLeft,
-  ArrowBigDownDash 
+  ArrowBigDownDash,
+  FolderUp,
 } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 
@@ -40,6 +41,7 @@ const menuItems = [
   { title: 'Inspeccion Sanitaria', url: '/inspeccion', icon: FlaskConical },
   { title: 'Mapa de riesgo', url: '/mapa', icon: MapPin },
   { title: 'Exportar', url: '/exportar', icon: ArrowBigDownDash },
+  { title: 'Subir', url: '/subir', icon: FolderUp },
 ];
 
 const drawerWidth = 260;
