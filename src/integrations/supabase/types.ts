@@ -1,4 +1,11 @@
-// Supabase generated types - FULL SCHEMA UPDATED
+// instalar el cliente de supabase
+//npm install supabase --save-dev
+
+// Para iniciar sesion:
+// npx supabase login
+
+//comandos para actualizar el type.ts
+// npx supabase gen types typescript --project-id ID_DEL_PROYECTO > src/integrations/supabase/types.ts
 
 export type Json =
   | string
@@ -9,6 +16,8 @@ export type Json =
   | Json[]
 
 export type Database = {
+  // Allows to automatically instantiate createClient with right options
+  // instead of createClient<Database, { PostgrestVersion: 'XX' }>(URL, KEY)
   __InternalSupabase: {
     PostgrestVersion: "13.0.5"
   }
@@ -16,89 +25,87 @@ export type Database = {
     Tables: {
       analisis_muestra: {
         Row: {
-          id_analisis_muestra: number
-          tipo_analisis: string
           caracteristica: string | null
+          diagnostico: string | null
+          id_analisis_muestra: number
+          id_muestra: number
           metodo: string | null
-          resultado: number | null
+          resultado: string | null
+          tipo_analisis: string | null
           unidades: string | null
           valores_aceptados: string | null
-          diagnostico: string | null
-          id_muestra: number | null
         }
         Insert: {
-          id_analisis_muestra?: number
-          tipo_analisis: string
           caracteristica?: string | null
+          diagnostico?: string | null
+          id_analisis_muestra?: number
+          id_muestra: number
           metodo?: string | null
-          resultado?: number | null
+          resultado?: string | null
+          tipo_analisis?: string | null
           unidades?: string | null
           valores_aceptados?: string | null
-          diagnostico?: string | null
-          id_muestra?: number | null
         }
         Update: {
-          id_analisis_muestra?: number
-          tipo_analisis?: string
           caracteristica?: string | null
+          diagnostico?: string | null
+          id_analisis_muestra?: number
+          id_muestra?: number
           metodo?: string | null
-          resultado?: number | null
+          resultado?: string | null
+          tipo_analisis?: string | null
           unidades?: string | null
           valores_aceptados?: string | null
-          diagnostico?: string | null
-          id_muestra?: number | null
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "analisis_muestra_id_muestra_fkey"
+            columns: ["id_muestra"]
+            isOneToOne: false
+            referencedRelation: "muestra"
+            referencedColumns: ["id_muestra"]
+          },
+        ]
       }
-
-      MuestraResumen: {
-        Row: {
-          id_muestra: number
-          cantidad_analisis: number
-          tipos_analisis: string[]
-          ultimo_analisis?: string
-        }
-      }
-
       anexo: {
         Row: {
+          autoridad_sanitaria: string | null
+          departamento: string | null
+          fecha_entidades: string | null
+          fecha_inspeccion_ocular: string | null
+          fecha_reunion_entidades: string | null
+          id_mapa: number | null
           id_reporte1: number
           inspeccion_ocular: string | null
-          tipo_inspeccion_ocular: string | null
-          fecha_inspeccion_ocular: string | null
-          fecha_entidades: string | null
-          departamento: string | null
           municipio: string | null
+          tipo_inspeccion_ocular: string | null
           vereda: string | null
-          autoridad_sanitaria: string | null
-          id_mapa: number | null
-          fecha_reunion_entidades: string | null
         }
         Insert: {
+          autoridad_sanitaria?: string | null
+          departamento?: string | null
+          fecha_entidades?: string | null
+          fecha_inspeccion_ocular?: string | null
+          fecha_reunion_entidades?: string | null
+          id_mapa?: number | null
           id_reporte1?: number
           inspeccion_ocular?: string | null
-          tipo_inspeccion_ocular?: string | null
-          fecha_inspeccion_ocular?: string | null
-          fecha_entidades?: string | null
-          departamento?: string | null
           municipio?: string | null
+          tipo_inspeccion_ocular?: string | null
           vereda?: string | null
-          autoridad_sanitaria?: string | null
-          id_mapa?: number | null
-          fecha_reunion_entidades?: string | null
         }
         Update: {
+          autoridad_sanitaria?: string | null
+          departamento?: string | null
+          fecha_entidades?: string | null
+          fecha_inspeccion_ocular?: string | null
+          fecha_reunion_entidades?: string | null
+          id_mapa?: number | null
           id_reporte1?: number
           inspeccion_ocular?: string | null
-          tipo_inspeccion_ocular?: string | null
-          fecha_inspeccion_ocular?: string | null
-          fecha_entidades?: string | null
-          departamento?: string | null
           municipio?: string | null
+          tipo_inspeccion_ocular?: string | null
           vereda?: string | null
-          autoridad_sanitaria?: string | null
-          id_mapa?: number | null
-          fecha_reunion_entidades?: string | null
         }
         Relationships: [
           {
@@ -107,28 +114,27 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "mapa_riesgo"
             referencedColumns: ["id_mapa"]
-          }
+          },
         ]
       }
-
       anexo2: {
         Row: {
-          id_reporte2: number
-          consecutivo_mapa_riesgo: string | null
           anterior_mapa_riesgo: string | null
+          consecutivo_mapa_riesgo: string | null
           id_mapa: number | null
+          id_reporte2: number
         }
         Insert: {
-          id_reporte2?: number
-          consecutivo_mapa_riesgo?: string | null
           anterior_mapa_riesgo?: string | null
+          consecutivo_mapa_riesgo?: string | null
           id_mapa?: number | null
+          id_reporte2?: number
         }
         Update: {
-          id_reporte2?: number
-          consecutivo_mapa_riesgo?: string | null
           anterior_mapa_riesgo?: string | null
+          consecutivo_mapa_riesgo?: string | null
           id_mapa?: number | null
+          id_reporte2?: number
         }
         Relationships: [
           {
@@ -137,186 +143,182 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "mapa_riesgo"
             referencedColumns: ["id_mapa"]
-          }
+          },
         ]
       }
-
       bocatoma: {
         Row: {
-          id_bocatoma: number
-          fecha: string | null
-          caract_fisica: string | null
-          caract_quimica: string | null
-          caract_microbiologicas: string | null
           caract_especiales: string | null
+          caract_fisica: string | null
+          caract_microbiologicas: string | null
+          caract_quimica: string | null
           descartadas: string | null
+          fecha: string | null
+          id_bocatoma: number
           id_reporte2: number | null
         }
         Insert: {
-          id_bocatoma?: number
-          fecha?: string | null
-          caract_fisica?: string | null
-          caract_quimica?: string | null
-          caract_microbiologicas?: string | null
           caract_especiales?: string | null
+          caract_fisica?: string | null
+          caract_microbiologicas?: string | null
+          caract_quimica?: string | null
           descartadas?: string | null
+          fecha?: string | null
+          id_bocatoma?: number
           id_reporte2?: number | null
         }
         Update: {
-          id_bocatoma?: number
-          fecha?: string | null
-          caract_fisica?: string | null
-          caract_quimica?: string | null
-          caract_microbiologicas?: string | null
           caract_especiales?: string | null
+          caract_fisica?: string | null
+          caract_microbiologicas?: string | null
+          caract_quimica?: string | null
           descartadas?: string | null
+          fecha?: string | null
+          id_bocatoma?: number
           id_reporte2?: number | null
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "bocatoma_id_reporte2_fkey"
+            columns: ["id_reporte2"]
+            isOneToOne: false
+            referencedRelation: "anexo2"
+            referencedColumns: ["id_reporte2"]
+          },
+        ]
       }
-
-      caracteristica: {
-        Row: {
-          id_caracteristica: number
-          caracteristica_seguimiento: string | null
-          frecuencia_pp: string | null
-          minimo_muestras_pp: string | null
-          frecuencia_as: string | null
-          minimo_muestras_as: string | null
-          id_reporte3: number | null
-        }
-        Insert: {
-          id_caracteristica?: number
-          caracteristica_seguimiento?: string | null
-          frecuencia_pp?: string | null
-          minimo_muestras_pp?: string | null
-          frecuencia_as?: string | null
-          minimo_muestras_as?: string | null
-          id_reporte3?: number | null
-        }
-        Update: {
-          id_caracteristica?: number
-          caracteristica_seguimiento?: string | null
-          frecuencia_pp?: string | null
-          minimo_muestras_pp?: string | null
-          frecuencia_as?: string | null
-          minimo_muestras_as?: string | null
-          id_reporte3?: number | null
-        }
-        Relationships: []
-      }
-
       caracteristica_priorizada: {
         Row: {
-          id_caracteristica: number
           actividad_contaminante: string | null
-          caract_fisica: string | null
-          caract_quimica: string | null
-          caract_microbiologica: string | null
-          caract_especial: string | null
-          observaciones: string | null
+          carac_especial: string | null
+          carac_fisica: string | null
+          carac_microbiologica: string | null
+          carac_quimica: string | null
+          id_caracteristica: number
           id_reporte1: number | null
+          observaciones: string | null
         }
         Insert: {
-          id_caracteristica?: number
           actividad_contaminante?: string | null
-          caract_fisica?: string | null
-          caract_quimica?: string | null
-          caract_microbiologica?: string | null
-          caract_especial?: string | null
-          observaciones?: string | null
+          carac_especial?: string | null
+          carac_fisica?: string | null
+          carac_microbiologica?: string | null
+          carac_quimica?: string | null
+          id_caracteristica?: number
           id_reporte1?: number | null
+          observaciones?: string | null
         }
         Update: {
-          id_caracteristica?: number
           actividad_contaminante?: string | null
-          caract_fisica?: string | null
-          caract_quimica?: string | null
-          caract_microbiologica?: string | null
-          caract_especial?: string | null
-          observaciones?: string | null
+          carac_especial?: string | null
+          carac_fisica?: string | null
+          carac_microbiologica?: string | null
+          carac_quimica?: string | null
+          id_caracteristica?: number
           id_reporte1?: number | null
+          observaciones?: string | null
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "caracteristica_priorizada_id_reporte1_fkey"
+            columns: ["id_reporte1"]
+            isOneToOne: false
+            referencedRelation: "anexo"
+            referencedColumns: ["id_reporte1"]
+          },
+        ]
       }
-
       documento_fuente: {
         Row: {
-          id_documento: number
-          fuente_info: string | null
-          nombre_documento: string | null
-          tipo_documento: string | null
           autor: string | null
           fecha_publicacion: string | null
+          fuente_info: string | null
+          id_documento: number
           id_reporte1: number | null
+          nombre_documento: string | null
+          tipo_documento: string | null
         }
         Insert: {
-          id_documento?: number
-          fuente_info?: string | null
-          nombre_documento?: string | null
-          tipo_documento?: string | null
           autor?: string | null
           fecha_publicacion?: string | null
+          fuente_info?: string | null
+          id_documento?: number
           id_reporte1?: number | null
+          nombre_documento?: string | null
+          tipo_documento?: string | null
         }
         Update: {
-          id_documento?: number
-          fuente_info?: string | null
-          nombre_documento?: string | null
-          tipo_documento?: string | null
           autor?: string | null
           fecha_publicacion?: string | null
+          fuente_info?: string | null
+          id_documento?: number
           id_reporte1?: number | null
+          nombre_documento?: string | null
+          tipo_documento?: string | null
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "documento_fuente_id_reporte1_fkey"
+            columns: ["id_reporte1"]
+            isOneToOne: false
+            referencedRelation: "anexo"
+            referencedColumns: ["id_reporte1"]
+          },
+        ]
       }
-
       entidad_participante: {
         Row: {
-          id_entidad: number
-          entidad: string | null
-          dependencia: string | null
           cargo: string | null
+          dependencia: string | null
+          entidad: string | null
+          id_entidad: number
           id_reporte1: number | null
         }
         Insert: {
-          id_entidad?: number
-          entidad?: string | null
-          dependencia?: string | null
           cargo?: string | null
+          dependencia?: string | null
+          entidad?: string | null
+          id_entidad?: number
           id_reporte1?: number | null
         }
         Update: {
-          id_entidad?: number
-          entidad?: string | null
-          dependencia?: string | null
           cargo?: string | null
+          dependencia?: string | null
+          entidad?: string | null
+          id_entidad?: number
           id_reporte1?: number | null
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "entidad_participante_id_reporte1_fkey"
+            columns: ["id_reporte1"]
+            isOneToOne: false
+            referencedRelation: "anexo"
+            referencedColumns: ["id_reporte1"]
+          },
+        ]
       }
-
       fuente: {
         Row: {
-          id_fuente: number
-          nombre: string
           clase: string | null
-          tipo: string | null
+          id_fuente: number
           id_ubicacion: number | null
+          nombre: string
+          tipo: string | null
         }
         Insert: {
-          id_fuente?: number
-          nombre: string
           clase?: string | null
-          tipo?: string | null
+          id_fuente?: number
           id_ubicacion?: number | null
+          nombre: string
+          tipo?: string | null
         }
         Update: {
-          id_fuente?: number
-          nombre?: string
           clase?: string | null
-          tipo?: string | null
+          id_fuente?: number
           id_ubicacion?: number | null
+          nombre?: string
+          tipo?: string | null
         }
         Relationships: [
           {
@@ -325,73 +327,72 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "ubicacion"
             referencedColumns: ["id_ubicacion"]
-          }
+          },
         ]
       }
-
       inspeccion: {
         Row: {
+          autoridad_inspeccion: string | null
+          bps: number | null
+          concepto: string | null
+          copia_visita_anterior: string | null
+          estado: string | null
+          fecha_inspeccion: string | null
+          fecha_visita_anterior: string | null
+          habitantes_municipio: number | null
           id_inspeccion: number
           id_inspeccion_sivicap: number | null
-          fecha_inspeccion: string | null
-          autoridad_inspeccion: string | null
-          fecha_visita_anterior: string | null
+          id_prestador: number | null
+          indice_continuidad: number | null
+          indice_tratamiento: number | null
+          iraba_inspeccion: number | null
           nombre_visita_anterior: string | null
-          copia_visita_anterior: string | null
-          concepto: string | null
-          plazo_ejecucion_inspeccion: string | null
           plan_mejoramiento: string | null
-          habitantes_municipio: number | null
+          plazo_ejecucion_inspeccion: string | null
           viviendas: number | null
           viviendas_urbano: number | null
-          iraba_inspeccion: number | null
-          indice_tratamiento: number | null
-          indice_continuidad: number | null
-          bps: number | null
-          estado: string | null
-          id_prestador: number | null
         }
         Insert: {
-          id_inspeccion: number
-          id_inspeccion_sivicap?: number | null
-          fecha_inspeccion?: string | null
           autoridad_inspeccion?: string | null
-          fecha_visita_anterior?: string | null
-          nombre_visita_anterior?: string | null
-          copia_visita_anterior?: string | null
-          concepto?: string | null
-          plazo_ejecucion_inspeccion?: string | null
-          plan_mejoramiento?: string | null
-          habitantes_municipio?: number | null
-          viviendas?: number | null
-          viviendas_urbano?: number | null
-          iraba_inspeccion?: number | null
-          indice_tratamiento?: number | null
-          indice_continuidad?: number | null
           bps?: number | null
+          concepto?: string | null
+          copia_visita_anterior?: string | null
           estado?: string | null
-          id_prestador?: number | null
-        }
-        Update: {
+          fecha_inspeccion?: string | null
+          fecha_visita_anterior?: string | null
+          habitantes_municipio?: number | null
           id_inspeccion?: number
           id_inspeccion_sivicap?: number | null
-          fecha_inspeccion?: string | null
-          autoridad_inspeccion?: string | null
-          fecha_visita_anterior?: string | null
+          id_prestador?: number | null
+          indice_continuidad?: number | null
+          indice_tratamiento?: number | null
+          iraba_inspeccion?: number | null
           nombre_visita_anterior?: string | null
-          copia_visita_anterior?: string | null
-          concepto?: string | null
-          plazo_ejecucion_inspeccion?: string | null
           plan_mejoramiento?: string | null
-          habitantes_municipio?: number | null
+          plazo_ejecucion_inspeccion?: string | null
           viviendas?: number | null
           viviendas_urbano?: number | null
-          iraba_inspeccion?: number | null
-          indice_tratamiento?: number | null
-          indice_continuidad?: number | null
+        }
+        Update: {
+          autoridad_inspeccion?: string | null
           bps?: number | null
+          concepto?: string | null
+          copia_visita_anterior?: string | null
           estado?: string | null
+          fecha_inspeccion?: string | null
+          fecha_visita_anterior?: string | null
+          habitantes_municipio?: number | null
+          id_inspeccion?: number
+          id_inspeccion_sivicap?: number | null
           id_prestador?: number | null
+          indice_continuidad?: number | null
+          indice_tratamiento?: number | null
+          iraba_inspeccion?: number | null
+          nombre_visita_anterior?: string | null
+          plan_mejoramiento?: string | null
+          plazo_ejecucion_inspeccion?: string | null
+          viviendas?: number | null
+          viviendas_urbano?: number | null
         }
         Relationships: [
           {
@@ -400,34 +401,102 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "prestador"
             referencedColumns: ["id_prestador"]
-          }
+          },
         ]
       }
-
-      laboratorio: {
+      inspeccion_staging: {
         Row: {
-          id_laboratorio: number
-          nombre: string
+          autoridad_inspeccion: string | null
+          bps: string | null
+          concepto: string | null
+          copia_visita_anterior: string | null
+          created_at: string | null
           estado: string | null
-          telefono: string | null
-          email: string | null
-          id_ubicacion_lab: number | null
+          fecha_inspeccion: string | null
+          fecha_visita_anterior: string | null
+          habitantes_municipio: string | null
+          id_inspeccion_sivicap: string | null
+          indice_continuidad: string | null
+          indice_tratamiento: string | null
+          iraba_inspeccion: string | null
+          nit: string | null
+          nombre_visita_anterior: string | null
+          plan_mejoramiento: string | null
+          plazo_ejecucion_inspeccion: string | null
+          processed: boolean | null
+          viviendas: string | null
+          viviendas_urbano: string | null
         }
         Insert: {
-          id_laboratorio?: number
-          nombre: string
+          autoridad_inspeccion?: string | null
+          bps?: string | null
+          concepto?: string | null
+          copia_visita_anterior?: string | null
+          created_at?: string | null
           estado?: string | null
-          telefono?: string | null
-          email?: string | null
-          id_ubicacion_lab?: number | null
+          fecha_inspeccion?: string | null
+          fecha_visita_anterior?: string | null
+          habitantes_municipio?: string | null
+          id_inspeccion_sivicap?: string | null
+          indice_continuidad?: string | null
+          indice_tratamiento?: string | null
+          iraba_inspeccion?: string | null
+          nit?: string | null
+          nombre_visita_anterior?: string | null
+          plan_mejoramiento?: string | null
+          plazo_ejecucion_inspeccion?: string | null
+          processed?: boolean | null
+          viviendas?: string | null
+          viviendas_urbano?: string | null
         }
         Update: {
-          id_laboratorio?: number
-          nombre?: string
+          autoridad_inspeccion?: string | null
+          bps?: string | null
+          concepto?: string | null
+          copia_visita_anterior?: string | null
+          created_at?: string | null
           estado?: string | null
-          telefono?: string | null
+          fecha_inspeccion?: string | null
+          fecha_visita_anterior?: string | null
+          habitantes_municipio?: string | null
+          id_inspeccion_sivicap?: string | null
+          indice_continuidad?: string | null
+          indice_tratamiento?: string | null
+          iraba_inspeccion?: string | null
+          nit?: string | null
+          nombre_visita_anterior?: string | null
+          plan_mejoramiento?: string | null
+          plazo_ejecucion_inspeccion?: string | null
+          processed?: boolean | null
+          viviendas?: string | null
+          viviendas_urbano?: string | null
+        }
+        Relationships: []
+      }
+      laboratorio: {
+        Row: {
+          email: string | null
+          estado: string | null
+          id_laboratorio: number
+          id_ubicacion_lab: number | null
+          nombre: string
+          telefono: string | null
+        }
+        Insert: {
           email?: string | null
+          estado?: string | null
+          id_laboratorio?: number
           id_ubicacion_lab?: number | null
+          nombre: string
+          telefono?: string | null
+        }
+        Update: {
+          email?: string | null
+          estado?: string | null
+          id_laboratorio?: number
+          id_ubicacion_lab?: number | null
+          nombre?: string
+          telefono?: string | null
         }
         Relationships: [
           {
@@ -436,10 +505,9 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "ubicacion_laboratorio"
             referencedColumns: ["id_ubicacion_lab"]
-          }
+          },
         ]
       }
-
       mapa_riesgo: {
         Row: {
           id_mapa: number
@@ -458,103 +526,320 @@ export type Database = {
         }
         Relationships: [
           {
+            foreignKeyName: "mapa_riesgo_id_prestador_fkey"
+            columns: ["id_prestador"]
+            isOneToOne: false
+            referencedRelation: "prestador"
+            referencedColumns: ["id_prestador"]
+          },
+          {
             foreignKeyName: "mapa_riesgo_id_punto_captacion_fkey"
             columns: ["id_punto_captacion"]
             isOneToOne: false
             referencedRelation: "punto_captacion"
             referencedColumns: ["id_punto_captacion"]
           },
-          {
-            foreignKeyName: "mapa_riesgo_id_prestador_fkey"
-            columns: ["id_prestador"]
-            isOneToOne: false
-            referencedRelation: "prestador"
-            referencedColumns: ["id_prestador"]
-          }
         ]
       }
-
+      mapa_riesgo_staging: {
+        Row: {
+          actividad_contaminante: string | null
+          anexo1_departamento: string | null
+          anexo1_municipio: string | null
+          anexo1_vereda: string | null
+          anexo2_consecutivo: string | null
+          anterior_mapa_riesgo: string | null
+          archivo_resolucion: string | null
+          autor: string | null
+          autoridad_sanitaria: string | null
+          bocatoma_descartadas: string | null
+          bocatoma_especiales: string | null
+          bocatoma_fecha: string | null
+          bocatoma_fisica: string | null
+          bocatoma_micro: string | null
+          bocatoma_quimica: string | null
+          carac_especial: string | null
+          carac_fisica: string | null
+          carac_microbiologica: string | null
+          carac_quimica: string | null
+          caracteristica_seguimiento: string | null
+          cargo: string | null
+          cp_observaciones: string | null
+          created_at: string | null
+          dependencia: string | null
+          entidad: string | null
+          fecha_actualizacion: string | null
+          fecha_creacion: string | null
+          fecha_entidades: string | null
+          fecha_expedicion: string | null
+          fecha_inspeccion_ocular: string | null
+          fecha_publicacion: string | null
+          fecha_reunion_entidades: string | null
+          frecuencia_as: string | null
+          frecuencia_pp: string | null
+          fuente_captacion: string | null
+          fuente_info: string | null
+          georeferenciacion: string | null
+          id_mapa: string | null
+          id_staging: number
+          inspeccion_ocular: string | null
+          medidas_sanitarias: string | null
+          minimo_muestras_as: string | null
+          minimo_muestras_pp: string | null
+          nit: string | null
+          nombre_documento: string | null
+          numero_resolucion: string | null
+          pc_departamento: string | null
+          pc_municipio: string | null
+          pc_vereda: string | null
+          processed: boolean | null
+          red_descartadas: string | null
+          red_especiales: string | null
+          red_fecha: string | null
+          red_fisica: string | null
+          red_micro: string | null
+          red_observaciones: string | null
+          red_quimica: string | null
+          riesgo_actividad: string | null
+          riesgo_cumple: string | null
+          riesgo_entidad: string | null
+          riesgo_evidencia: string | null
+          riesgo_fecha: string | null
+          seguimiento_consecutivo: string | null
+          seguridad_fecha: string | null
+          seguridad_medida: string | null
+          seguridad_observacion: string | null
+          si_acta: string | null
+          si_archivo: string | null
+          si_fecha: string | null
+          tipo_captacion: string | null
+          tipo_documento: string | null
+          tipo_inspeccion_ocular: string | null
+        }
+        Insert: {
+          actividad_contaminante?: string | null
+          anexo1_departamento?: string | null
+          anexo1_municipio?: string | null
+          anexo1_vereda?: string | null
+          anexo2_consecutivo?: string | null
+          anterior_mapa_riesgo?: string | null
+          archivo_resolucion?: string | null
+          autor?: string | null
+          autoridad_sanitaria?: string | null
+          bocatoma_descartadas?: string | null
+          bocatoma_especiales?: string | null
+          bocatoma_fecha?: string | null
+          bocatoma_fisica?: string | null
+          bocatoma_micro?: string | null
+          bocatoma_quimica?: string | null
+          carac_especial?: string | null
+          carac_fisica?: string | null
+          carac_microbiologica?: string | null
+          carac_quimica?: string | null
+          caracteristica_seguimiento?: string | null
+          cargo?: string | null
+          cp_observaciones?: string | null
+          created_at?: string | null
+          dependencia?: string | null
+          entidad?: string | null
+          fecha_actualizacion?: string | null
+          fecha_creacion?: string | null
+          fecha_entidades?: string | null
+          fecha_expedicion?: string | null
+          fecha_inspeccion_ocular?: string | null
+          fecha_publicacion?: string | null
+          fecha_reunion_entidades?: string | null
+          frecuencia_as?: string | null
+          frecuencia_pp?: string | null
+          fuente_captacion?: string | null
+          fuente_info?: string | null
+          georeferenciacion?: string | null
+          id_mapa?: string | null
+          id_staging?: never
+          inspeccion_ocular?: string | null
+          medidas_sanitarias?: string | null
+          minimo_muestras_as?: string | null
+          minimo_muestras_pp?: string | null
+          nit?: string | null
+          nombre_documento?: string | null
+          numero_resolucion?: string | null
+          pc_departamento?: string | null
+          pc_municipio?: string | null
+          pc_vereda?: string | null
+          processed?: boolean | null
+          red_descartadas?: string | null
+          red_especiales?: string | null
+          red_fecha?: string | null
+          red_fisica?: string | null
+          red_micro?: string | null
+          red_observaciones?: string | null
+          red_quimica?: string | null
+          riesgo_actividad?: string | null
+          riesgo_cumple?: string | null
+          riesgo_entidad?: string | null
+          riesgo_evidencia?: string | null
+          riesgo_fecha?: string | null
+          seguimiento_consecutivo?: string | null
+          seguridad_fecha?: string | null
+          seguridad_medida?: string | null
+          seguridad_observacion?: string | null
+          si_acta?: string | null
+          si_archivo?: string | null
+          si_fecha?: string | null
+          tipo_captacion?: string | null
+          tipo_documento?: string | null
+          tipo_inspeccion_ocular?: string | null
+        }
+        Update: {
+          actividad_contaminante?: string | null
+          anexo1_departamento?: string | null
+          anexo1_municipio?: string | null
+          anexo1_vereda?: string | null
+          anexo2_consecutivo?: string | null
+          anterior_mapa_riesgo?: string | null
+          archivo_resolucion?: string | null
+          autor?: string | null
+          autoridad_sanitaria?: string | null
+          bocatoma_descartadas?: string | null
+          bocatoma_especiales?: string | null
+          bocatoma_fecha?: string | null
+          bocatoma_fisica?: string | null
+          bocatoma_micro?: string | null
+          bocatoma_quimica?: string | null
+          carac_especial?: string | null
+          carac_fisica?: string | null
+          carac_microbiologica?: string | null
+          carac_quimica?: string | null
+          caracteristica_seguimiento?: string | null
+          cargo?: string | null
+          cp_observaciones?: string | null
+          created_at?: string | null
+          dependencia?: string | null
+          entidad?: string | null
+          fecha_actualizacion?: string | null
+          fecha_creacion?: string | null
+          fecha_entidades?: string | null
+          fecha_expedicion?: string | null
+          fecha_inspeccion_ocular?: string | null
+          fecha_publicacion?: string | null
+          fecha_reunion_entidades?: string | null
+          frecuencia_as?: string | null
+          frecuencia_pp?: string | null
+          fuente_captacion?: string | null
+          fuente_info?: string | null
+          georeferenciacion?: string | null
+          id_mapa?: string | null
+          id_staging?: never
+          inspeccion_ocular?: string | null
+          medidas_sanitarias?: string | null
+          minimo_muestras_as?: string | null
+          minimo_muestras_pp?: string | null
+          nit?: string | null
+          nombre_documento?: string | null
+          numero_resolucion?: string | null
+          pc_departamento?: string | null
+          pc_municipio?: string | null
+          pc_vereda?: string | null
+          processed?: boolean | null
+          red_descartadas?: string | null
+          red_especiales?: string | null
+          red_fecha?: string | null
+          red_fisica?: string | null
+          red_micro?: string | null
+          red_observaciones?: string | null
+          red_quimica?: string | null
+          riesgo_actividad?: string | null
+          riesgo_cumple?: string | null
+          riesgo_entidad?: string | null
+          riesgo_evidencia?: string | null
+          riesgo_fecha?: string | null
+          seguimiento_consecutivo?: string | null
+          seguridad_fecha?: string | null
+          seguridad_medida?: string | null
+          seguridad_observacion?: string | null
+          si_acta?: string | null
+          si_archivo?: string | null
+          si_fecha?: string | null
+          tipo_captacion?: string | null
+          tipo_documento?: string | null
+          tipo_inspeccion_ocular?: string | null
+        }
+        Relationships: []
+      }
       muestra: {
         Row: {
-          id_muestra: number
-          muestra_no: string
-          contramuestra_pp: string | null
-          id_prestador: number | null
-          id_laboratorio: number | null
-          id_solicitante: number | null
-          fecha_toma: string | null
-          fecha_recepcion_lab: string | null
-          fecha_analisis_lab: string | null
-          desinfectante: string | null
-          coagulante: string | null
           analisis_solicitados: string | null
-          resultados_para: string | null
-          observaciones: string | null
-          nota: string | null
+          coagulante: string | null
+          codigo_laboratorio: string | null
+          contramuestra_pp: string | null
+          desinfectante: string | null
+          fecha_analisis_lab: string | null
+          fecha_recepcion_lab: string | null
+          fecha_toma: string | null
+          id_laboratorio: number | null
+          id_muestra: number
+          id_muestreo: number | null
+          id_prestador: number | null
+          id_solicitante: number | null
+          irca: number | null
           irca_basico: number | null
           irca_especial: number | null
-          irca: number | null
+          muestra_no: string
           nivel_riesgo: string | null
-          id_muestreo: number | null
-          codigo_laboratorio: string | null
+          nota: string | null
+          observaciones: string | null
+          resultados_para: string | null
           tipo_muestra: string | null
         }
         Insert: {
-          id_muestra?: number
-          muestra_no: string
-          contramuestra_pp?: string | null
-          id_prestador?: number | null
-          id_laboratorio?: number | null
-          id_solicitante?: number | null
-          fecha_toma?: string | null
-          fecha_recepcion_lab?: string | null
-          fecha_analisis_lab?: string | null
-          desinfectante?: string | null
-          coagulante?: string | null
           analisis_solicitados?: string | null
-          resultados_para?: string | null
-          observaciones?: string | null
-          nota?: string | null
+          coagulante?: string | null
+          codigo_laboratorio?: string | null
+          contramuestra_pp?: string | null
+          desinfectante?: string | null
+          fecha_analisis_lab?: string | null
+          fecha_recepcion_lab?: string | null
+          fecha_toma?: string | null
+          id_laboratorio?: number | null
+          id_muestra?: number
+          id_muestreo?: number | null
+          id_prestador?: number | null
+          id_solicitante?: number | null
+          irca?: number | null
           irca_basico?: number | null
           irca_especial?: number | null
-          irca?: number | null
+          muestra_no: string
           nivel_riesgo?: string | null
-          id_muestreo?: number | null
-          codigo_laboratorio?: string | null
+          nota?: string | null
+          observaciones?: string | null
+          resultados_para?: string | null
           tipo_muestra?: string | null
         }
         Update: {
-          id_muestra?: number
-          muestra_no?: string
-          contramuestra_pp?: string | null
-          id_prestador?: number | null
-          id_laboratorio?: number | null
-          id_solicitante?: number | null
-          fecha_toma?: string | null
-          fecha_recepcion_lab?: string | null
-          fecha_analisis_lab?: string | null
-          desinfectante?: string | null
-          coagulante?: string | null
           analisis_solicitados?: string | null
-          resultados_para?: string | null
-          observaciones?: string | null
-          nota?: string | null
+          coagulante?: string | null
+          codigo_laboratorio?: string | null
+          contramuestra_pp?: string | null
+          desinfectante?: string | null
+          fecha_analisis_lab?: string | null
+          fecha_recepcion_lab?: string | null
+          fecha_toma?: string | null
+          id_laboratorio?: number | null
+          id_muestra?: number
+          id_muestreo?: number | null
+          id_prestador?: number | null
+          id_solicitante?: number | null
+          irca?: number | null
           irca_basico?: number | null
           irca_especial?: number | null
-          irca?: number | null
+          muestra_no?: string
           nivel_riesgo?: string | null
-          id_muestreo?: number | null
-          codigo_laboratorio?: string | null
+          nota?: string | null
+          observaciones?: string | null
+          resultados_para?: string | null
           tipo_muestra?: string | null
         }
         Relationships: [
-          {
-            foreignKeyName: "muestra_id_prestador_fkey"
-            columns: ["id_prestador"]
-            isOneToOne: false
-            referencedRelation: "prestador"
-            referencedColumns: ["id_prestador"]
-          },
           {
             foreignKeyName: "muestra_id_laboratorio_fkey"
             columns: ["id_laboratorio"]
@@ -568,46 +853,175 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "punto_muestreo"
             referencedColumns: ["id_muestreo"]
-          }
+          },
+          {
+            foreignKeyName: "muestra_id_prestador_fkey"
+            columns: ["id_prestador"]
+            isOneToOne: false
+            referencedRelation: "prestador"
+            referencedColumns: ["id_prestador"]
+          },
         ]
       }
-
-      prestador: {
+      muestra_staging: {
         Row: {
-          id_prestador: number
-          nit: string | null
-          id_autoridad_sanitaria: string | null
-          nombre: string | null
+          analisis_solicitados: string | null
+          caracteristica: string | null
+          coagulante: string | null
+          codigo: string | null
+          codigo_laboratorio: string | null
+          contramuestra_pp: string | null
+          created_at: string | null
+          departamento: string | null
+          descripcion: string | null
+          desinfectante: string | null
+          diagnostico: string | null
           direccion: string | null
-          telefono: string | null
-          id_ubicacion: number | null
-          codigo_sistema: number | null
-          codigo_anterior: number | null
-          nombre_sistema: string | null
+          fecha_analisis_lab: string | null
+          fecha_recepcion_lab: string | null
+          fecha_toma: string | null
+          id_muestreo: string | null
+          id_staging: number
+          irca: string | null
+          irca_basico: string | null
+          irca_especial: string | null
+          latitud: string | null
+          longitud: string | null
+          metodo: string | null
+          muestra_no: string | null
+          municipio: string | null
+          nit: string | null
+          nivel_riesgo: string | null
+          nombre: string | null
+          nota: string | null
+          observaciones: string | null
+          processed: boolean | null
+          resultado: string | null
+          resultados_para: string | null
+          tipo_analisis: string | null
+          tipo_muestra: string | null
+          unidades: string | null
+          valores_aceptados: string | null
+          vereda: string | null
         }
         Insert: {
-          id_prestador?: number
-          nit?: string | null
-          id_autoridad_sanitaria?: string | null
-          nombre?: string | null
+          analisis_solicitados?: string | null
+          caracteristica?: string | null
+          coagulante?: string | null
+          codigo?: string | null
+          codigo_laboratorio?: string | null
+          contramuestra_pp?: string | null
+          created_at?: string | null
+          departamento?: string | null
+          descripcion?: string | null
+          desinfectante?: string | null
+          diagnostico?: string | null
           direccion?: string | null
-          telefono?: string | null
-          id_ubicacion?: number | null
-          codigo_sistema?: number | null
-          codigo_anterior?: number | null
-          nombre_sistema?: string | null
+          fecha_analisis_lab?: string | null
+          fecha_recepcion_lab?: string | null
+          fecha_toma?: string | null
+          id_muestreo?: string | null
+          id_staging?: number
+          irca?: string | null
+          irca_basico?: string | null
+          irca_especial?: string | null
+          latitud?: string | null
+          longitud?: string | null
+          metodo?: string | null
+          muestra_no?: string | null
+          municipio?: string | null
+          nit?: string | null
+          nivel_riesgo?: string | null
+          nombre?: string | null
+          nota?: string | null
+          observaciones?: string | null
+          processed?: boolean | null
+          resultado?: string | null
+          resultados_para?: string | null
+          tipo_analisis?: string | null
+          tipo_muestra?: string | null
+          unidades?: string | null
+          valores_aceptados?: string | null
+          vereda?: string | null
         }
         Update: {
-          id_prestador?: number
-          nit?: string | null
-          id_autoridad_sanitaria?: string | null
-          nombre?: string | null
+          analisis_solicitados?: string | null
+          caracteristica?: string | null
+          coagulante?: string | null
+          codigo?: string | null
+          codigo_laboratorio?: string | null
+          contramuestra_pp?: string | null
+          created_at?: string | null
+          departamento?: string | null
+          descripcion?: string | null
+          desinfectante?: string | null
+          diagnostico?: string | null
           direccion?: string | null
-          telefono?: string | null
-          id_ubicacion?: number | null
-          codigo_sistema?: number | null
+          fecha_analisis_lab?: string | null
+          fecha_recepcion_lab?: string | null
+          fecha_toma?: string | null
+          id_muestreo?: string | null
+          id_staging?: number
+          irca?: string | null
+          irca_basico?: string | null
+          irca_especial?: string | null
+          latitud?: string | null
+          longitud?: string | null
+          metodo?: string | null
+          muestra_no?: string | null
+          municipio?: string | null
+          nit?: string | null
+          nivel_riesgo?: string | null
+          nombre?: string | null
+          nota?: string | null
+          observaciones?: string | null
+          processed?: boolean | null
+          resultado?: string | null
+          resultados_para?: string | null
+          tipo_analisis?: string | null
+          tipo_muestra?: string | null
+          unidades?: string | null
+          valores_aceptados?: string | null
+          vereda?: string | null
+        }
+        Relationships: []
+      }
+      prestador: {
+        Row: {
+          codigo_anterior: number | null
+          codigo_sistema: number | null
+          direccion: string | null
+          id_autoridad_sanitaria: string | null
+          id_prestador: number
+          id_ubicacion: number | null
+          nit: string | null
+          nombre: string | null
+          nombre_sistema: string | null
+          telefono: string | null
+        }
+        Insert: {
           codigo_anterior?: number | null
+          codigo_sistema?: number | null
+          direccion?: string | null
+          id_autoridad_sanitaria?: string | null
+          id_prestador: number
+          id_ubicacion?: number | null
+          nit?: string | null
+          nombre?: string | null
           nombre_sistema?: string | null
+          telefono?: string | null
+        }
+        Update: {
+          codigo_anterior?: number | null
+          codigo_sistema?: number | null
+          direccion?: string | null
+          id_autoridad_sanitaria?: string | null
+          id_prestador?: number
+          id_ubicacion?: number | null
+          nit?: string | null
+          nombre?: string | null
+          nombre_sistema?: string | null
+          telefono?: string | null
         }
         Relationships: [
           {
@@ -616,178 +1030,179 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "ubicacion"
             referencedColumns: ["id_ubicacion"]
-          }
+          },
         ]
       }
-
       profiles: {
         Row: {
+          created_at: string | null
+          email: string | null
           id: string
           nombre: string | null
-          email: string | null
           rol: string | null
-          created_at: string | null
           updated_at: string | null
         }
         Insert: {
+          created_at?: string | null
+          email?: string | null
           id: string
           nombre?: string | null
-          email?: string | null
           rol?: string | null
-          created_at?: string | null
           updated_at?: string | null
         }
         Update: {
+          created_at?: string | null
+          email?: string | null
           id?: string
           nombre?: string | null
-          email?: string | null
           rol?: string | null
-          created_at?: string | null
           updated_at?: string | null
+        }
+        Relationships: []
+      }
+      punto_captacion: {
+        Row: {
+          departamento: string | null
+          fuente_captacion: string | null
+          georeferenciacion: string | null
+          id_punto_captacion: number
+          latitud: number | null
+          longitud: number | null
+          municipio: string | null
+          tipo_captacion: string
+          vereda: string | null
+        }
+        Insert: {
+          departamento?: string | null
+          fuente_captacion?: string | null
+          georeferenciacion?: string | null
+          id_punto_captacion?: number
+          latitud?: number | null
+          longitud?: number | null
+          municipio?: string | null
+          tipo_captacion: string
+          vereda?: string | null
+        }
+        Update: {
+          departamento?: string | null
+          fuente_captacion?: string | null
+          georeferenciacion?: string | null
+          id_punto_captacion?: number
+          latitud?: number | null
+          longitud?: number | null
+          municipio?: string | null
+          tipo_captacion?: string
+          vereda?: string | null
+        }
+        Relationships: []
+      }
+      punto_muestreo: {
+        Row: {
+          codigo: string | null
+          departamento: string | null
+          descripcion: string | null
+          direccion: string | null
+          id_muestreo: number
+          latitud: string | null
+          longitud: string | null
+          municipio: string | null
+          nombre: string | null
+          vereda: string | null
+        }
+        Insert: {
+          codigo?: string | null
+          departamento?: string | null
+          descripcion?: string | null
+          direccion?: string | null
+          id_muestreo?: number
+          latitud?: string | null
+          longitud?: string | null
+          municipio?: string | null
+          nombre?: string | null
+          vereda?: string | null
+        }
+        Update: {
+          codigo?: string | null
+          departamento?: string | null
+          descripcion?: string | null
+          direccion?: string | null
+          id_muestreo?: number
+          latitud?: string | null
+          longitud?: string | null
+          municipio?: string | null
+          nombre?: string | null
+          vereda?: string | null
+        }
+        Relationships: []
+      }
+      red: {
+        Row: {
+          caract_especiales: string | null
+          caract_fisicas: string | null
+          caract_microbiologicas: string | null
+          caract_quimicas: string | null
+          descartadas: string | null
+          fecha: string | null
+          id_red: number
+          id_reporte2: number | null
+          medidas_sanitarias: string | null
+          observaciones: string | null
+        }
+        Insert: {
+          caract_especiales?: string | null
+          caract_fisicas?: string | null
+          caract_microbiologicas?: string | null
+          caract_quimicas?: string | null
+          descartadas?: string | null
+          fecha?: string | null
+          id_red?: number
+          id_reporte2?: number | null
+          medidas_sanitarias?: string | null
+          observaciones?: string | null
+        }
+        Update: {
+          caract_especiales?: string | null
+          caract_fisicas?: string | null
+          caract_microbiologicas?: string | null
+          caract_quimicas?: string | null
+          descartadas?: string | null
+          fecha?: string | null
+          id_red?: number
+          id_reporte2?: number | null
+          medidas_sanitarias?: string | null
+          observaciones?: string | null
         }
         Relationships: [
           {
-            foreignKeyName: "profiles_id_fkey"
-            columns: ["id"]
+            foreignKeyName: "red_id_reporte2_fkey"
+            columns: ["id_reporte2"]
             isOneToOne: false
-            referencedRelation: "auth.users"
-            referencedColumns: ["id"]
-          }
+            referencedRelation: "anexo2"
+            referencedColumns: ["id_reporte2"]
+          },
         ]
       }
-
-      punto_captacion: {
-        Row: {
-          id_punto_captacion: number
-          tipo_captacion: string
-          fuente_captacion: string | null
-          georeferenciacion: string | null
-          departamento: string | null
-          municipio: string | null
-          vereda: string | null
-        }
-        Insert: {
-          id_punto_captacion?: number
-          tipo_captacion: string
-          fuente_captacion?: string | null
-          georeferenciacion?: string | null
-          departamento?: string | null
-          municipio?: string | null
-          vereda?: string | null
-        }
-        Update: {
-          id_punto_captacion?: number
-          tipo_captacion?: string
-          fuente_captacion?: string | null
-          georeferenciacion?: string | null
-          departamento?: string | null
-          municipio?: string | null
-          vereda?: string | null
-        }
-        Relationships: []
-      }
-
-      punto_muestreo: {
-        Row: {
-          id_muestreo: number
-          codigo: string
-          nombre: string | null
-          descripcion: string | null
-          departamento: string | null
-          municipio: string | null
-          vereda: string | null
-          latitud: string | null
-          longitud: string | null
-          direccion: string | null
-        }
-        Insert: {
-          id_muestreo?: number
-          codigo: string
-          nombre?: string | null
-          descripcion?: string | null
-          departamento?: string | null
-          municipio?: string | null
-          vereda?: string | null
-          latitud?: string | null
-          longitud?: string | null
-          direccion?: string | null
-        }
-        Update: {
-          id_muestreo?: number
-          codigo?: string
-          nombre?: string | null
-          descripcion?: string | null
-          departamento?: string | null
-          municipio?: string | null
-          vereda?: string | null
-          latitud?: string | null
-          longitud?: string | null
-          direccion?: string | null
-        }
-        Relationships: []
-      }
-
-      red: {
-        Row: {
-          id_red: number
-          fecha: string | null
-          caract_fisicas: string | null
-          caract_quimicas: string | null
-          caract_microbiologicas: string | null
-          caract_especiales: string | null
-          descartadas: string | null
-          medidas_sanitarias: string | null
-          observaciones: string | null
-          id_reporte2: number | null
-        }
-        Insert: {
-          id_red?: number
-          fecha?: string | null
-          caract_fisicas?: string | null
-          caract_quimicas?: string | null
-          caract_microbiologicas?: string | null
-          caract_especiales?: string | null
-          descartadas?: string | null
-          medidas_sanitarias?: string | null
-          observaciones?: string | null
-          id_reporte2?: number | null
-        }
-        Update: {
-          id_red?: number
-          fecha?: string | null
-          caract_fisicas?: string | null
-          caract_quimicas?: string | null
-          caract_microbiologicas?: string | null
-          caract_especiales?: string | null
-          descartadas?: string | null
-          medidas_sanitarias?: string | null
-          observaciones?: string | null
-          id_reporte2?: number | null
-        }
-        Relationships: []
-      }
-
       representante: {
         Row: {
-          id_representante: number
-          nombre: string
           cargo: string | null
           email: string | null
           id_prestador: number | null
+          id_representante: number
+          nombre: string
         }
         Insert: {
+          cargo?: string | null
+          email?: string | null
+          id_prestador?: number | null
           id_representante?: number
           nombre: string
-          cargo?: string | null
-          email?: string | null
-          id_prestador?: number | null
         }
         Update: {
-          id_representante?: number
-          nombre?: string
           cargo?: string | null
           email?: string | null
           id_prestador?: number | null
+          id_representante?: number
+          nombre?: string
         }
         Relationships: [
           {
@@ -796,87 +1211,100 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "prestador"
             referencedColumns: ["id_prestador"]
-          }
+          },
         ]
       }
-
       resolucion: {
         Row: {
+          archivo_resolucion: string | null
+          fecha_expedicion: string | null
+          id_reporte2: number | null
           id_resolucion: number
           numero_resolucion: string | null
-          fecha_expedicion: string | null
-          archivo_resolucion: string | null
-          id_reporte2: number | null
         }
         Insert: {
+          archivo_resolucion?: string | null
+          fecha_expedicion?: string | null
+          id_reporte2?: number | null
           id_resolucion?: number
           numero_resolucion?: string | null
-          fecha_expedicion?: string | null
-          archivo_resolucion?: string | null
-          id_reporte2?: number | null
         }
         Update: {
+          archivo_resolucion?: string | null
+          fecha_expedicion?: string | null
+          id_reporte2?: number | null
           id_resolucion?: number
           numero_resolucion?: string | null
-          fecha_expedicion?: string | null
-          archivo_resolucion?: string | null
-          id_reporte2?: number | null
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "resolucion_id_reporte2_fkey"
+            columns: ["id_reporte2"]
+            isOneToOne: false
+            referencedRelation: "anexo2"
+            referencedColumns: ["id_reporte2"]
+          },
+        ]
       }
-
       riesgo: {
         Row: {
-          id_riesgo: number
           actividad: string | null
+          cumple: string | null
           entidad: string | null
           evidencia: string | null
           fecha: string | null
-          cumple: string | null
           id_reporte3: number | null
+          id_riesgo: number
         }
         Insert: {
-          id_riesgo?: number
           actividad?: string | null
+          cumple?: string | null
           entidad?: string | null
           evidencia?: string | null
           fecha?: string | null
-          cumple?: string | null
           id_reporte3?: number | null
+          id_riesgo?: number
         }
         Update: {
-          id_riesgo?: number
           actividad?: string | null
+          cumple?: string | null
           entidad?: string | null
           evidencia?: string | null
           fecha?: string | null
-          cumple?: string | null
           id_reporte3?: number | null
+          id_riesgo?: number
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "riesgo_id_reporte3_fkey"
+            columns: ["id_reporte3"]
+            isOneToOne: false
+            referencedRelation: "seguimiento"
+            referencedColumns: ["id_reporte3"]
+          },
+        ]
       }
-
       seguimiento: {
         Row: {
-          id_reporte3: number
           consecutivo_mapa_riesgo: string | null
-          fecha_creacion: string | null
           fecha_actualizacion: string | null
+          fecha_creacion: string | null
           id_mapa: number | null
+          id_reporte3: number
         }
         Insert: {
-          id_reporte3?: number
           consecutivo_mapa_riesgo?: string | null
-          fecha_creacion?: string | null
           fecha_actualizacion?: string | null
+          fecha_creacion?: string | null
           id_mapa?: number | null
+          id_reporte3?: number
         }
         Update: {
-          id_reporte3?: number
           consecutivo_mapa_riesgo?: string | null
-          fecha_creacion?: string | null
           fecha_actualizacion?: string | null
+          fecha_creacion?: string | null
           id_mapa?: number | null
+          id_reporte3?: number
         }
         Relationships: [
           {
@@ -885,75 +1313,129 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "mapa_riesgo"
             referencedColumns: ["id_mapa"]
-          }
+          },
         ]
       }
-
+      seguimiento_caracteristica: {
+        Row: {
+          caracteristica_seguimiento: string | null
+          frecuencia_as: string | null
+          frecuencia_pp: string | null
+          id_caracteristica: number
+          id_reporte3: number | null
+          minimo_muestras_as: string | null
+          minimo_muestras_pp: string | null
+        }
+        Insert: {
+          caracteristica_seguimiento?: string | null
+          frecuencia_as?: string | null
+          frecuencia_pp?: string | null
+          id_caracteristica?: number
+          id_reporte3?: number | null
+          minimo_muestras_as?: string | null
+          minimo_muestras_pp?: string | null
+        }
+        Update: {
+          caracteristica_seguimiento?: string | null
+          frecuencia_as?: string | null
+          frecuencia_pp?: string | null
+          id_caracteristica?: number
+          id_reporte3?: number | null
+          minimo_muestras_as?: string | null
+          minimo_muestras_pp?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "seguimiento_caracteristica_id_reporte3_fkey"
+            columns: ["id_reporte3"]
+            isOneToOne: false
+            referencedRelation: "seguimiento"
+            referencedColumns: ["id_reporte3"]
+          },
+        ]
+      }
       seguimiento_inspeccion: {
         Row: {
-          id_inspeccion: number
-          nombre_archivo: string | null
           acta: string | null
           fecha_acta: string | null
+          id_inspeccion: number
+          id_reporte3: number | null
+          nombre_archivo: string | null
         }
         Insert: {
-          id_inspeccion?: number
-          nombre_archivo?: string | null
           acta?: string | null
           fecha_acta?: string | null
+          id_inspeccion?: number
+          id_reporte3?: number | null
+          nombre_archivo?: string | null
         }
         Update: {
-          id_inspeccion?: number
-          nombre_archivo?: string | null
           acta?: string | null
           fecha_acta?: string | null
+          id_inspeccion?: number
+          id_reporte3?: number | null
+          nombre_archivo?: string | null
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "seguimiento_inspeccion_id_reporte3_fkey"
+            columns: ["id_reporte3"]
+            isOneToOne: false
+            referencedRelation: "seguimiento"
+            referencedColumns: ["id_reporte3"]
+          },
+        ]
       }
-
       seguridad: {
         Row: {
+          fecha: string | null
+          id_reporte3: number | null
           id_seguridad: number
           medida: string | null
-          fecha: string | null
           observacion: string | null
-          id_reporte3: number | null
         }
         Insert: {
+          fecha?: string | null
+          id_reporte3?: number | null
           id_seguridad?: number
           medida?: string | null
-          fecha?: string | null
           observacion?: string | null
-          id_reporte3?: number | null
         }
         Update: {
+          fecha?: string | null
+          id_reporte3?: number | null
           id_seguridad?: number
           medida?: string | null
-          fecha?: string | null
           observacion?: string | null
-          id_reporte3?: number | null
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "seguridad_id_reporte3_fkey"
+            columns: ["id_reporte3"]
+            isOneToOne: false
+            referencedRelation: "seguimiento"
+            referencedColumns: ["id_reporte3"]
+          },
+        ]
       }
-
       solicitante: {
         Row: {
-          id_solicitante: number
-          nombre: string
           estado: string | null
+          id_solicitante: number
           id_ubicacion_sol: number | null
+          nombre: string
         }
         Insert: {
-          id_solicitante?: number
-          nombre: string
           estado?: string | null
+          id_solicitante?: number
           id_ubicacion_sol?: number | null
+          nombre: string
         }
         Update: {
-          id_solicitante?: number
-          nombre?: string
           estado?: string | null
+          id_solicitante?: number
           id_ubicacion_sol?: number | null
+          nombre?: string
         }
         Relationships: [
           {
@@ -962,42 +1444,48 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "ubicacion_solicitante"
             referencedColumns: ["id_ubicacion_sol"]
-          }
+          },
         ]
       }
-
       tecnico: {
         Row: {
+          email: string | null
+          id_laboratorio: number | null
           id_tecnico: number
+          id_ubicacion_tec: number | null
           identificacion: number | null
           nombre: string
-          telefono: string | null
           profesion: string | null
-          email: string | null
-          id_ubicacion_tec: number | null
-          id_laboratorio: number | null
+          telefono: string | null
         }
         Insert: {
+          email?: string | null
+          id_laboratorio?: number | null
           id_tecnico?: number
+          id_ubicacion_tec?: number | null
           identificacion?: number | null
           nombre: string
-          telefono?: string | null
           profesion?: string | null
-          email?: string | null
-          id_ubicacion_tec?: number | null
-          id_laboratorio?: number | null
+          telefono?: string | null
         }
         Update: {
+          email?: string | null
+          id_laboratorio?: number | null
           id_tecnico?: number
+          id_ubicacion_tec?: number | null
           identificacion?: number | null
           nombre?: string
-          telefono?: string | null
           profesion?: string | null
-          email?: string | null
-          id_ubicacion_tec?: number | null
-          id_laboratorio?: number | null
+          telefono?: string | null
         }
         Relationships: [
+          {
+            foreignKeyName: "tecnico_id_laboratorio_fkey"
+            columns: ["id_laboratorio"]
+            isOneToOne: false
+            referencedRelation: "laboratorio"
+            referencedColumns: ["id_laboratorio"]
+          },
           {
             foreignKeyName: "tecnico_id_ubicacion_tec_fkey"
             columns: ["id_ubicacion_tec"]
@@ -1005,97 +1493,86 @@ export type Database = {
             referencedRelation: "ubicacion_tecnico"
             referencedColumns: ["id_ubicacion_tec"]
           },
-          {
-            foreignKeyName: "tecnico_id_laboratorio_fkey"
-            columns: ["id_laboratorio"]
-            isOneToOne: false
-            referencedRelation: "laboratorio"
-            referencedColumns: ["id_laboratorio"]
-          }
         ]
       }
-
       ubicacion: {
         Row: {
-          id_ubicacion: number
           departamento: string
+          id_ubicacion: number
           municipio: string
           vereda: string | null
         }
         Insert: {
-          id_ubicacion?: number
           departamento: string
+          id_ubicacion?: number
           municipio: string
           vereda?: string | null
         }
         Update: {
-          id_ubicacion?: number
           departamento?: string
+          id_ubicacion?: number
           municipio?: string
           vereda?: string | null
         }
         Relationships: []
       }
-
       ubicacion_laboratorio: {
         Row: {
-          id_ubicacion_lab: number
           departamento: string
-          municipio: string
           direccion: string | null
+          id_ubicacion_lab: number
+          municipio: string
         }
         Insert: {
-          id_ubicacion_lab?: number
           departamento: string
-          municipio: string
           direccion?: string | null
+          id_ubicacion_lab?: number
+          municipio: string
         }
         Update: {
-          id_ubicacion_lab?: number
           departamento?: string
-          municipio?: string
           direccion?: string | null
+          id_ubicacion_lab?: number
+          municipio?: string
         }
         Relationships: []
       }
-
       ubicacion_solicitante: {
         Row: {
-          id_ubicacion_sol: number
           departamento: string
+          id_ubicacion_sol: number
           municipio: string
         }
         Insert: {
-          id_ubicacion_sol?: number
           departamento: string
+          id_ubicacion_sol?: number
           municipio: string
         }
         Update: {
-          id_ubicacion_sol?: number
           departamento?: string
+          id_ubicacion_sol?: number
           municipio?: string
         }
         Relationships: []
       }
-
       ubicacion_tecnico: {
         Row: {
-          id_ubicacion_tec: number
           departamento: string
-          municipio: string
           direccion: string | null
+          id_ubicacion_tec: number
+          municipio: string
         }
         Insert: {
-          id_ubicacion_tec?: number
           departamento: string
-          municipio: string
           direccion?: string | null
+          id_ubicacion_tec?: number
+          municipio: string
         }
         Update: {
-          id_ubicacion_tec?: number
           departamento?: string
-          municipio?: string
           direccion?: string | null
+          id_ubicacion_tec?: number
+          municipio?: string
         }
         Relationships: []
       }
@@ -1104,7 +1581,18 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      actualizar_lat_long: { Args: never; Returns: undefined }
+      confirmar_carga_mapas: { Args: { p_payload: Json }; Returns: Json }
+      limpiar_y_convertir_coord: {
+        Args: { coord_text: string }
+        Returns: number
+      }
+      procesar_inspeccion_staging: { Args: never; Returns: Json }
+      procesar_muestra_staging: { Args: never; Returns: Json }
+      recrear_politicas_tabla: {
+        Args: { tabla_nombre: string }
+        Returns: undefined
+      }
     }
     Enums: {
       [_ in never]: never
@@ -1115,7 +1603,7 @@ export type Database = {
   }
 }
 
-export type DatabaseWithoutInternals = Omit<Database, "__InternalSupabase">
+type DatabaseWithoutInternals = Omit<Database, "__InternalSupabase">
 
 type DefaultSchema = DatabaseWithoutInternals[Extract<keyof Database, "public">]
 
@@ -1212,7 +1700,7 @@ export type Enums<
 }
   ? DatabaseWithoutInternals[DefaultSchemaEnumNameOrOptions["schema"]]["Enums"][EnumName]
   : DefaultSchemaEnumNameOrOptions extends keyof DefaultSchema["Enums"]
-  ? DefaultSchema[DefaultSchemaEnumNameOrOptions]
+  ? DefaultSchema["Enums"][DefaultSchemaEnumNameOrOptions]
   : never
 
 export type CompositeTypes<
@@ -1229,7 +1717,7 @@ export type CompositeTypes<
 }
   ? DatabaseWithoutInternals[PublicCompositeTypeNameOrOptions["schema"]]["CompositeTypes"][CompositeTypeName]
   : PublicCompositeTypeNameOrOptions extends keyof DefaultSchema["CompositeTypes"]
-  ? DefaultSchema[PublicCompositeTypeNameOrOptions]
+  ? DefaultSchema["CompositeTypes"][PublicCompositeTypeNameOrOptions]
   : never
 
 export const Constants = {

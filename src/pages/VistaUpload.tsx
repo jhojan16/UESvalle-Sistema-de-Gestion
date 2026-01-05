@@ -12,12 +12,13 @@ import {
     Divider,
     Stack
 } from "@mui/material";
-import { UploadCloud, FileSpreadsheet, CheckCircle2, AlertCircle, Trash2, Download } from "lucide-react";
+import { UploadCloud, FileSpreadsheet, Download, Map as MapIcon } from "lucide-react";
 
-type ImportType = "inspeccion" | "muestra";
+// 1. Actualizamos el tipo para incluir 'mapa_riesgo'
+type ImportType = "inspeccion" | "muestra" | "mapa_riesgo";
 
 export default function CargaMasivaVista() {
-    const [importType, setImportType] = useState<ImportType>("muestra");
+    const [importType, setImportType] = useState<ImportType>("mapa_riesgo");
     const [file, setFile] = useState<File | null>(null);
     const [loading, setLoading] = useState(false);
     const [status, setStatus] = useState<{ type: "success" | "error"; msg: string } | null>(null);
@@ -43,30 +44,27 @@ export default function CargaMasivaVista() {
         setStatus(null);
 
         try {
-            // Determinamos el nombre de la función
-            const endpoint = importType === "muestra" ? "muestra_insert" : "super-handler";
+            // 2. Configuración del endpoint según el tipo seleccionado
+            let endpoint = "";
+            switch (importType) {
+                case "muestra": endpoint = "muestra_insert"; break;
+                case "inspeccion": endpoint = "super-handler"; break;
+                case "mapa_riesgo": endpoint = "mapaRiesgo"; break; // Tu nuevo endpoint
+            }
 
-            // 1. IMPORTANTE: Empaquetar el archivo en un FormData
-            // Esto debe coincidir con el 'formData.get("file")' de tu Edge Function
             const formData = new FormData();
             formData.append("file", file);
 
-            // 2. Invocamos la función enviando el formData directamente en el body
             const { data, error } = await supabase.functions.invoke(endpoint, {
                 body: formData,
             });
 
-            // 3. Manejo de errores de la respuesta de Supabase
             if (error) {
-                console.error("Detalle del error:", error);
-                // Intentamos extraer un mensaje amigable si la función devolvió un JSON con error
                 const errorMsg = error.message || "Error en la respuesta del servidor";
                 setStatus({ type: "error", msg: `Error de Function: ${errorMsg}` });
                 return;
             }
 
-            // 4. Éxito (ajustado a la estructura de respuesta de tu RPC)
-            // Nota: Asegúrate de que data.result contenga estas propiedades o ajusta el mensaje
             setStatus({
                 type: "success",
                 msg: data.message || "Archivo procesado correctamente.",
@@ -74,7 +72,6 @@ export default function CargaMasivaVista() {
 
             setFile(null);
         } catch (error: any) {
-            console.error("Error capturado:", error);
             setStatus({
                 type: "error",
                 msg: error.message === "Failed to fetch"
@@ -86,25 +83,29 @@ export default function CargaMasivaVista() {
         }
     };
 
+    // Helper para obtener el nombre de la plantilla
+    const getTemplateConfig = () => {
+        switch (importType) {
+            case 'muestra': return { name: 'Muestras', path: '/templates/muestra.csv' };
+            case 'inspeccion': return { name: 'Inspecciones', path: '/templates/inspeccion.csv' };
+            case 'mapa_riesgo': return { name: 'Mapa de Riesgo', path: '/templates/mapa de riesgo.csv' };
+        }
+    };
+
+    const template = getTemplateConfig();
+
     return (
         <Box className="max-w-4xl mx-auto p-6 animate-in fade-in duration-500">
-            {/* Header */}
             <Box sx={{ textAlign: 'center', mb: 5 }}>
                 <Typography variant="h3" fontWeight="800" className="text-slate-800">
                     Carga Masiva de Datos
                 </Typography>
                 <Typography variant="body1" color="text.secondary" sx={{ mt: 1 }}>
-                    Sube archivos CSV/Excel de forma rápida y segura.
+                    Sube archivos CSV de forma rápida y segura a la plataforma.
                 </Typography>
             </Box>
 
-            {/* Contenedor Principal Sin Lineas Punteadas Laterales */}
-            <Paper
-                elevation={0}
-                className="border border-slate-200 shadow-sm rounded-2xl overflow-hidden"
-                sx={{ position: 'relative' }} // Evita que elementos hijos "se salgan"
-            >
-                {/* Paso 1: Selección */}
+            <Paper elevation={0} className="border border-slate-200 shadow-sm rounded-2xl overflow-hidden">
                 <Box sx={{ bgcolor: 'grey.50', p: 4, borderBottom: '1px solid', borderColor: 'divider' }}>
                     <Typography variant="subtitle2" fontWeight="700" sx={{ mb: 2, textAlign: 'center', textTransform: 'uppercase' }}>
                         PASO 1: ¿QUÉ TIPO DE DATOS VAS A SUBIR?
@@ -116,30 +117,32 @@ export default function CargaMasivaVista() {
                         color="primary"
                         fullWidth
                     >
+                        <ToggleButton value="mapa_riesgo" sx={{ py: 1.5, fontWeight: 'bold' }}>
+                            <MapIcon size={18} className="mr-2" /> MAPA DE RIESGO
+                        </ToggleButton>
                         <ToggleButton value="muestra" sx={{ py: 1.5, fontWeight: 'bold' }}>
-                            <UploadCloud size={18} className="mr-2" /> MUESTRAS DE AGUA
+                            <UploadCloud size={18} className="mr-2" /> MUESTRAS
                         </ToggleButton>
                         <ToggleButton value="inspeccion" sx={{ py: 1.5, fontWeight: 'bold' }}>
-                            <UploadCloud size={18} className="mr-2" /> INSPECCIONES TÉCNICAS
+                            <UploadCloud size={18} className="mr-2" /> INSPECCIONES
                         </ToggleButton>
                     </ToggleButtonGroup>
                 </Box>
 
                 <Box sx={{ p: 5 }}>
                     <Stack spacing={4}>
-                        {/* Plantilla */}
                         <Box sx={{ textAlign: 'center' }}>
                             <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
-                                Asegúrate de usar el formato correcto antes de subir el archivo.
+                                Asegúrate de usar el formato oficial para evitar errores de carga.
                             </Typography>
                             <Button
                                 variant="outlined"
                                 startIcon={<Download size={18} />}
-                                href={importType === 'muestra' ? '/templates/muestra.csv' : '/templates/inspeccion.csv'}
+                                href={template.path}
                                 download
                                 sx={{ borderRadius: '12px', px: 4 }}
                             >
-                                Descargar Plantilla {importType === 'muestra' ? 'Muestras' : 'Inspecciones'}
+                                Descargar Plantilla {template.name}
                             </Button>
                         </Box>
 
@@ -149,14 +152,13 @@ export default function CargaMasivaVista() {
                             </Typography>
                         </Divider>
 
-                        {/* Dropzone (Aquí es el único lugar donde debe haber líneas punteadas) */}
                         <Box component="label" sx={{ cursor: 'pointer' }}>
-                            <input type="file" hidden accept=".csv, .xlsx" onChange={handleFileChange} disabled={loading} />
+                            <input type="file" hidden accept=".csv" onChange={handleFileChange} disabled={loading} />
                             <Box
                                 sx={{
                                     p: 6,
                                     border: '2px dashed',
-                                    borderColor: file ? 'primary.main' : '#e2e8f0', // Color slate-200
+                                    borderColor: file ? 'primary.main' : '#e2e8f0',
                                     bgcolor: file ? 'aliceblue' : 'transparent',
                                     textAlign: 'center',
                                     borderRadius: '16px',
@@ -168,8 +170,8 @@ export default function CargaMasivaVista() {
                                     <Stack spacing={2} alignItems="center">
                                         <UploadCloud size={48} className="text-blue-500" />
                                         <Box>
-                                            <Typography variant="h6" fontWeight="bold">Arrastra tu archivo aquí</Typography>
-                                            <Typography variant="body2" color="text.secondary">Solo se permiten formatos .csv o .xlsx</Typography>
+                                            <Typography variant="h6" fontWeight="bold">Arrastra tu archivo CSV aquí</Typography>
+                                            <Typography variant="body2" color="text.secondary">Formato requerido para {template.name}</Typography>
                                         </Box>
                                     </Stack>
                                 ) : (
@@ -187,7 +189,6 @@ export default function CargaMasivaVista() {
                             </Box>
                         </Box>
 
-                        {/* Botón Acción */}
                         <Box>
                             {status && (
                                 <Alert severity={status.type} sx={{ mb: 2, borderRadius: '12px' }}>
@@ -202,16 +203,13 @@ export default function CargaMasivaVista() {
                                 disabled={!file || loading}
                                 onClick={handleUpload}
                             >
-                                {loading ? 'Procesando...' : 'Iniciar Carga de Datos'}
+                                {loading ? 'Procesando...' : `Cargar Datos de ${template.name}`}
                             </Button>
                             {loading && <LinearProgress sx={{ mt: 2, borderRadius: '4px', height: 6 }} />}
                         </Box>
                     </Stack>
                 </Box>
             </Paper>
-            <Typography variant="caption" sx={{ display: 'block', mt: 4, textAlign: 'center', color: 'text.disabled' }}>
-                ¿Tienes problemas con el formato? Contacta al soporte técnico.
-            </Typography>
         </Box>
     );
 }

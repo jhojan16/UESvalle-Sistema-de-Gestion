@@ -19,52 +19,12 @@ import { Grid } from '@mui/material';
 import { DataGrid, GridColDef, GridActionsCellItem } from '@mui/x-data-grid';
 import { Search, Eye, X } from 'lucide-react';
 import { useParams } from 'react-router-dom';
-
-type muestra = {
-    id_muestra: number
-    muestra_no: string
-    contramuestra_pp: string | null
-    fecha_toma: string | null
-    fecha_recepcion_lab: string | null
-    fecha_analisis_lab: string | null
-    desinfectante: string | null
-    coagulante: string | null
-    analisis_solicitados: string | null
-    resultados_para: string | null
-    observaciones: string | null
-    nota: string | null
-    irca_basico: number | null
-    irca_especial: number | null
-    irca: number | null
-    nivel_riesgo: string | null
-    id_muestreo: number | null
-    codigo_laboratorio: string | null
-    tipo_muestra: string | null
-    nombre: string | null
-    prestador?: prestador | null;
-    laboratorio?: laboratorio | null
-};
-
-type prestador = {
-    nit: string | null
-    nombre: string | null
-    telefono: string | null
-    direccion: string | null
-    codigo_sistema: string | null
-    nombre_sistema: string | null
-    codigo_anterior: string | null
-}
-
-type laboratorio = {
-    nombre: string | null
-    estado: string | null
-    telefono: string | null
-}
+import { MuestraCompleta } from '@/integrations/supabase/index';
 
 export default function VistaAnalisisMuestras() {
     const { id } = useParams<{ id: string }>();
     const [search, setSearch] = useState('');
-    const [selectedAnalisis, setSelectedAnalisis] = useState<muestra | null>(null);
+    const [selectedAnalisis, setSelectedAnalisis] = useState<MuestraCompleta | null>(null);
     const [dialogOpen, setDialogOpen] = useState(false);
     const [paginationModel, setPaginationModel] = useState({
         page: 0,
@@ -73,29 +33,25 @@ export default function VistaAnalisisMuestras() {
 
     const muestraId = id ? parseInt(id) : 0;
 
-    // ✅ Consultar todos los análisis de muestras
     const { data: analisis, isLoading } = useQuery({
-        queryKey: ['muestras'],
-        queryFn: async () => {
-            const { data, error } = await supabase
-                .from('muestra')
-                .select(`
-                    *,
-                    prestador(*),
-                    laboratorio (
-                    nombre, estado, telefono)`)
-                .order('fecha_toma', { ascending: false });
-            console.log(data);
-            if (error) throw error;
-            return data as muestra[];
-            
+    queryKey: ['muestras'],
+    queryFn: async () => {
+        const { data, error } = await supabase
+            .from('muestra')
+            .select(`
+                *,
+                prestador(*),
+                laboratorio(nombre, estado, telefono)
+            `)
+            .order('fecha_toma', { ascending: false });
 
-        },
+        if (error) throw error;
         
-        
-        staleTime: 5 * 60 * 1000, // Cache por 5 minutos
-        refetchOnWindowFocus: false,
-    });
+        // El casting ahora es limpio usando la interfaz del index
+        return data as MuestraCompleta[];
+    },
+    staleTime: 5 * 60 * 1000,
+});
 
     // ✅ Filtrado optimizado con useMemo
     const filteredData = useMemo(() => {
