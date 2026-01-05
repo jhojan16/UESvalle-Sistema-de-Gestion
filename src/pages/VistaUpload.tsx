@@ -170,7 +170,7 @@ export default function CargaMasivaVista() {
                                     <Stack spacing={2} alignItems="center">
                                         <UploadCloud size={48} className="text-blue-500" />
                                         <Box>
-                                            <Typography variant="h6" fontWeight="bold">Arrastra tu archivo CSV aquí</Typography>
+                                            <Typography variant="h6" fontWeight="bold">Selecciona tu archivo CSV aquí</Typography>
                                             <Typography variant="body2" color="text.secondary">Formato requerido para {template.name}</Typography>
                                         </Box>
                                     </Stack>
