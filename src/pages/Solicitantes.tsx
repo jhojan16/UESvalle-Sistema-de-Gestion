@@ -16,18 +16,7 @@ import {
 import { DataGrid, GridColDef, GridActionsCellItem } from '@mui/x-data-grid';
 import { Plus, Search, Edit, Trash2 } from 'lucide-react';
 import { toast } from 'sonner';
-
-type Solicitante = {
-    id_solicitante: number;
-    nombre: string;
-    estado: string | null;
-    id_ubicacion_sol: number | null;
-    ubicacion_solicitante?: {
-        departamento: string;
-        municipio: string;
-    } | null;
-};
-
+import { Solicitante } from '@/integrations/supabase/index'
 
 export default function Solicitantes() {
     const [search, setSearch] = useState('');
@@ -41,6 +30,19 @@ export default function Solicitantes() {
 
     const queryClient = useQueryClient();
 
+    const { data: ubicaciones } = useQuery({
+    queryKey: ['ubicaciones-selector'],
+    queryFn: async () => {
+        const { data, error } = await supabase
+            .from('ubicacion_solicitante')
+            .select('id_ubicacion_sol, municipio, departamento')
+            .order('municipio', { ascending: true });
+
+        if (error) throw error;
+        return data;
+    },
+});
+
     // ✅ Obtener solicitantes con su ubicación relacionada
     const { data: solicitantes, isLoading } = useQuery({
         queryKey: ['solicitantes', search],
@@ -52,7 +54,7 @@ export default function Solicitantes() {
                 nombre,
                 estado,
                 id_ubicacion_sol,
-                ubicacion_solicitante (
+                Ubicacion_solicitante:ubicacion_solicitante (
                 departamento,
                 municipio
                 )
@@ -75,7 +77,11 @@ export default function Solicitantes() {
     // ✅ Crear solicitante
     const createMutation = useMutation({
         mutationFn: async (data: typeof formData) => {
-            const { error } = await supabase.from('solicitante').insert([data]);
+            const payload = {
+                ...data,
+                id_ubicacion_sol: data.id_ubicacion_sol ? parseInt(data.id_ubicacion_sol) : null
+            };
+            const { error } = await supabase.from('solicitante').insert([payload]);
             if (error) throw error;
         },
         onSuccess: () => {
@@ -92,9 +98,13 @@ export default function Solicitantes() {
     // ✅ Actualizar solicitante
     const updateMutation = useMutation({
         mutationFn: async ({ id, data }: { id: number; data: typeof formData }) => {
+            const payload = {
+                ...data,
+                id_ubicacion_sol: data.id_ubicacion_sol ? parseInt(data.id_ubicacion_sol) : null
+            };
             const { error } = await supabase
                 .from('solicitante')
-                .update(data)
+                .update(payload)
                 .eq('id_solicitante', id);
             if (error) throw error;
         },
@@ -169,7 +179,7 @@ export default function Solicitantes() {
             flex: 1,
             minWidth: 250,
             renderCell: (params) => {
-                const ubicacion = params.row?.ubicacion_solicitante;
+                const ubicacion = params.row?.Ubicacion_solicitante;
                 if (!ubicacion) return 'Sin ubicación';
                 return `${ubicacion.municipio}, ${ubicacion.departamento}`;
             },
@@ -289,16 +299,23 @@ export default function Solicitantes() {
                                 margin="normal"
                             />
                             <TextField
+                                select
                                 label="Ubicación"
                                 fullWidth
-                                value={
-                                    editingSolicitante?.ubicacion_solicitante
-                                        ? `${editingSolicitante.ubicacion_solicitante.municipio ?? ''}`
-                                        : 'Sin ubicación'
-                                }
+                                required
+                                value={formData.id_ubicacion_sol}
+                                onChange={(e) => setFormData({ ...formData, id_ubicacion_sol: e.target.value })}
+                                SelectProps={{ native: true }}
                                 margin="normal"
-                                
-                            />
+                            >
+                                <option value=""></option>
+                                {/* Aquí deberías mapear tus ubicaciones desde otra query */}
+                                {ubicaciones?.map((loc) => (
+                                    <option key={loc.id_ubicacion_sol} value={loc.id_ubicacion_sol}>
+                                        {loc.municipio} - {loc.departamento}
+                                    </option>
+                                ))}
+                            </TextField>
                         </Box>
                     </DialogContent>
                     <DialogActions sx={{ px: 3, pb: 2 }}>

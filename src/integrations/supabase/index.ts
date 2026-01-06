@@ -16,11 +16,14 @@ export type Resolucion = Database['public']['Tables']['resolucion']['Row'];
 export type PuntoCaptacion = Database['public']['Tables']['punto_captacion']['Row'];
 export type MuestraBase = Database['public']['Tables']['muestra']['Row'];
 export type Laboratorio = Database['public']['Tables']['laboratorio']['Row'];
+export type SolicitanteBase = Database['public']['Tables']['solicitante']['Row'];
+export type Ubicacion_solicitante = Database['public']['Tables']['ubicacion_solicitante']['Row'];
 
 /**
  * Para tu tipo "MapaRiesgoCompleto" (el que tiene los joins),
  * lo definimos combinando los tipos de arriba:
  */
+
 
 export interface Prestador extends PrestadorBase {
     ubicacion: Ubicacion | null;
@@ -46,3 +49,6 @@ export interface MuestraCompleta extends MuestraBase {
     laboratorio: Pick<Laboratorio, 'nombre' | 'estado' | 'telefono'> | null;
 }
 
+export interface Solicitante extends SolicitanteBase {
+    Ubicacion_solicitante: Pick<Ubicacion_solicitante, 'departamento' | 'municipio'> | null;
+}
