@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { MapContainer, TileLayer, Marker, Popup } from "react-leaflet";
+import { MapContainer, TileLayer, Marker, Popup, useMap } from "react-leaflet";
 import "leaflet/dist/leaflet.css";
 import { supabase } from "../integrations/supabase/client";
 import L from "leaflet";
@@ -75,7 +75,6 @@ export default function MapaPuntosCaptacion() {
             p.punto_captacion?.municipio?.toLowerCase().includes(query)
         );
     });
-
     return (
         <div className="flex flex-row w-full h-[95vh] gap-4">
             {/* MAPA (Lado izquierdo) */}
@@ -251,7 +250,7 @@ export default function MapaPuntosCaptacion() {
                                     {selectedMapa.anexo && selectedMapa.anexo.length > 0 ? (
                                         selectedMapa.anexo.map((a2, idx) => (
                                             <div key={a2.id_reporte1} className="border-b pb-4 last:border-0">
-                                                {/* Bocatomas */}
+                                                {/* entidad_participante */}
                                                 <div className="mb-3">
                                                     <h6 className="font-bold text-xs text-gray-700 mb-1">Entidad Participante ({a2.entidad_participante?.length || 0})</h6>
                                                     {a2.entidad_participante?.map(b => (
@@ -263,7 +262,7 @@ export default function MapaPuntosCaptacion() {
                                                     ))}
                                                 </div>
 
-                                                {/* Redes */}
+                                                {/* documento_fuente */}
                                                 <div>
                                                     <h6 className="font-bold text-xs text-gray-700 mb-1">Documentos ({a2.documento_fuente?.length || 0})</h6>
                                                     {a2.documento_fuente?.map(r => (
@@ -276,6 +275,8 @@ export default function MapaPuntosCaptacion() {
                                                         </div>
                                                     ))}
                                                 </div>
+
+                                                {/* caracteristica_priorizada */}
                                                 <div>
                                                     <h6 className="font-bold text-xs text-gray-700 mb-1">Caracteristicas ({a2.caracteristica_priorizada?.length || 0})</h6>
                                                     {a2.caracteristica_priorizada?.map(re => (
@@ -341,7 +342,7 @@ export default function MapaPuntosCaptacion() {
                                                     ))}
                                                 </div>
                                                 <div>
-                                                    <h6 className="font-bold text-xs text-gray-700 mb-1">Resolucion ({a2.red?.length || 0})</h6>
+                                                    <h6 className="font-bold text-xs text-gray-700 mb-1">Resolucion ({a2.resolucion?.length || 0})</h6>
                                                     {a2.resolucion?.map(re => (
                                                         <div key={re.id_resolucion} className="bg-white p-2 rounded border mb-1 text-xs">
                                                             <p><b>Fecha:</b> {re.numero_resolucion}</p>

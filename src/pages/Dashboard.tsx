@@ -10,7 +10,10 @@ import {
   Grid
 } from '@mui/material';
 import { Users, FlaskConical, FileText, Building2 } from 'lucide-react';
-import { PieChart, Pie, Cell, ResponsiveContainer, Legend, Tooltip } from 'recharts';
+import {
+  BarChart, Bar, XAxis, YAxis, CartesianGrid,
+  PieChart, Pie, Cell, ResponsiveContainer, Legend, Tooltip
+} from 'recharts';
 
 // Paleta de colores para los gráficos
 const COLORS = [
@@ -41,6 +44,42 @@ export default function Dashboard() {
     },
   });
 
+  // Consulta para promedio de IRCA por Municipio
+  const { data: ircaData, isLoading: isLoadingIrca } = useQuery({
+    queryKey: ['irca-promedio-region'],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('muestra')
+        .select(`
+        irca,
+        punto_muestreo:id_muestreo (
+          municipio
+        )
+      `)
+        .not('irca', 'is', null); // Solo muestras con IRCA calculado
+
+      if (error) throw error;
+
+      // Agrupar y promediar por municipio
+      const agrupado: Record<string, { total: number; count: number }> = {};
+
+      data?.forEach((item: any) => {
+        const municipio = item.punto_muestreo?.municipio || 'No definido';
+        if (!agrupado[municipio]) {
+          agrupado[municipio] = { total: 0, count: 0 };
+        }
+        agrupado[municipio].total += item.irca;
+        agrupado[municipio].count += 1;
+      });
+
+      return Object.entries(agrupado)
+        .map(([name, stats]) => ({
+          name,
+          promedio: Number((stats.total / stats.count).toFixed(2))
+        }))
+        .sort((a, b) => b.promedio - a.promedio); // Ordenar de mayor a menor riesgo
+    },
+  });
 
 
   // Consulta para ubicaciones de prestadores
@@ -226,7 +265,7 @@ export default function Dashboard() {
         </Card>
 
         {/* Gráfico por Departamento */}
-        <Grid item xs={12} md={6}>
+        <Grid size={{ xs: 12, md: 6 }}>
           <Card>
             <CardContent>
               <Typography variant="h6" component="h2" gutterBottom fontWeight="bold">
@@ -279,7 +318,7 @@ export default function Dashboard() {
 
 
         {/* Gráfico por Municipio (Top 10) */}
-        <Grid item xs={100} md={6} >
+        <Grid size={{ xs: 100, md: 6 }} >
           <Card >
             <CardContent>
               <Typography variant="h6" component="h2" gutterBottom fontWeight="bold">
@@ -332,8 +371,58 @@ export default function Dashboard() {
 
 
       </Grid>
+      {/* Gráfico de IRCA por Municipio */}
+      <Grid container spacing={3} sx={{ mt: 1 }}>
+        <Grid size={{xs:12}} >
+          <Card>
+            <CardContent>
+              <Typography variant="h6" component="h2" gutterBottom fontWeight="bold">
+                Promedio de IRCA por Municipio
+              </Typography>
+              <Typography variant="body2" color="text.secondary" sx={{ mb: 3 }}>
+                Nivel de riesgo promedio detectado en las muestras (0-100)
+              </Typography>
 
-
+              {isLoadingIrca ? (
+                <Box sx={{ display: 'flex', justifyContent: 'center', py: 8 }}>
+                  <CircularProgress />
+                </Box>
+              ) : (
+                <ResponsiveContainer width="100%" height={350}>
+                  <BarChart data={ircaData} layout="vertical" margin={{ left: 30, right: 30 }}>
+                    <CartesianGrid strokeDasharray="3 3" horizontal={true} vertical={false} />
+                    <XAxis type="number" domain={[0, 100]} />
+                    <YAxis
+                      dataKey="name"
+                      type="category"
+                      width={120}
+                      tick={{ fontSize: 12 }}
+                    />
+                    <Tooltip
+                      formatter={(value: number) => [`${value}%`, 'IRCA Promedio']}
+                      cursor={{ fill: '#f3f4f6' }}
+                    />
+                    <Bar
+                      dataKey="promedio"
+                      fill="#3b82f6"
+                      radius={[0, 4, 4, 0]}
+                      label={{ position: 'right', formatter: (v: any) => `${v}%`, fontSize: 12 }}
+                    >
+                      {ircaData?.map((entry, index) => (
+                        <Cell
+                          key={`cell-${index}`}
+                          // Color dinámico según el riesgo (Rojo si IRCA > 35)
+                          fill={entry.promedio > 35 ? '#ef4444' : entry.promedio > 14 ? '#f59e0b' : '#10b981'}
+                        />
+                      ))}
+                    </Bar>
+                  </BarChart>
+                </ResponsiveContainer>
+              )}
+            </CardContent>
+          </Card>
+        </Grid>
+      </Grid>
     </Box>
   );
 }
