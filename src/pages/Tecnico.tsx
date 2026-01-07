@@ -16,22 +16,18 @@ import {
 import { DataGrid, GridColDef, GridActionsCellItem } from '@mui/x-data-grid';
 import { Plus, Search, Edit, Trash2 } from 'lucide-react';
 import { toast } from 'sonner';
-
-type Tecnico = {
-    id_tecnico: number;
-    identificacion: number | null;
-    nombre: string;
-    telefono: string | null;
-    profesion: string | null;
-    email: string | null;
-    id_ubicacion_tec: number | null;
-    id_laboratorio: number | null;
-};
+import { Tecnico } from '@/integrations/supabase/index.ts'
 
 export default function Tecnicos() {
     const [search, setSearch] = useState('');
     const [dialogOpen, setDialogOpen] = useState(false);
     const [editingTecnico, setEditingTecnico] = useState<Tecnico | null>(null);
+    const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+    const [idToDelete, setIdToDelete] = useState<number | null>(null);
+    const confirmDelete = (id: number) => {
+        setIdToDelete(id);
+        setDeleteDialogOpen(true);
+    };
     const [formData, setFormData] = useState({
         identificacion: '',
         nombre: '',
@@ -44,58 +40,82 @@ export default function Tecnicos() {
 
     const queryClient = useQueryClient();
 
-    // ✅ Obtener técnicos desde Supabase
+
+    // Obtener ubicaciones para el selector
+    const { data: ubicaciones } = useQuery({
+        queryKey: ['ubicaciones-tec-selector'],
+        queryFn: async () => {
+            const { data, error } = await supabase.from('ubicacion_tecnico').select('*').order('municipio');
+            if (error) throw error;
+            return data;
+        },
+    });
+
+    // Obtener laboratorios para el selector
+    const { data: laboratorios } = useQuery({
+        queryKey: ['laboratorios-selector'],
+        queryFn: async () => {
+            const { data, error } = await supabase.from('laboratorio').select('id_laboratorio, nombre').order('nombre');
+            if (error) throw error;
+            return data;
+        },
+    });
+
     const { data: tecnicos, isLoading } = useQuery({
         queryKey: ['tecnicos', search],
         queryFn: async () => {
-            let query = supabase.from('tecnico').select('*').order('nombre');
+            // Traemos el técnico y los nombres de sus relaciones en una sola petición
+            let query = supabase
+                .from('tecnico')
+                .select(`
+                *,
+                laboratorio ( nombre ),
+                ubicacion_tecnico ( municipio, departamento )
+            `)
+                .order('nombre');
 
             if (search) {
-                query = query.or(`nombre.ilike.%${search}%,profesion.ilike.%${search}%,email.ilike.%${search}%`);
+                query = query.or(`nombre.ilike.%${search}%,profesion.ilike.%${search}%`);
             }
 
             const { data, error } = await query;
             if (error) throw error;
-            return data as Tecnico[];
+            return data;
         },
     });
 
-    // ✅ Crear técnico
+    const preparePayload = (data: typeof formData) => ({
+        ...data,
+        identificacion: data.identificacion ? parseInt(data.identificacion) : null,
+        id_ubicacion_tec: data.id_ubicacion_tec ? parseInt(data.id_ubicacion_tec) : null,
+        id_laboratorio: data.id_laboratorio ? parseInt(data.id_laboratorio) : null,
+    });
+
+    // ✅ Crear
     const createMutation = useMutation({
         mutationFn: async (data: typeof formData) => {
-            const { error } = await supabase.from('tecnico').insert([data]);
+            const { error } = await supabase.from('tecnico').insert([preparePayload(data)]);
             if (error) throw error;
         },
-        onSuccess: () => {
-            queryClient.invalidateQueries({ queryKey: ['tecnicos'] });
-            toast.success('Técnico creado exitosamente');
-            setDialogOpen(false);
-            resetForm();
-        },
-        onError: (error) => {
-            toast.error('Error al crear técnico', { description: error.message });
-        },
+        onSuccess: () => handleSuccess('Técnico creado'),
     });
 
-    // ✅ Actualizar técnico
+    // ✅ Actualizar
     const updateMutation = useMutation({
         mutationFn: async ({ id, data }: { id: number; data: typeof formData }) => {
-            const { error } = await supabase
-                .from('tecnico')
-                .update(data)
-                .eq('id_tecnico', id);
+            const { error } = await supabase.from('tecnico').update(preparePayload(data)).eq('id_tecnico', id);
             if (error) throw error;
         },
-        onSuccess: () => {
-            queryClient.invalidateQueries({ queryKey: ['tecnicos'] });
-            toast.success('Técnico actualizado exitosamente');
-            setDialogOpen(false);
-            resetForm();
-        },
-        onError: (error) => {
-            toast.error('Error al actualizar técnico', { description: error.message });
-        },
+        onSuccess: () => handleSuccess('Técnico actualizado'),
     });
+
+    // Función auxiliar para no repetir el cierre de modales
+    const handleSuccess = (message: string) => {
+        queryClient.invalidateQueries({ queryKey: ['tecnicos'] });
+        toast.success(message);
+        setDialogOpen(false);
+        resetForm();
+    };
 
     // ✅ Eliminar técnico
     const deleteMutation = useMutation({
@@ -148,12 +168,6 @@ export default function Tecnicos() {
         setDialogOpen(true);
     };
 
-    const handleDelete = (id: number) => {
-        if (confirm('¿Está seguro de eliminar este técnico?')) {
-            deleteMutation.mutate(id);
-        }
-    };
-
     const columns: GridColDef[] = [
         { field: 'nombre', headerName: 'Nombre', flex: 1, minWidth: 200 },
         { field: 'identificacion', headerName: 'Identificación', width: 150 },
@@ -174,7 +188,7 @@ export default function Tecnicos() {
                 <GridActionsCellItem
                     icon={<Trash2 size={18} />}
                     label="Eliminar"
-                    onClick={() => handleDelete(params.row.id_tecnico)}
+                    onClick={() => confirmDelete(params.row.id_tecnico)}
                 />,
             ],
         },
@@ -241,93 +255,67 @@ export default function Tecnicos() {
             </Paper>
 
             {/* ✅ Diálogo */}
-            <Dialog
-                open={dialogOpen}
-                onClose={() => {
-                    setDialogOpen(false);
-                    resetForm();
-                }}
-                maxWidth="md"
-                fullWidth
-            >
+            <Dialog open={dialogOpen} onClose={() => { setDialogOpen(false); resetForm(); }} maxWidth="md" fullWidth>
                 <DialogTitle>{editingTecnico ? 'Editar Técnico' : 'Nuevo Técnico'}</DialogTitle>
                 <form onSubmit={handleSubmit}>
-                    <DialogContent>
-                        <Box
-                            sx={{
-                                display: 'grid',
-                                gridTemplateColumns: { xs: '1fr', sm: 'repeat(2, 1fr)' },
-                                gap: 2,
-                            }}
-                        >
-                            <TextField
-                                label="Nombre"
-                                fullWidth
-                                required
-                                value={formData.nombre}
-                                onChange={(e) => setFormData({ ...formData, nombre: e.target.value })}
-                                margin="normal"
-                            />
-                            <TextField
-                                label="Identificación"
-                                fullWidth
-                                value={formData.identificacion}
-                                onChange={(e) => setFormData({ ...formData, identificacion: e.target.value })}
-                                margin="normal"
-                            />
-                            <TextField
-                                label="Profesión"
-                                fullWidth
-                                value={formData.profesion}
-                                onChange={(e) => setFormData({ ...formData, profesion: e.target.value })}
-                                margin="normal"
-                            />
-                            <TextField
-                                label="Teléfono"
-                                fullWidth
-                                value={formData.telefono}
-                                onChange={(e) => setFormData({ ...formData, telefono: e.target.value })}
-                                margin="normal"
-                            />
-                            <TextField
-                                label="Email"
-                                fullWidth
-                                type="email"
-                                value={formData.email}
-                                onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                                margin="normal"
-                                sx={{ gridColumn: '1 / -1' }}
-                            />
-                            <TextField
-                                label="ID Laboratorio"
-                                fullWidth
-                                value={formData.id_laboratorio}
-                                onChange={(e) => setFormData({ ...formData, id_laboratorio: e.target.value })}
-                                margin="normal"
-                            />
-                            <TextField
-                                label="ID Ubicación"
-                                fullWidth
-                                value={formData.id_ubicacion_tec}
-                                onChange={(e) => setFormData({ ...formData, id_ubicacion_tec: e.target.value })}
-                                margin="normal"
-                            />
+                    <DialogContent dividers>
+                        <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', sm: '1fr 1fr' }, gap: 2 }}>
+                            <TextField label="Nombre Completo" required fullWidth value={formData.nombre}
+                                onChange={(e) => setFormData({ ...formData, nombre: e.target.value })} />
+
+                            <TextField label="Identificación (C.C)" type="number" fullWidth value={formData.identificacion}
+                                onChange={(e) => setFormData({ ...formData, identificacion: e.target.value })} />
+
+                            <TextField label="Profesión" fullWidth value={formData.profesion}
+                                onChange={(e) => setFormData({ ...formData, profesion: e.target.value })} />
+
+                            <TextField label="Teléfono" fullWidth value={formData.telefono}
+                                onChange={(e) => setFormData({ ...formData, telefono: e.target.value })} />
+
+                            <TextField label="Email" type="email" fullWidth sx={{ gridColumn: '1 / -1' }} value={formData.email}
+                                onChange={(e) => setFormData({ ...formData, email: e.target.value })} />
+
+                            {/* SELECTOR DE LABORATORIO */}
+                            <TextField select label="Laboratorio" fullWidth required SelectProps={{ native: true }}
+                                value={formData.id_laboratorio} onChange={(e) => setFormData({ ...formData, id_laboratorio: e.target.value })}>
+                                <option value=""></option>
+                                {laboratorios?.map((lab) => (
+                                    <option key={lab.id_laboratorio} value={lab.id_laboratorio}>{lab.nombre}</option>
+                                ))}
+                            </TextField>
+
+                            {/* SELECTOR DE UBICACIÓN */}
+                            <TextField select label="Ubicación" fullWidth required SelectProps={{ native: true }}
+                                value={formData.id_ubicacion_tec} onChange={(e) => setFormData({ ...formData, id_ubicacion_tec: e.target.value })}>
+                                <option value=""></option>
+                                {ubicaciones?.map((u) => (
+                                    <option key={u.id_ubicacion_tec} value={u.id_ubicacion_tec}>{u.municipio} - {u.departamento}</option>
+                                ))}
+                            </TextField>
                         </Box>
                     </DialogContent>
-                    <DialogActions sx={{ px: 3, pb: 2 }}>
-                        <Button
-                            onClick={() => {
-                                setDialogOpen(false);
-                                resetForm();
-                            }}
-                        >
-                            Cancelar
-                        </Button>
-                        <Button type="submit" variant="contained">
-                            {editingTecnico ? 'Actualizar' : 'Crear'}
+                    <DialogActions sx={{ p: 3 }}>
+                        <Button onClick={() => { setDialogOpen(false); resetForm(); }}>Cancelar</Button>
+                        <Button type="submit" variant="contained" disabled={createMutation.isPending || updateMutation.isPending}>
+                            {editingTecnico ? 'Guardar Cambios' : 'Crear Técnico'}
                         </Button>
                     </DialogActions>
                 </form>
+            </Dialog>
+
+            {/* --- DIÁLOGO DE ELIMINACIÓN --- */}
+            <Dialog open={deleteDialogOpen} onClose={() => setDeleteDialogOpen(false)}>
+                <DialogTitle>¿Confirmar eliminación?</DialogTitle>
+                <DialogContent>
+                    <Typography>Esta acción no se puede deshacer. El técnico será removido permanentemente del sistema.</Typography>
+                </DialogContent>
+                <DialogActions>
+                    <Button onClick={() => setDeleteDialogOpen(false)}>Cancelar</Button>
+                    <Button color="error" variant="contained" onClick={() => {
+                        if (idToDelete) deleteMutation.mutate(idToDelete);
+                        setDeleteDialogOpen(false);
+                    }}>Eliminar permanentemente</Button>
+                </DialogActions>
             </Dialog>
         </Box>
     );
