@@ -70,7 +70,7 @@ export default function Tecnicos() {
                 .select(`
                 *,
                 laboratorio ( nombre ),
-                ubicacion_tecnico ( municipio, departamento )
+                ubicacion_tecnico ( municipio, departamento, direccion )
             `)
                 .order('nombre');
 
