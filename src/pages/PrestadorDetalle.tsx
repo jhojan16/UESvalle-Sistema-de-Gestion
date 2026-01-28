@@ -69,11 +69,11 @@ export default function PrestadorDetalle() {
     });
 
     // Representantes del prestador
-    const { data: representantes = [] } = useQuery({
-        queryKey: ['representantes', prestadorId],
+    const { data: inspeccion = [] } = useQuery({
+        queryKey: ['inspeccion', prestadorId],
         queryFn: async () => {
             const { data, error } = await supabase
-                .from('representante')
+                .from('inspeccion')
                 .select('*')
                 .eq('id_prestador', prestadorId)
                 .order('nombre');
@@ -140,10 +140,11 @@ export default function PrestadorDetalle() {
         );
     }
 
-    const representantesColumns: GridColDef[] = [
-        { field: 'nombre', headerName: 'Nombre', flex: 1, minWidth: 200 },
-        { field: 'cargo', headerName: 'Cargo', width: 180 },
-        { field: 'email', headerName: 'Email', flex: 1, minWidth: 200 },
+    const inspeccionColumns: GridColDef[] = [
+        // { field: 'id_inspeccion', headerName: 'id', flex: 1, minWidth: 200 },
+        { field: 'id_inspeccion_sivicap', headerName: 'ID Inspección', flex: 1, minWidth: 200 },
+        { field: 'fecha_inspeccion', headerName: 'Fecha', width: 180 },
+        { field: 'concepto', headerName: 'Concepto', flex: 1, minWidth: 200 },
     ];
 
     const muestreosColumns: GridColDef[] = [
@@ -199,11 +200,11 @@ export default function PrestadorDetalle() {
                                         <Typography variant="body2" color="text.secondary">Teléfono:</Typography>
                                         <Typography variant="body2" fontWeight="medium">{prestador.telefono || 'N/A'}</Typography>
                                     </Box>
-                                    <Box display="flex" alignItems="center" gap={1}>
+                                    {/* <Box display="flex" alignItems="center" gap={1}>
                                         <FileText size={18} />
                                         <Typography variant="body2" color="text.secondary">ID SSPD:</Typography>
-                                        <Typography variant="body2" fontWeight="medium">{prestador.id_sspd || 'N/A'}</Typography>
-                                    </Box>
+                                        <Typography variant="body2" fontWeight="medium">{prestador.id_autoridad_sanitaria|| 'N/A'}</Typography>
+                                    </Box> */}
                                     <Box display="flex" alignItems="center" gap={1}>
                                         <FileText size={18} />
                                         <Typography variant="body2" color="text.secondary">ID Autoridad Sanitaria:</Typography>
@@ -267,7 +268,7 @@ export default function PrestadorDetalle() {
             {/* Tabs con información relacionada */}
             <Paper sx={{ p: 3 }}>
                 <Tabs value={tabValue} onChange={(_, newValue) => setTabValue(newValue)}>
-                    <Tab label={`Representantes (${representantes.length})`} />
+                    <Tab label={`Inspección (${inspeccion.length})`} />
                     <Tab label={`Muestras (${muestreos.length})`} />
                     <Tab label={`Mapa riesgo (${reporte.length})`} />
                 </Tabs>
@@ -275,9 +276,9 @@ export default function PrestadorDetalle() {
                 <TabPanel value={tabValue} index={0}>
                     <Box sx={{ height: 400, width: '100%' }}>
                         <DataGrid
-                            rows={representantes}
-                            columns={representantesColumns}
-                            getRowId={(row) => row.id_representante}
+                            rows={inspeccion}
+                            columns={inspeccionColumns}
+                            getRowId={(row) => row.id_inspeccion}
                             pageSizeOptions={[10, 25, 50]}
                             initialState={{
                                 pagination: { paginationModel: { pageSize: 10 } },

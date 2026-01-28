@@ -62,7 +62,7 @@ const App = () => (
                 </ProtectedRoute>
               }
             />
-            <Route
+            {/* <Route
               path="/laboratorios"
               element={
                 <ProtectedRoute>
@@ -71,7 +71,7 @@ const App = () => (
                   </Layout>
                 </ProtectedRoute>
               }
-            />
+            /> */}
             <Route
               path="/muestras"
               element={
