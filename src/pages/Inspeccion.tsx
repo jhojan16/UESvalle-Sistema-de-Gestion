@@ -63,7 +63,8 @@ export default function VistaInspeccionesMasterDetail() {
         const s = search.toLowerCase();
         return inspecciones.filter((item) => (
             item.Prestador?.nombre?.toLowerCase().includes(s) ||
-            item.id_inspeccion_sivicap?.toString().includes(s)
+            item.id_inspeccion_sivicap?.toString().includes(s) ||
+            item.Prestador?.nit?.toLowerCase().includes(s)
         ));
     }, [inspecciones, search]);
 
@@ -130,7 +131,8 @@ export default function VistaInspeccionesMasterDetail() {
                                     {ins.Prestador?.nombre || 'Sin Nombre'}
                                 </Typography>
                                 <Box sx={{ mt: 1, display: 'flex', gap: 1 }}>
-                                    <Chip label={`IRABA: ${ins.iraba_inspeccion}%`} size="small" sx={{ fontSize: '10px', height: 20 }} color={Number(ins.iraba_inspeccion) > 5 ? "error" : "success"} variant="outlined" />
+                                    {/* <Chip label={`IRABA: ${ins.iraba_inspeccion}`} size="small" sx={{ fontSize: '10px', height: 20 }} color={Number(ins.iraba_inspeccion) > 5 ? "error" : "success"} variant="outlined" /> */}
+                                    <Chip label={`IRABA: ${ins.iraba_inspeccion}`} size="small" sx={{ fontSize: '10px', height: 20 }}  variant="outlined" />
                                     <Chip label={ins.concepto || 'Pendiente'} size="small" sx={{ fontSize: '10px', height: 20 }} variant="outlined" />
                                 </Box>
                             </ListItemButton>

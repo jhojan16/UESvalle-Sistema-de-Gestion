@@ -76,8 +76,6 @@ export default function PrestadorDetalle() {
                 .from('inspeccion')
                 .select('*')
                 .eq('id_prestador', prestadorId)
-                .order('nombre');
-
             if (error) throw error;
             return data;
         },
@@ -143,8 +141,10 @@ export default function PrestadorDetalle() {
     const inspeccionColumns: GridColDef[] = [
         // { field: 'id_inspeccion', headerName: 'id', flex: 1, minWidth: 200 },
         { field: 'id_inspeccion_sivicap', headerName: 'ID Inspección', flex: 1, minWidth: 200 },
-        { field: 'fecha_inspeccion', headerName: 'Fecha', width: 180 },
+        { field: 'fecha_inspeccion', headerName: 'Fecha', width: 200 },
         { field: 'concepto', headerName: 'Concepto', flex: 1, minWidth: 200 },
+        { field: 'estado', headerName: 'Estado', flex: 1, minWidth: 200 },
+
     ];
 
     const muestreosColumns: GridColDef[] = [
