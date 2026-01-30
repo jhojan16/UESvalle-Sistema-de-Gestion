@@ -149,9 +149,9 @@ export default function VistaInspeccionesMasterDetail() {
                                 <Typography variant="overline" color="text.secondary">Informe Detallado de Inspección</Typography>
                                 <Typography variant="h3" fontWeight="800" gutterBottom>{current.Prestador?.nombre}</Typography>
                                 <Box sx={{ display: 'flex', gap: 3, color: 'text.secondary' }}>
-                                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
+                                    {/* <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
                                         <Calendar size={16} /> <Typography variant="body2">{current.fecha_inspeccion}</Typography>
-                                    </Box>
+                                    </Box> */}
                                     <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
                                         <User size={16} /> <Typography variant="body2">{current.autoridad_inspeccion}</Typography>
                                     </Box>
@@ -162,8 +162,9 @@ export default function VistaInspeccionesMasterDetail() {
 
                             <DetailSection title="Resultado de la Visita" icon={ClipboardCheck}>
                                 <InfoField label="Concepto Técnico" value={current.concepto} md={6} />
+                                <InfoField label="Fecha Inspección" value={current.fecha_inspeccion} md={6} />
+                                <InfoField label="Plazo de Ejecución" value={current.plazo_ejecucion_inspeccion} md={6} />
                                 <InfoField label="Estado Registro" value={current.estado} md={6} />
-                                <InfoField label="Plazo de Ejecución" value={current.plazo_ejecucion_inspeccion} md={12} />
                             </DetailSection>
 
                             <DetailSection title="Indicadores de Calidad y Continuidad" icon={Landmark}>
