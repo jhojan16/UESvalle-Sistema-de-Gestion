@@ -12,7 +12,7 @@ import Prestadores from "./pages/Prestadores";
 import NotFound from "./pages/NotFound";
 import Muestras from "./pages/Muestras";
 import Tecnico from "./pages/Tecnico";
-import Laboratorio from "./pages/Laboratorio";
+import InspeccionStagingResolver from "./pages/InsercionIndividual";
 import PrestadorDetalle from "./pages/PrestadorDetalle";
 import Solicitantes from "./pages/Solicitantes";
 import VistaExportar from "./pages/VistaExportar";
@@ -62,16 +62,16 @@ const App = () => (
                 </ProtectedRoute>
               }
             />
-            {/* <Route
-              path="/laboratorios"
+            <Route
+              path="/InsercionIndividual"
               element={
                 <ProtectedRoute>
                   <Layout>
-                    <Laboratorio />
+                    <InspeccionStagingResolver />
                   </Layout>
                 </ProtectedRoute>
               }
-            /> */}
+            />
             <Route
               path="/muestras"
               element={
