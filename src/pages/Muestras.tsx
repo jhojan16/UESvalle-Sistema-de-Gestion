@@ -14,14 +14,12 @@ import {
   IconButton,
   Chip,
   Divider,
+  Stack,
 } from "@mui/material";
-import { Grid } from "@mui/material"; // Usando la versión más reciente de Grid
+import { Grid } from "@mui/material";
 import { DataGrid, GridColDef, GridActionsCellItem } from "@mui/x-data-grid";
 import { Search, Eye, X } from "lucide-react";
-import { useParams } from "react-router-dom";
 import { MuestraCompleta } from "@/integrations/supabase/index";
-
-// --- COMPONENTES AUXILIARES PARA REFACTORIZACIÓN ---
 
 const InfoField = ({
   label,
@@ -75,8 +73,6 @@ const InfoSection = ({
   </Paper>
 );
 
-// --- CONFIGURACIÓN DE CAMPOS ---
-
 const CONFIG_CAMPOS = {
   general: [
     { label: "ID Muestra", key: "id_muestra", md: 2 },
@@ -99,8 +95,8 @@ const CONFIG_CAMPOS = {
   ],
   punto: [
     { label: "Nombre", key: "nombre", md: 3 },
-    { label: "Municipio", key: "departamento", md: 3 }, // Ajustado según tu código original
-    { label: "Dirección", key: "municipio", md: 3 }, // Ajustado según tu código original
+    { label: "Municipio", key: "departamento", md: 3 },
+    { label: "Dirección", key: "municipio", md: 3 },
     { label: "Vereda", key: "vereda", md: 3 },
     { label: "Dirección Exacta", key: "direccion", md: 6 },
     { label: "Descripción", key: "descripcion", md: 6 },
@@ -119,49 +115,75 @@ const CONFIG_CAMPOS = {
   ],
 };
 
+type MuestraRow = {
+  id_muestra: number;
+  muestra_no: string | null;
+  fecha_toma: string | null;
+  tipo_muestra: string | null;
+  irca: number | null;
+};
+
 export default function VistaAnalisisMuestras() {
-  const { id } = useParams<{ id: string }>();
   const [search, setSearch] = useState("");
-  const [selectedAnalisis, setSelectedAnalisis] =
-    useState<MuestraCompleta | null>(null);
+  const [selectedId, setSelectedId] = useState<number | null>(null);
   const [dialogOpen, setDialogOpen] = useState(false);
   const [paginationModel, setPaginationModel] = useState({
     page: 0,
     pageSize: 50,
   });
 
-  const { data: analisis, isLoading } = useQuery({
-    queryKey: ["muestras"],
+  const { data: listado, isLoading: loadingListado } = useQuery({
+    queryKey: ["muestras_listado", paginationModel.page, paginationModel.pageSize],
+    queryFn: async () => {
+      const from = paginationModel.page * paginationModel.pageSize;
+      const to = from + paginationModel.pageSize - 1;
+
+      const { data, error, count } = await supabase
+        .from("muestra")
+        .select("id_muestra,muestra_no,fecha_toma,tipo_muestra,irca", { count: "exact" })
+        .order("fecha_toma", { ascending: false })
+        .range(from, to);
+
+      if (error) throw error;
+      return { rows: (data as MuestraRow[]) ?? [], count: count ?? 0 };
+    },
+    staleTime: 60 * 1000,
+  });
+
+  const { data: detalle, isLoading: loadingDetalle } = useQuery({
+    queryKey: ["muestra_detalle", selectedId],
+    enabled: !!selectedId && dialogOpen,
     queryFn: async () => {
       const { data, error } = await supabase
         .from("muestra")
-        .select(
-          `*, prestador(*), laboratorio(nombre, estado, telefono), punto_muestreo (*), analisis_muestra(*)`,
-        )
-        .order("fecha_toma", { ascending: false });
+        .select("*, prestador(*), laboratorio(nombre, estado, telefono), punto_muestreo(*), analisis_muestra(*)")
+        .eq("id_muestra", selectedId)
+        .maybeSingle();
+
       if (error) throw error;
-      return data as MuestraCompleta[];
+      return data as MuestraCompleta | null;
     },
-    staleTime: 5 * 60 * 1000,
+    staleTime: 60 * 1000,
   });
 
-  const filteredData = useMemo(() => {
-    if (!search.trim() || !analisis) return analisis || [];
-    const searchLower = search.toLowerCase();
-    return analisis.filter(
-      (item) =>
-        item.muestra_no?.toLowerCase().includes(searchLower) ||
-        item.fecha_toma?.toLowerCase().includes(searchLower) ||
-        item.irca?.toString().includes(searchLower),
-    );
-  }, [analisis, search]);
+  const filteredRows = useMemo(() => {
+    const rows = listado?.rows ?? [];
+    const q = search.trim().toLowerCase();
+    if (!q) return rows;
+    return rows.filter((r) => {
+      const a = r.muestra_no?.toLowerCase().includes(q) ?? false;
+      const b = r.fecha_toma?.toLowerCase().includes(q) ?? false;
+      const c = r.irca?.toString().includes(q) ?? false;
+      return a || b || c;
+    });
+  }, [listado?.rows, search]);
 
   const columns: GridColDef[] = [
     {
       field: "muestra_no",
       headerName: "Nº Muestra",
       flex: 1,
-      minWidth: 100,
+      minWidth: 120,
       renderCell: (p) => (
         <Chip
           label={p.value || "Sin número"}
@@ -175,28 +197,23 @@ export default function VistaAnalisisMuestras() {
       field: "fecha_toma",
       headerName: "Fecha Toma",
       flex: 1,
-      minWidth: 100,
+      minWidth: 130,
       renderCell: (p) =>
         p.value ? new Date(p.value).toLocaleDateString("es-CO") : "-",
     },
-    {
-      field: "tipo_muestra",
-      headerName: "Tipo muestra",
-      flex: 0.5,
-      minWidth: 100,
-    },
-    { field: "irca", headerName: "IRCA", flex: 0.5, minWidth: 100 },
+    { field: "tipo_muestra", headerName: "Tipo muestra", flex: 1, minWidth: 140 },
+    { field: "irca", headerName: "IRCA", flex: 0.5, minWidth: 90 },
     {
       field: "actions",
       type: "actions",
       headerName: "Acciones",
-      width: 100,
+      width: 110,
       getActions: (p) => [
         <GridActionsCellItem
           icon={<Eye size={20} />}
           label="Ver Detalles"
           onClick={() => {
-            setSelectedAnalisis(p.row);
+            setSelectedId(p.row.id_muestra);
             setDialogOpen(true);
           }}
         />,
@@ -215,7 +232,7 @@ export default function VistaAnalisisMuestras() {
 
   const closeDialog = () => {
     setDialogOpen(false);
-    setSelectedAnalisis(null);
+    setSelectedId(null);
   };
 
   return (
@@ -242,16 +259,18 @@ export default function VistaAnalisisMuestras() {
               </InputAdornment>
             ),
           }}
-          helperText={`${filteredData.length} registros encontrados`}
+          helperText={`${filteredRows.length} registros en esta página`}
         />
       </Paper>
 
       <Paper sx={{ p: 2 }}>
         <DataGrid
-          rows={filteredData}
+          rows={filteredRows}
           columns={columns}
-          loading={isLoading}
+          loading={loadingListado}
           getRowId={(row) => row.id_muestra}
+          paginationMode="server"
+          rowCount={listado?.count ?? 0}
           paginationModel={paginationModel}
           onPaginationModelChange={setPaginationModel}
           pageSizeOptions={[25, 50, 100]}
@@ -275,7 +294,7 @@ export default function VistaAnalisisMuestras() {
                 Detalles del Análisis
               </Typography>
               <Typography variant="body2" color="text.secondary">
-                Muestra: {selectedAnalisis?.muestra_no || "Sin número"}
+                Muestra: {detalle?.muestra_no || "Sin número"}
               </Typography>
             </Box>
             <IconButton onClick={closeDialog}>
@@ -285,14 +304,18 @@ export default function VistaAnalisisMuestras() {
         </DialogTitle>
 
         <DialogContent dividers>
-          {selectedAnalisis ? (
+          {loadingDetalle ? (
+            <Box sx={{ display: "flex", justifyContent: "center", py: 10 }}>
+              <CircularProgress />
+            </Box>
+          ) : detalle ? (
             <Box sx={{ py: 1 }}>
               <InfoSection title="Información General">
                 {CONFIG_CAMPOS.general.map((f) => (
                   <InfoField
                     key={f.label}
                     label={f.label}
-                    value={selectedAnalisis[f.key as keyof MuestraCompleta]}
+                    value={detalle[f.key as keyof MuestraCompleta]}
                     md={f.md}
                   />
                 ))}
@@ -301,7 +324,7 @@ export default function VistaAnalisisMuestras() {
               <InfoSection title="Resultados de Laboratorio por Parámetro">
                 <Box sx={{ height: 350, width: "100%" }}>
                   <DataGrid
-                    rows={selectedAnalisis.analisis_muestra || []}
+                    rows={detalle.analisis_muestra || []}
                     columns={analisisColumns}
                     getRowId={(row) => row.id_analisis_muestra}
                     density="compact"
@@ -317,8 +340,8 @@ export default function VistaAnalisisMuestras() {
                     key={f.label}
                     label={f.label}
                     value={
-                      selectedAnalisis.punto_muestreo?.[
-                        f.key as keyof typeof selectedAnalisis.punto_muestreo
+                      detalle.punto_muestreo?.[
+                        f.key as keyof typeof detalle.punto_muestreo
                       ]
                     }
                     md={f.md}
@@ -332,8 +355,8 @@ export default function VistaAnalisisMuestras() {
                     key={f.label}
                     label={f.label}
                     value={
-                      selectedAnalisis.prestador?.[
-                        f.key as keyof typeof selectedAnalisis.prestador
+                      detalle.prestador?.[
+                        f.key as keyof typeof detalle.prestador
                       ]
                     }
                     md={f.md}
@@ -347,8 +370,8 @@ export default function VistaAnalisisMuestras() {
                     key={f.label}
                     label={f.label}
                     value={
-                      selectedAnalisis.laboratorio?.[
-                        f.key as keyof typeof selectedAnalisis.laboratorio
+                      detalle.laboratorio?.[
+                        f.key as keyof typeof detalle.laboratorio
                       ]
                     }
                     md={f.md}
@@ -357,9 +380,12 @@ export default function VistaAnalisisMuestras() {
               </InfoSection>
             </Box>
           ) : (
-            <Box sx={{ display: "flex", justifyContent: "center", py: 10 }}>
-              <CircularProgress />
-            </Box>
+            <Stack sx={{ py: 6 }} spacing={1} alignItems="center">
+              <Typography variant="body1">No se pudo cargar el detalle.</Typography>
+              <Typography variant="body2" color="text.secondary">
+                Intenta nuevamente.
+              </Typography>
+            </Stack>
           )}
         </DialogContent>
       </Dialog>

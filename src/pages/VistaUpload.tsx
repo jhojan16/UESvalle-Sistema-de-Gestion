@@ -19,8 +19,29 @@ import {
   Map as MapIcon,
 } from "lucide-react";
 
-// 1. Actualizamos el tipo para incluir 'mapa_riesgo'
 type ImportType = "inspeccion" | "muestra" | "mapa_riesgo";
+
+const getEndpoint = (importType: ImportType) => {
+  switch (importType) {
+    case "muestra":
+      return "muestra_insert";
+    case "inspeccion":
+      return "super-handler";
+    case "mapa_riesgo":
+      return "mapaRiesgo";
+  }
+};
+
+const makeId = () => `${Date.now()}-${Math.random().toString(16).slice(2)}`;
+
+const sanitize = (name: string) => name.replace(/[^\w.\-]+/g, "_");
+
+const getEnvSupabaseUrl = () => {
+  const v = (import.meta as any)?.env?.VITE_SUPABASE_URL;
+  return typeof v === "string" ? v : "";
+  
+
+};
 
 export default function CargaMasivaVista() {
   const [importType, setImportType] = useState<ImportType>("mapa_riesgo");
@@ -51,54 +72,104 @@ export default function CargaMasivaVista() {
     setLoading(true);
     setStatus(null);
 
+    const endpoint = getEndpoint(importType);
+    const bucket = "imports";
+
     try {
-      // 2. Configuración del endpoint según el tipo seleccionado
-      let endpoint = "";
-      switch (importType) {
-        case "muestra":
-          endpoint = "muestra_insert";
-          break;
-        case "inspeccion":
-          endpoint = "super-handler";
-          break;
-        case "mapa_riesgo":
-          endpoint = "mapaRiesgo";
-          break; // Tu nuevo endpoint
-      }
-
-      const formData = new FormData();
-      formData.append("file", file);
-
-      const { data, error } = await supabase.functions.invoke(endpoint, {
-        body: formData,
-      });
-
-      if (error) {
-        const errorMsg = error.message || "Error en la respuesta del servidor";
-        setStatus({ type: "error", msg: `Error de Function: ${errorMsg}` });
+      const { data: userRes, error: userErr } = await supabase.auth.getUser();
+      if (userErr || !userRes?.user?.id) {
+        setStatus({
+          type: "error",
+          msg: "No hay sesión activa. Inicia sesión e intenta de nuevo.",
+        });
         return;
       }
 
+      const { data: sessionRes, error: sessErr } = await supabase.auth.getSession();
+      if (sessErr) {
+        setStatus({ type: "error", msg: `Error obteniendo sesión: ${sessErr.message}` });
+        return;
+      }
+
+      const token = sessionRes.session?.access_token;
+      if (!token) {
+        setStatus({
+          type: "error",
+          msg: "No se encontró token de sesión. Cierra sesión e inicia sesión nuevamente.",
+        });
+        return;
+      }
+
+      const userId = userRes.user.id;
+      const id = makeId();
+      const safeName = sanitize(file.name || "archivo.csv");
+      const path = `tmp/${userId}/${id}-${safeName}`;
+
+      const { error: upErr } = await supabase.storage
+        .from(bucket)
+        .upload(path, file, { contentType: "text/csv", upsert: false });
+
+      if (upErr) {
+        setStatus({
+          type: "error",
+          msg: `Error subiendo a Storage: ${upErr.message}`,
+        });
+        return;
+      }
+
+      const supabaseUrl = getEnvSupabaseUrl();
+      if (!supabaseUrl) {
+        setStatus({
+          type: "error",
+          msg: "Falta VITE_SUPABASE_URL en tus variables de entorno.",
+        });
+        return;
+      }
+      console.log("ENV URL:", import.meta.env.VITE_SUPABASE_URL);
+
+      const res = await fetch(`${supabaseUrl}/functions/v1/${endpoint}`, {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ path }),
+      });
+
+      const text = await res.text();
+
+      console.log("FUNCTION STATUS:", res.status);
+      console.log("FUNCTION BODY:", text);
+
+      if (!res.ok) {
+        setStatus({
+          type: "error",
+          msg: `Error Function (${res.status}): ${text || "Sin body"}`,
+        });
+        return;
+      }
+
+      const json = text ? JSON.parse(text) : null;
+
       setStatus({
         type: "success",
-        msg: data.message || "Archivo procesado correctamente.",
+        msg: json?.message || "Archivo procesado correctamente.",
       });
 
       setFile(null);
-    } catch (error) {
+    } catch (error: any) {
       setStatus({
         type: "error",
         msg:
-          error.message === "Failed to fetch"
+          error?.message === "Failed to fetch"
             ? "Error de conexión o CORS. Verifica que la función esté desplegada."
-            : error.message || "Error al procesar el archivo",
+            : error?.message || "Error al procesar el archivo",
       });
     } finally {
       setLoading(false);
     }
   };
 
-  // Helper para obtener el nombre de la plantilla
   const getTemplateConfig = () => {
     switch (importType) {
       case "muestra":
@@ -106,10 +177,7 @@ export default function CargaMasivaVista() {
       case "inspeccion":
         return { name: "Inspecciones", path: "/templates/inspeccion.csv" };
       case "mapa_riesgo":
-        return {
-          name: "Mapa de Riesgo",
-          path: "/templates/mapa de riesgo.csv",
-        };
+        return { name: "Mapa de Riesgo", path: "/templates/mapa de riesgo.csv" };
     }
   };
 
