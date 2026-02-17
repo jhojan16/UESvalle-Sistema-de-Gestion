@@ -286,11 +286,6 @@ export default function VistaAnalisisMuestras() {
     setPaginationModel((p) => ({ ...p, page: 0 }));
   };
 
-  const helperText = useMemo(() => {
-    if (!isSearchMode) return `${rowsToShow.length} registros en esta página`;
-    return `${rowsToShow.length} resultado(s) exacto(s)`;
-  }, [isSearchMode, rowsToShow.length]);
-
   const labelFiltro = useMemo(() => {
     if (filtro === "muestra_no") return "Nº Muestra";
     if (filtro === "nit") return "NIT";
@@ -337,7 +332,6 @@ export default function VistaAnalisisMuestras() {
                 </InputAdornment>
               ),
             }}
-            helperText={helperText}
           />
 
           <Button variant="contained" onClick={applySearch} disabled={!draft.trim()}>
@@ -348,14 +342,6 @@ export default function VistaAnalisisMuestras() {
             Limpiar
           </Button>
         </Box>
-
-        {isSearchMode ? (
-          <Box sx={{ mt: 1 }}>
-            <Typography variant="caption" color="text.secondary">
-              Filtro aplicado: <b>{appliedFiltro}</b> = <b>{appliedValue}</b>
-            </Typography>
-          </Box>
-        ) : null}
       </Paper>
 
       <Paper sx={{ p: 2 }}>
