@@ -135,7 +135,7 @@ export default function PrestadorDetalle() {
         queryFn: async () => {
             const { data, error } = await supabase
                 .from('muestra')
-                .select('id_muestra, muestra_no, irca, nivel_riesgo, tipo_muestra')
+                .select('id_muestra, muestra_no, irca, nivel_riesgo, tipo_muestra, fecha_toma, analisis_solicitados')
                 .eq('id_prestador', prestadorId)
 
             if (error) throw error;
@@ -234,9 +234,11 @@ export default function PrestadorDetalle() {
     ];
 
     const muestreosColumns: GridColDef[] = [
-        { field: 'muestra_no', headerName: 'Código', flex: 1, width: 150 },
-        { field: 'irca', headerName: 'Irca', flex: 1, minWidth: 200 },
+        { field: 'muestra_no', headerName: 'Código', flex: 1, width: 100 },
+        { field: 'irca', headerName: 'Irca', flex: 1, width: 100 },
         { field: 'nivel_riesgo', headerName: 'Nivel de riesgo', flex: 1, width: 200, },
+        { field: 'fecha_toma', headerName: 'Fecha toma', flex: 1, width: 200, },
+        { field: 'analisis_solicitados', headerName: 'Análisis solicitados', flex: 1, width: 200, },
         { field: 'tipo_muestra', headerName: 'Tipo muestra', flex: 1, width: 200, },
     ];
 

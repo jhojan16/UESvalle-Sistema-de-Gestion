@@ -63,7 +63,7 @@ const App = () => (
               }
             />
             <Route
-              path="/InsercionIndividual"
+              path="/inspeccion/InsercionIndividual"
               element={
                 <ProtectedRoute>
                   <Layout>

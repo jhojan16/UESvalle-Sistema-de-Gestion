@@ -27,6 +27,7 @@ export type riesgo = Database['public']['Tables']['riesgo']['Row'];
 export type seguridad = Database['public']['Tables']['seguridad']['Row'];
 export type seguimiento_inspeccion = Database['public']['Tables']['seguimiento_inspeccion']['Row'];
 export type seguimiento_caracteristica = Database['public']['Tables']['seguimiento_caracteristica']['Row'];
+export type inspeccionStaging = Database['public']['Tables']['inspeccion_staging']['Row'];
 
 /**
  * Para tu tipo "MapaRiesgoCompleto" (el que tiene los joins),

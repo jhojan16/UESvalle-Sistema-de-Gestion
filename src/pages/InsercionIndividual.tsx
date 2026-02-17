@@ -11,38 +11,19 @@ import {
     Select,
     MenuItem,
     Button,
-    CircularProgress
+    CircularProgress,
+    Dialog,
+    DialogTitle,
+    DialogContent,
+    DialogActions
 } from "@mui/material"
-import { DataGrid, GridColDef } from "@mui/x-data-grid"
+import { DataGrid, GridColDef, GridActionsCellItem } from "@mui/x-data-grid"
+import DeleteIcon from "@mui/icons-material/Delete"
+import { inspeccionStaging } from "@/integrations/supabase/index"
 
 type NitDuplicado = { nit: string; total: number }
 type PrestadorOpt = { id_prestador: number; nombre: string | null; nit: string | null }
-
-type StagingRow = {
-    id_staging: number
-    id_inspeccion_sivicap: string | null
-    fecha_inspeccion: string | null
-    autoridad_inspeccion: string | null
-    fecha_visita_anterior: string | null
-    nombre_visita_anterior: string | null
-    copia_visita_anterior: string | null
-    concepto: string | null
-    plazo_ejecucion_inspeccion: string | null
-    plan_mejoramiento: string | null
-    habitantes_municipio: string | null
-    viviendas: string | null
-    viviendas_urbano: string | null
-    iraba_inspeccion: string | null
-    indice_tratamiento: string | null
-    indice_continuidad: string | null
-    bps: string | null
-    estado: string | null
-    nit: string | null
-    created_at: string | null
-    processed: boolean | null
-}
-
-type DraftRow = StagingRow & { id_prestador: number | null }
+type DraftRow = inspeccionStaging & { id_prestador: number | null }
 
 const toInt = (v: any) => {
     if (v === undefined || v === null) return null
@@ -70,12 +51,13 @@ export default function InspeccionStagingResolver() {
     const [originalRows, setOriginalRows] = React.useState<DraftRow[]>([])
     const [draftRows, setDraftRows] = React.useState<DraftRow[]>([])
 
+    const [confirmOpen, setConfirmOpen] = React.useState(false)
+    const [confirmId, setConfirmId] = React.useState<number | null>(null)
+
     const { data: nitsDup = [], isLoading: loadingNits } = useQuery({
         queryKey: ["staging-nits-duplicados"],
         queryFn: async () => {
-            const { data, error } = await supabase
-                .from("inspeccion_staging_nits_duplicados")
-                .select("nit,total")
+            const { data, error } = await supabase.from("inspeccion_staging_nits_duplicados").select("nit,total")
             if (error) throw error
             return (data ?? []) as NitDuplicado[]
         }
@@ -92,12 +74,12 @@ export default function InspeccionStagingResolver() {
                 .eq("nit", selectedNit)
                 .order("created_at", { ascending: true })
             if (error) throw error
-            return (data ?? []) as StagingRow[]
+            return (data ?? []) as inspeccionStaging[]
         }
     })
 
     React.useEffect(() => {
-        const base = (stagingRows ?? []).map((r) => ({ ...r, id_prestador: null }))
+        const base: DraftRow[] = (stagingRows ?? []).map((r) => ({ ...(r as any), id_prestador: null }))
         setOriginalRows(base)
         setDraftRows(base)
     }, [stagingRows])
@@ -147,15 +129,28 @@ export default function InspeccionStagingResolver() {
 
     const readyRows = React.useMemo(() => draftRows.filter(isReadyRow), [draftRows])
     const pendingRows = React.useMemo(() => draftRows.filter((r) => !isReadyRow(r)), [draftRows])
-
     const canSend = readyRows.length > 0
+
+    const deleteMutation = useMutation({
+        mutationFn: async (id: number) => {
+            const { error } = await supabase.from("inspeccion_staging").delete().eq("id_staging", id)
+            if (error) throw error
+            return id
+        },
+        onSuccess: async (id) => {
+            setDraftRows((prev) => prev.filter((x: any) => Number(x.id_staging) !== Number(id)))
+            setOriginalRows((prev) => prev.filter((x: any) => Number(x.id_staging) !== Number(id)))
+            await qc.invalidateQueries({ queryKey: ["staging-nits-duplicados"] })
+            await qc.invalidateQueries({ queryKey: ["staging-rows-por-nit", selectedNit] })
+        }
+    })
 
     const enviarMutation = useMutation({
         mutationFn: async () => {
             const rowsToSend = draftRows.filter(isReadyRow)
 
             if (rowsToSend.length === 0) {
-                return { inserted: 0, pending: draftRows.length }
+                return { inserted: 0, pending: draftRows.length, deletedIds: [] as number[] }
             }
 
             const payload = rowsToSend.map((r) => ({
@@ -182,32 +177,60 @@ export default function InspeccionStagingResolver() {
             const { error: insertErr } = await supabase.from("inspeccion").insert(payload as any)
             if (insertErr) throw insertErr
 
-            const ids = rowsToSend.map((r) => r.id_staging)
-            const { error: updErr } = await supabase
-                .from("inspeccion_staging")
-                .update({ processed: true })
-                .in("id_staging", ids)
+            const ids = rowsToSend.map((r: any) => Number(r.id_staging)).filter((n) => Number.isFinite(n))
+
+            const { error: updErr } = await supabase.from("inspeccion_staging").update({ processed: true }).in("id_staging", ids)
             if (updErr) throw updErr
 
-            return { inserted: rowsToSend.length, pending: draftRows.length - rowsToSend.length }
+            const { error: delErr } = await supabase.from("inspeccion_staging").delete().in("id_staging", ids)
+            if (delErr) throw delErr
+
+            return { inserted: rowsToSend.length, pending: draftRows.length - rowsToSend.length, deletedIds: ids }
         },
-        onSuccess: async () => {
+        onSuccess: async (r) => {
+            if (r?.deletedIds?.length) {
+                setDraftRows((prev) => prev.filter((x: any) => !r.deletedIds.includes(Number(x.id_staging))))
+                setOriginalRows((prev) => prev.filter((x: any) => !r.deletedIds.includes(Number(x.id_staging))))
+            }
             await qc.invalidateQueries({ queryKey: ["staging-nits-duplicados"] })
             await qc.invalidateQueries({ queryKey: ["staging-rows-por-nit", selectedNit] })
         }
     })
 
     const columns: GridColDef[] = [
+        {
+            field: "__actions__",
+            headerName: "",
+            width: 70,
+            sortable: false,
+            filterable: false,
+            disableColumnMenu: true,
+            type: "actions",
+            getActions: (params) => [
+                <GridActionsCellItem
+                    icon={<DeleteIcon />}
+                    label="Eliminar"
+                    onClick={() => {
+                        const id = Number((params.row as any).id_staging)
+                        setConfirmId(Number.isFinite(id) ? id : null)
+                        setConfirmOpen(true)
+                    }}
+                    showInMenu={false}
+                />
+            ]
+        },
         { field: "id_staging", headerName: "ID", width: 90 },
-        { field: "nit", headerName: "NIT", width: 180, editable: true },
+        { field: "nit", headerName: "NIT", width: 180 },
         {
             field: "id_prestador",
             headerName: "Prestador",
             width: 320,
+            sortable: false,
+            filterable: false,
             renderCell: (params) => {
-                const nit = String(params.row.nit ?? "").trim()
+                const nit = String((params.row as any).nit ?? "").trim()
                 const opts = prestadoresPorNit.get(nit) ?? []
-                const value = params.row.id_prestador ?? ""
+                const value = (params.row as any).id_prestador ?? ""
                 return (
                     <FormControl fullWidth size="small" disabled={opts.length === 0}>
                         <Select
@@ -215,7 +238,9 @@ export default function InspeccionStagingResolver() {
                             onChange={(e) => {
                                 const v = e.target.value === "" ? null : Number(e.target.value)
                                 setDraftRows((prev) =>
-                                    prev.map((r) => (r.id_staging === params.row.id_staging ? { ...r, id_prestador: v } : r))
+                                    prev.map((r: any) =>
+                                        Number(r.id_staging) === Number((params.row as any).id_staging) ? { ...r, id_prestador: v } : r
+                                    )
                                 )
                             }}
                         >
@@ -230,19 +255,31 @@ export default function InspeccionStagingResolver() {
                 )
             }
         },
-        { field: "id_inspeccion_sivicap", headerName: "ID SIVICAP", width: 160, editable: true },
-        { field: "fecha_inspeccion", headerName: "Fecha inspección", width: 200, editable: true },
-        { field: "autoridad_inspeccion", headerName: "Autoridad", width: 200, editable: true },
-        { field: "concepto", headerName: "Concepto", width: 220, editable: true },
-        { field: "estado", headerName: "Estado", width: 140, editable: true },
-        { field: "habitantes_municipio", headerName: "Habitantes", width: 130, editable: true },
-        { field: "viviendas", headerName: "Viviendas", width: 120, editable: true },
-        { field: "viviendas_urbano", headerName: "Viviendas urbano", width: 150, editable: true },
-        { field: "iraba_inspeccion", headerName: "IRABA", width: 110, editable: true },
-        { field: "indice_tratamiento", headerName: "Índice trat.", width: 140, editable: true },
-        { field: "indice_continuidad", headerName: "Índice cont.", width: 140, editable: true },
-        { field: "bps", headerName: "BPS", width: 100, editable: true }
+        { field: "id_inspeccion_sivicap", headerName: "ID SIVICAP", width: 160 },
+        { field: "fecha_inspeccion", headerName: "Fecha inspección", width: 200 },
+        { field: "autoridad_inspeccion", headerName: "Autoridad", width: 200 },
+        { field: "concepto", headerName: "Concepto", width: 220 },
+        { field: "estado", headerName: "Estado", width: 140 },
+        { field: "habitantes_municipio", headerName: "Habitantes", width: 130 },
+        { field: "viviendas", headerName: "Viviendas", width: 120 },
+        { field: "viviendas_urbano", headerName: "Viviendas urbano", width: 150 },
+        { field: "iraba_inspeccion", headerName: "IRABA", width: 110 },
+        { field: "indice_tratamiento", headerName: "Índice trat.", width: 140 },
+        { field: "indice_continuidad", headerName: "Índice cont.", width: 140 },
+        { field: "bps", headerName: "BPS", width: 100 }
     ]
+
+    const closeConfirm = () => {
+        setConfirmOpen(false)
+        setConfirmId(null)
+    }
+
+    const confirmDelete = async () => {
+        const id = confirmId
+        closeConfirm()
+        if (!id) return
+        await deleteMutation.mutateAsync(id)
+    }
 
     return (
         <Box sx={{ display: "flex", flexDirection: "column", gap: 3 }}>
@@ -255,11 +292,7 @@ export default function InspeccionStagingResolver() {
                 <Box sx={{ display: "grid", gridTemplateColumns: { xs: "1fr", md: "1fr 1fr" }, gap: 2 }}>
                     <FormControl fullWidth>
                         <InputLabel>NIT duplicado</InputLabel>
-                        <Select
-                            label="NIT duplicado"
-                            value={selectedNit}
-                            onChange={(e) => setSelectedNit(String(e.target.value))}
-                        >
+                        <Select label="NIT duplicado" value={selectedNit} onChange={(e) => setSelectedNit(String(e.target.value))}>
                             {loadingNits ? (
                                 <MenuItem value="">
                                     <CircularProgress size={18} />
@@ -283,7 +316,7 @@ export default function InspeccionStagingResolver() {
 
                         <Button
                             variant="outlined"
-                            disabled={!selectedNit || draftRows.length === 0}
+                            disabled={!selectedNit || draftRows.length === 0 || enviarMutation.isPending || deleteMutation.isPending}
                             onClick={() => setDraftRows(originalRows)}
                         >
                             Cancelar
@@ -291,7 +324,7 @@ export default function InspeccionStagingResolver() {
 
                         <Button
                             variant="contained"
-                            disabled={!selectedNit || !canSend || enviarMutation.isPending}
+                            disabled={!selectedNit || !canSend || enviarMutation.isPending || deleteMutation.isPending}
                             onClick={() => enviarMutation.mutate()}
                         >
                             {enviarMutation.isPending ? "Enviando..." : `Enviar (${readyRows.length})`}
@@ -299,27 +332,49 @@ export default function InspeccionStagingResolver() {
                     </Box>
                 </Box>
 
-                {selectedNit && (
+                {!selectedNit ? (
+                    <Box sx={{ mt: 3, height: 220, display: "grid", placeItems: "center" }}>
+                        <Box sx={{ textAlign: "center" }}>
+                            <Typography variant="h6" fontWeight={700}>
+                                Sin resultados
+                            </Typography>
+                            <Typography variant="body2" color="text.secondary">
+                                Selecciona un NIT para continuar
+                            </Typography>
+                        </Box>
+                    </Box>
+                ) : (
                     <Box sx={{ mt: 3, height: 560, width: "100%" }}>
                         <DataGrid
-                            rows={draftRows}
+                            rows={draftRows as any[]}
                             columns={columns}
-                            getRowId={(row) => row.id_staging}
+                            getRowId={(row: any) => Number(row.id_staging)}
                             pageSizeOptions={[10, 25, 50]}
                             initialState={{ pagination: { paginationModel: { pageSize: 10 } } }}
                             disableRowSelectionOnClick
                             loading={loadingRows || loadingPrestadores}
-                            processRowUpdate={(newRow, oldRow) => {
-                                const nitNew = String(newRow.nit ?? "").trim()
-                                const nitOld = String(oldRow.nit ?? "").trim()
-                                const updated = nitNew !== nitOld ? { ...newRow, id_prestador: null } : newRow
-                                setDraftRows((prev) => prev.map((r) => (r.id_staging === updated.id_staging ? (updated as DraftRow) : r)))
-                                return updated
-                            }}
+                            isCellEditable={() => false}
                         />
                     </Box>
                 )}
             </Paper>
+
+            <Dialog open={confirmOpen} onClose={closeConfirm} maxWidth="xs" fullWidth>
+                <DialogTitle>Confirmar eliminación</DialogTitle>
+                <DialogContent dividers>
+                    <Typography variant="body2" color="text.secondary">
+                        ¿Estás seguro de que deseas eliminar esta fila? Esta acción no se puede deshacer.
+                    </Typography>
+                </DialogContent>
+                <DialogActions>
+                    <Button onClick={closeConfirm} disabled={deleteMutation.isPending}>
+                        Cancelar
+                    </Button>
+                    <Button color="error" variant="contained" onClick={confirmDelete} disabled={deleteMutation.isPending}>
+                        {deleteMutation.isPending ? "Eliminando..." : "Eliminar"}
+                    </Button>
+                </DialogActions>
+            </Dialog>
         </Box>
     )
 }

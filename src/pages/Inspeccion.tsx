@@ -24,6 +24,7 @@ import {
 import { Grid } from "@mui/material";
 import { Search, Eye, X } from "lucide-react";
 import { InspeccionBase } from "@/integrations/supabase/index";
+import { useNavigate } from "react-router-dom";
 
 type InspeccionRow = {
     id_inspeccion: number;
@@ -83,7 +84,6 @@ const InfoSection = ({ title, children }: { title: string; children: React.React
 );
 
 const InspeccionCard = ({ item, onClick }: { item: InspeccionRow; onClick: () => void }) => {
-    const fecha = item.fecha_inspeccion ? new Date(item.fecha_inspeccion).toLocaleDateString("es-CO") : "-";
 
     return (
         <Paper
@@ -110,7 +110,7 @@ const InspeccionCard = ({ item, onClick }: { item: InspeccionRow; onClick: () =>
                         {item.prestador_nombre ?? "Sin prestador"}
                     </Typography>
                     <Typography variant="body2" color="text.secondary" sx={{ mt: 0.5 }}>
-                        Fecha: {fecha}
+                        Fecha: {item.fecha_inspeccion ?? "---"}
                     </Typography>
                     <Typography variant="body2" color="text.secondary" sx={{ mt: 0.25 }}>
                         NIT: {item.prestador_nit ?? "---"}
@@ -141,6 +141,8 @@ const InspeccionCard = ({ item, onClick }: { item: InspeccionRow; onClick: () =>
 };
 
 export default function VistaInspeccionesCards() {
+    const navigate = useNavigate();
+
     const [filtro, setFiltro] = useState<Filtro>("id_inspeccion_sivicap");
     const [draft, setDraft] = useState("");
     const [appliedFiltro, setAppliedFiltro] = useState<Filtro | null>(null);
@@ -207,15 +209,10 @@ export default function VistaInspeccionesCards() {
             }
 
             if (appliedFiltro === "nit") {
-                const { data: prestadores, error: pErr } = await supabase
-                    .from("prestador")
-                    .select("id_prestador")
-                    .eq("nit", value);
-
+                const { data: prestadores, error: pErr } = await supabase.from("prestador").select("id_prestador").eq("nit", value);
                 if (pErr) throw pErr;
 
                 const ids = (prestadores ?? []).map((p: any) => Number(p.id_prestador)).filter((n: any) => Number.isFinite(n));
-
                 if (ids.length === 0) return { rows: [], count: 0 };
 
                 const { data, error } = await base.in("id_prestador", ids);
@@ -224,15 +221,10 @@ export default function VistaInspeccionesCards() {
             }
 
             if (appliedFiltro === "prestador") {
-                const { data: prestadores, error: pErr } = await supabase
-                    .from("prestador")
-                    .select("id_prestador")
-                    .ilike("nombre", value);
-
+                const { data: prestadores, error: pErr } = await supabase.from("prestador").select("id_prestador").ilike("nombre", value);
                 if (pErr) throw pErr;
 
                 const ids = (prestadores ?? []).map((p: any) => Number(p.id_prestador)).filter((n: any) => Number.isFinite(n));
-
                 if (ids.length === 0) return { rows: [], count: 0 };
 
                 const { data, error } = await base.in("id_prestador", ids);
@@ -287,12 +279,7 @@ export default function VistaInspeccionesCards() {
         queryKey: ["inspeccion_detalle_cards", selectedId],
         enabled: !!selectedId && dialogOpen,
         queryFn: async () => {
-            const { data, error } = await supabase
-                .from("inspeccion")
-                .select("*, Prestador:prestador (*)")
-                .eq("id_inspeccion", selectedId)
-                .maybeSingle();
-
+            const { data, error } = await supabase.from("inspeccion").select("*, Prestador:prestador (*)").eq("id_inspeccion", selectedId).maybeSingle();
             if (error) throw error;
             return data as InspeccionBase | null;
         },
@@ -310,24 +297,26 @@ export default function VistaInspeccionesCards() {
 
     return (
         <Box>
-            <Box sx={{ mb: 4 }}>
-                <Typography variant="h4" fontWeight="bold" gutterBottom>
-                    Inspecciones Sanitarias
-                </Typography>
-                <Typography variant="body1" color="text.secondary">
-                    Consulta y gestión de inspecciones
-                </Typography>
+            <Box sx={{ mb: 4, display: "flex", justifyContent: "space-between", alignItems: "flex-start", gap: 2, flexWrap: "wrap" }}>
+                <Box>
+                    <Typography variant="h4" fontWeight="bold" gutterBottom>
+                        Inspecciones Sanitarias
+                    </Typography>
+                    <Typography variant="body1" color="text.secondary">
+                        Consulta y gestión de inspecciones
+                    </Typography>
+                </Box>
+
+                <Button variant="contained" onClick={() => navigate("/inspeccion/InsercionIndividual")}>
+                    Completar inspecciones sin NIT
+                </Button>
             </Box>
 
             <Paper sx={{ p: 3, mb: 3 }}>
                 <Box sx={{ display: "flex", gap: 1.5, alignItems: "flex-start", flexWrap: "wrap" }}>
                     <FormControl size="small" sx={{ minWidth: 220 }}>
                         <InputLabel>Filtrar por</InputLabel>
-                        <Select
-                            label="Filtrar por"
-                            value={filtro}
-                            onChange={(e) => setFiltro(e.target.value as Filtro)}
-                        >
+                        <Select label="Filtrar por" value={filtro} onChange={(e) => setFiltro(e.target.value as Filtro)}>
                             <MenuItem value="id_inspeccion_sivicap">ID Inspeccion Sivicap</MenuItem>
                             <MenuItem value="fecha_inspeccion">Fecha Inspeccion</MenuItem>
                             <MenuItem value="nit">NIT prestador</MenuItem>

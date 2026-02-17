@@ -34,7 +34,6 @@ import { useAuth } from '@/contexts/AuthContext';
 const menuItems = [
   { title: 'Dashboard', url: '/dashboard', icon: Home },
   { title: 'Prestadores', url: '/prestadores', icon: Users },
-  // { title: 'Insersion', url: '/InsercionIndividual', icon: Building2 },
   { title: 'Técnicos', url: '/tecnicos', icon: UserCog },
   { title: 'Solicitantes', url: '/solicitantes', icon: ClipboardList },
   { title: 'Muestras', url: '/muestras', icon: FileText },
