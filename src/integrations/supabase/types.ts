@@ -1,12 +1,3 @@
-// instalar el cliente de supabase
-//npm install supabase --save-dev
-
-// Para iniciar sesion:
-// npx supabase login
-
-//comandos para actualizar el type.ts
-// npx supabase gen types typescript --project-id ID_DEL_PROYECTO > src/integrations/supabase/types.ts
-
 export type Json =
   | string
   | number
@@ -341,7 +332,7 @@ export type Database = {
           fecha_visita_anterior: string | null
           habitantes_municipio: number | null
           id_inspeccion: number
-          id_inspeccion_sivicap: number | null
+          id_inspeccion_sivicap: string | null
           id_prestador: number | null
           indice_continuidad: number | null
           indice_tratamiento: number | null
@@ -362,7 +353,7 @@ export type Database = {
           fecha_visita_anterior?: string | null
           habitantes_municipio?: number | null
           id_inspeccion?: number
-          id_inspeccion_sivicap?: number | null
+          id_inspeccion_sivicap?: string | null
           id_prestador?: number | null
           indice_continuidad?: number | null
           indice_tratamiento?: number | null
@@ -383,7 +374,7 @@ export type Database = {
           fecha_visita_anterior?: string | null
           habitantes_municipio?: number | null
           id_inspeccion?: number
-          id_inspeccion_sivicap?: number | null
+          id_inspeccion_sivicap?: string | null
           id_prestador?: number | null
           indice_continuidad?: number | null
           indice_tratamiento?: number | null
@@ -407,6 +398,7 @@ export type Database = {
       inspeccion_staging: {
         Row: {
           autoridad_inspeccion: string | null
+          batch_id: string | null
           bps: string | null
           concepto: string | null
           copia_visita_anterior: string | null
@@ -416,6 +408,7 @@ export type Database = {
           fecha_visita_anterior: string | null
           habitantes_municipio: string | null
           id_inspeccion_sivicap: string | null
+          id_staging: number
           indice_continuidad: string | null
           indice_tratamiento: string | null
           iraba_inspeccion: string | null
@@ -429,6 +422,7 @@ export type Database = {
         }
         Insert: {
           autoridad_inspeccion?: string | null
+          batch_id?: string | null
           bps?: string | null
           concepto?: string | null
           copia_visita_anterior?: string | null
@@ -438,6 +432,7 @@ export type Database = {
           fecha_visita_anterior?: string | null
           habitantes_municipio?: string | null
           id_inspeccion_sivicap?: string | null
+          id_staging?: number
           indice_continuidad?: string | null
           indice_tratamiento?: string | null
           iraba_inspeccion?: string | null
@@ -451,6 +446,7 @@ export type Database = {
         }
         Update: {
           autoridad_inspeccion?: string | null
+          batch_id?: string | null
           bps?: string | null
           concepto?: string | null
           copia_visita_anterior?: string | null
@@ -460,6 +456,7 @@ export type Database = {
           fecha_visita_anterior?: string | null
           habitantes_municipio?: string | null
           id_inspeccion_sivicap?: string | null
+          id_staging?: number
           indice_continuidad?: string | null
           indice_tratamiento?: string | null
           iraba_inspeccion?: string | null
@@ -552,6 +549,7 @@ export type Database = {
           archivo_resolucion: string | null
           autor: string | null
           autoridad_sanitaria: string | null
+          batch_id: string | null
           bocatoma_descartadas: string | null
           bocatoma_especiales: string | null
           bocatoma_fecha: string | null
@@ -626,6 +624,7 @@ export type Database = {
           archivo_resolucion?: string | null
           autor?: string | null
           autoridad_sanitaria?: string | null
+          batch_id?: string | null
           bocatoma_descartadas?: string | null
           bocatoma_especiales?: string | null
           bocatoma_fecha?: string | null
@@ -700,6 +699,7 @@ export type Database = {
           archivo_resolucion?: string | null
           autor?: string | null
           autoridad_sanitaria?: string | null
+          batch_id?: string | null
           bocatoma_descartadas?: string | null
           bocatoma_especiales?: string | null
           bocatoma_fecha?: string | null
@@ -866,6 +866,7 @@ export type Database = {
       muestra_staging: {
         Row: {
           analisis_solicitados: string | null
+          batch_id: string | null
           caracteristica: string | null
           coagulante: string | null
           codigo: string | null
@@ -906,6 +907,7 @@ export type Database = {
         }
         Insert: {
           analisis_solicitados?: string | null
+          batch_id?: string | null
           caracteristica?: string | null
           coagulante?: string | null
           codigo?: string | null
@@ -946,6 +948,7 @@ export type Database = {
         }
         Update: {
           analisis_solicitados?: string | null
+          batch_id?: string | null
           caracteristica?: string | null
           coagulante?: string | null
           codigo?: string | null
@@ -994,10 +997,15 @@ export type Database = {
           id_autoridad_sanitaria: string | null
           id_prestador: number
           id_ubicacion: number | null
+          indice_ocupacion: number | null
           nit: string | null
           nombre: string | null
           nombre_sistema: string | null
+          poblacion_atendida: number | null
+          suscriptores_rurales: number | null
+          suscriptores_urbanos: number | null
           telefono: string | null
+          total_poblacion_atendida: number | null
         }
         Insert: {
           codigo_anterior?: number | null
@@ -1006,10 +1014,15 @@ export type Database = {
           id_autoridad_sanitaria?: string | null
           id_prestador: number
           id_ubicacion?: number | null
+          indice_ocupacion?: number | null
           nit?: string | null
           nombre?: string | null
           nombre_sistema?: string | null
+          poblacion_atendida?: number | null
+          suscriptores_rurales?: number | null
+          suscriptores_urbanos?: number | null
           telefono?: string | null
+          total_poblacion_atendida?: number | null
         }
         Update: {
           codigo_anterior?: number | null
@@ -1018,10 +1031,15 @@ export type Database = {
           id_autoridad_sanitaria?: string | null
           id_prestador?: number
           id_ubicacion?: number | null
+          indice_ocupacion?: number | null
           nit?: string | null
           nombre?: string | null
           nombre_sistema?: string | null
+          poblacion_atendida?: number | null
+          suscriptores_rurales?: number | null
+          suscriptores_urbanos?: number | null
           telefono?: string | null
+          total_poblacion_atendida?: number | null
         }
         Relationships: [
           {
@@ -1578,7 +1596,13 @@ export type Database = {
       }
     }
     Views: {
-      [_ in never]: never
+      inspeccion_staging_nits_duplicados: {
+        Row: {
+          nit: string | null
+          total: number | null
+        }
+        Relationships: []
+      }
     }
     Functions: {
       actualizar_lat_long: { Args: never; Returns: undefined }
@@ -1587,8 +1611,18 @@ export type Database = {
         Args: { coord_text: string }
         Returns: number
       }
-      procesar_inspeccion_staging: { Args: never; Returns: Json }
-      procesar_muestra_staging: { Args: never; Returns: Json }
+      procesar_inspeccion_staging_batch_chunk: {
+        Args: { p_batch: string; p_limit: number }
+        Returns: Json
+      }
+      procesar_mapa_riesgo_staging_batch_chunk: {
+        Args: { p_batch: string; p_limit: number }
+        Returns: Json
+      }
+      procesar_muestra_staging_batch_chunk: {
+        Args: { p_batch: string; p_limit: number }
+        Returns: Json
+      }
       recrear_politicas_tabla: {
         Args: { tabla_nombre: string }
         Returns: undefined
@@ -1609,116 +1643,116 @@ type DefaultSchema = DatabaseWithoutInternals[Extract<keyof Database, "public">]
 
 export type Tables<
   DefaultSchemaTableNameOrOptions extends
-  | keyof (DefaultSchema["Tables"] & DefaultSchema["Views"])
-  | { schema: keyof DatabaseWithoutInternals },
+    | keyof (DefaultSchema["Tables"] & DefaultSchema["Views"])
+    | { schema: keyof DatabaseWithoutInternals },
   TableName extends DefaultSchemaTableNameOrOptions extends {
     schema: keyof DatabaseWithoutInternals
   }
-  ? keyof (DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"] &
-    DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Views"])
-  : never = never,
+    ? keyof (DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"] &
+        DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Views"])
+    : never = never,
 > = DefaultSchemaTableNameOrOptions extends {
   schema: keyof DatabaseWithoutInternals
 }
   ? (DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"] &
-    DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Views"])[TableName] extends {
+      DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Views"])[TableName] extends {
       Row: infer R
     }
-  ? R
-  : never
+    ? R
+    : never
   : DefaultSchemaTableNameOrOptions extends keyof (DefaultSchema["Tables"] &
-    DefaultSchema["Views"])
-  ? (DefaultSchema["Tables"] &
-    DefaultSchema["Views"])[DefaultSchemaTableNameOrOptions] extends {
-      Row: infer R
-    }
-  ? R
-  : never
-  : never
+        DefaultSchema["Views"])
+    ? (DefaultSchema["Tables"] &
+        DefaultSchema["Views"])[DefaultSchemaTableNameOrOptions] extends {
+        Row: infer R
+      }
+      ? R
+      : never
+    : never
 
 export type TablesInsert<
   DefaultSchemaTableNameOrOptions extends
-  | keyof DefaultSchema["Tables"]
-  | { schema: keyof DatabaseWithoutInternals },
+    | keyof DefaultSchema["Tables"]
+    | { schema: keyof DatabaseWithoutInternals },
   TableName extends DefaultSchemaTableNameOrOptions extends {
     schema: keyof DatabaseWithoutInternals
   }
-  ? keyof DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"]
-  : never = never,
+    ? keyof DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"]
+    : never = never,
 > = DefaultSchemaTableNameOrOptions extends {
   schema: keyof DatabaseWithoutInternals
 }
   ? DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"][TableName] extends {
-    Insert: infer I
-  }
-  ? I
-  : never
+      Insert: infer I
+    }
+    ? I
+    : never
   : DefaultSchemaTableNameOrOptions extends keyof DefaultSchema["Tables"]
-  ? DefaultSchema["Tables"][DefaultSchemaTableNameOrOptions] extends {
-    Insert: infer I
-  }
-  ? I
-  : never
-  : never
+    ? DefaultSchema["Tables"][DefaultSchemaTableNameOrOptions] extends {
+        Insert: infer I
+      }
+      ? I
+      : never
+    : never
 
 export type TablesUpdate<
   DefaultSchemaTableNameOrOptions extends
-  | keyof DefaultSchema["Tables"]
-  | { schema: keyof DatabaseWithoutInternals },
+    | keyof DefaultSchema["Tables"]
+    | { schema: keyof DatabaseWithoutInternals },
   TableName extends DefaultSchemaTableNameOrOptions extends {
     schema: keyof DatabaseWithoutInternals
   }
-  ? keyof DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"]
-  : never = never,
+    ? keyof DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"]
+    : never = never,
 > = DefaultSchemaTableNameOrOptions extends {
   schema: keyof DatabaseWithoutInternals
 }
   ? DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"][TableName] extends {
-    Update: infer U
-  }
-  ? U
-  : never
+      Update: infer U
+    }
+    ? U
+    : never
   : DefaultSchemaTableNameOrOptions extends keyof DefaultSchema["Tables"]
-  ? DefaultSchema["Tables"][DefaultSchemaTableNameOrOptions] extends {
-    Update: infer U
-  }
-  ? U
-  : never
-  : never
+    ? DefaultSchema["Tables"][DefaultSchemaTableNameOrOptions] extends {
+        Update: infer U
+      }
+      ? U
+      : never
+    : never
 
 export type Enums<
   DefaultSchemaEnumNameOrOptions extends
-  | keyof DefaultSchema["Enums"]
-  | { schema: keyof DatabaseWithoutInternals },
+    | keyof DefaultSchema["Enums"]
+    | { schema: keyof DatabaseWithoutInternals },
   EnumName extends DefaultSchemaEnumNameOrOptions extends {
     schema: keyof DatabaseWithoutInternals
   }
-  ? keyof DatabaseWithoutInternals[DefaultSchemaEnumNameOrOptions["schema"]]["Enums"]
-  : never = never,
+    ? keyof DatabaseWithoutInternals[DefaultSchemaEnumNameOrOptions["schema"]]["Enums"]
+    : never = never,
 > = DefaultSchemaEnumNameOrOptions extends {
   schema: keyof DatabaseWithoutInternals
 }
   ? DatabaseWithoutInternals[DefaultSchemaEnumNameOrOptions["schema"]]["Enums"][EnumName]
   : DefaultSchemaEnumNameOrOptions extends keyof DefaultSchema["Enums"]
-  ? DefaultSchema["Enums"][DefaultSchemaEnumNameOrOptions]
-  : never
+    ? DefaultSchema["Enums"][DefaultSchemaEnumNameOrOptions]
+    : never
 
 export type CompositeTypes<
   PublicCompositeTypeNameOrOptions extends
-  | keyof DefaultSchema["CompositeTypes"]
-  | { schema: keyof DatabaseWithoutInternals },
+    | keyof DefaultSchema["CompositeTypes"]
+    | { schema: keyof DatabaseWithoutInternals },
   CompositeTypeName extends PublicCompositeTypeNameOrOptions extends {
     schema: keyof DatabaseWithoutInternals
   }
-  ? keyof DatabaseWithoutInternals[PublicCompositeTypeNameOrOptions["schema"]]["CompositeTypes"]
-  : never = never,
+    ? keyof DatabaseWithoutInternals[PublicCompositeTypeNameOrOptions["schema"]]["CompositeTypes"]
+    : never = never,
 > = PublicCompositeTypeNameOrOptions extends {
   schema: keyof DatabaseWithoutInternals
 }
   ? DatabaseWithoutInternals[PublicCompositeTypeNameOrOptions["schema"]]["CompositeTypes"][CompositeTypeName]
   : PublicCompositeTypeNameOrOptions extends keyof DefaultSchema["CompositeTypes"]
-  ? DefaultSchema["CompositeTypes"][PublicCompositeTypeNameOrOptions]
-  : never
+    ? DefaultSchema["CompositeTypes"][PublicCompositeTypeNameOrOptions]
+    : never
 
 export const Constants = {
   public: {

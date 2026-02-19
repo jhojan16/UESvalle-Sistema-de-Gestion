@@ -397,6 +397,69 @@ export default function PrestadorDetalle() {
                         </Card>
                     </Box>
                 </Box>
+                <Box sx={{ mt: 3 }}>
+                    <Card variant="outlined">
+                        <CardContent>
+                            <Typography variant="h6" gutterBottom color="primary">
+                                Indicadores de la población
+                            </Typography>
+                            <Divider sx={{ mb: 2 }} />
+
+                            <Box
+                                sx={{
+                                    display: "grid",
+                                    gridTemplateColumns: { xs: "1fr", sm: "repeat(2, 1fr)", md: "repeat(5, 1fr)" },
+                                    gap: 2,
+                                }}
+                            >
+                                <Box>
+                                    <Typography variant="caption" color="text.secondary">
+                                        No. Suscriptores Urbanos
+                                    </Typography>
+                                    <Typography variant="h6" fontWeight="bold">
+                                        {prestador.suscriptores_urbanos ?? "N/A"}
+                                    </Typography>
+                                </Box>
+
+                                <Box>
+                                    <Typography variant="caption" color="text.secondary">
+                                        No. Suscriptores Rurales
+                                    </Typography>
+                                    <Typography variant="h6" fontWeight="bold">
+                                        {prestador.suscriptores_rurales ?? "N/A"}
+                                    </Typography>
+                                </Box>
+
+                                <Box>
+                                    <Typography variant="caption" color="text.secondary">
+                                        Indice de Ocupación
+                                    </Typography>
+                                    <Typography variant="h6" fontWeight="bold">
+                                        {prestador.indice_ocupacion ?? "N/A"}
+                                    </Typography>
+                                </Box>
+
+                                <Box>
+                                    <Typography variant="caption" color="text.secondary">
+                                        Población atendida
+                                    </Typography>
+                                    <Typography variant="h6" fontWeight="bold">
+                                        {prestador.poblacion_atendida ?? "N/A"}
+                                    </Typography>
+                                </Box>
+
+                                <Box>
+                                    <Typography variant="caption" color="text.secondary">
+                                        Total población atendida
+                                    </Typography>
+                                    <Typography variant="h6" fontWeight="bold">
+                                        {prestador.total_poblacion_atendida ?? "N/A"}
+                                    </Typography>
+                                </Box>
+                            </Box>
+                        </CardContent>
+                    </Card>
+                </Box>
             </Paper>
 
             {puntosMapa.length > 0 && (
