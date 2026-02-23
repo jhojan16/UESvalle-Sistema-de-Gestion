@@ -6,7 +6,6 @@
     Card,
     CardContent,
     Typography,
-    CircularProgress,
     Paper,
     Divider,
     List,
@@ -17,6 +16,7 @@
     Select,
     MenuItem,
     } from '@mui/material';
+    import { AppLoader } from '@/components/AppLoader';
     import {
     PieChart,
     Pie,
@@ -49,9 +49,7 @@
 
     if (isLoading) {
         return (
-        <Box sx={{ display: 'flex', justifyContent: 'center', py: 4 }}>
-            <CircularProgress />
-        </Box>
+        <AppLoader message="Cargando reportes..." />
         );
     }
 

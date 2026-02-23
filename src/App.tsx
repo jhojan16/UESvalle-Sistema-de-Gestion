@@ -7,6 +7,7 @@ import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { AuthProvider } from "./contexts/AuthContext";
 import { ProtectedRoute } from "./components/ProtectedRoute";
 import { Layout } from "./components/Layout";
+import { AppLoader } from "./components/AppLoader";
 
 const Login = lazy(() => import("./pages/Login"));
 const Dashboard = lazy(() => import("./pages/Dashboard"));
@@ -24,12 +25,6 @@ const CargaMasivaVista = lazy(() => import("./pages/VistaUpload"));
 
 const queryClient = new QueryClient();
 
-const RouteLoader = () => (
-  <div className="flex h-screen items-center justify-center">
-    <div className="h-8 w-8 animate-spin rounded-full border-4 border-primary border-t-transparent"></div>
-  </div>
-);
-
 const App = () => (
   <QueryClientProvider client={queryClient}>
     <TooltipProvider>
@@ -37,7 +32,7 @@ const App = () => (
       <Sonner />
       <BrowserRouter>
         <AuthProvider>
-          <Suspense fallback={<RouteLoader />}>
+          <Suspense fallback={<AppLoader fullScreen message="Cargando vista..." />}>
             <Routes>
               <Route path="/" element={<Navigate to="/login" replace />} />
               <Route path="/login" element={<Login />} />

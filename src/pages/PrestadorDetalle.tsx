@@ -13,6 +13,7 @@ import markerIcon from "leaflet/dist/images/marker-icon.png"
 import markerIcon2x from "leaflet/dist/images/marker-icon-2x.png"
 import markerShadow from "leaflet/dist/images/marker-shadow.png"
 import { MapContainer, TileLayer, Marker, Popup, useMap } from "react-leaflet"
+import { AppLoader } from '@/components/AppLoader';
 
 delete (L.Icon.Default.prototype as any)._getIconUrl
 L.Icon.Default.mergeOptions({
@@ -202,11 +203,7 @@ export default function PrestadorDetalle() {
     ]
 
     if (loadingPrestador) {
-        return (
-            <Box display="flex" justifyContent="center" alignItems="center" minHeight="400px">
-                <CircularProgress />
-            </Box>
-        );
+        return <AppLoader message="Cargando detalle del prestador..." minHeight={400} />;
     }
 
     if (!prestador) {

@@ -4,10 +4,10 @@ import "leaflet/dist/leaflet.css";
 import { supabase } from "../integrations/supabase/client";
 import L from "leaflet";
 import markerIcon from "leaflet/dist/images/marker-icon.png";
-import { Box, LinearProgress, Typography } from "@mui/material";
 import markerIcon2x from "leaflet/dist/images/marker-icon-2x.png";
 import markerShadow from "leaflet/dist/images/marker-shadow.png";
 import { MapaRiesgoCompleto } from '@/integrations/supabase/index';
+import { AppLoader } from "@/components/AppLoader";
 
 delete (L.Icon.Default.prototype as any)._getIconUrl;
 L.Icon.Default.mergeOptions({
@@ -55,14 +55,9 @@ export default function MapaPuntosCaptacion() {
         setSelectedMapa(mapa);
     };
 
-    if (loading) return (
-        <Box sx={{ p: 4, textAlign: 'center', minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-            <Box sx={{ width: '100%', maxWidth: 400 }}>
-                <LinearProgress sx={{ height: 6, borderRadius: 3, bgcolor: '#e2e8f0' }} />
-                <Typography sx={{ mt: 2, color: '#4a5568' }}>Cargando Mapas de riesgo...</Typography>
-            </Box>
-        </Box>
-    );
+    if (loading) {
+        return <AppLoader fullScreen message="" />;
+    }
 
     const puntosFiltrados = puntos.filter((p) => {
         const query = searchTerm.toLowerCase();
