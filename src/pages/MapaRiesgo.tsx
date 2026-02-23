@@ -116,7 +116,7 @@ export default function MapaPuntosCaptacion() {
 
                 <input
                     type="text"
-                    placeholder="Buscar..."
+                    placeholder="Buscar por NIT, nombre prestador ó mapa de riesgo..."
                     className="w-full p-2 mb-4 border rounded"
                     value={searchTerm}
                     onChange={(e) => setSearchTerm(e.target.value)}

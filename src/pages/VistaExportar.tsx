@@ -68,14 +68,17 @@ export default function ExportarVista() {
 
         const rawHeaders = splitCsvLine(lines[0]).map((h) => h.trim())
         const sanitize = (s: string) => s.replace(/\s+/g, "_").replace(/[^a-zA-Z0-9_]/g, "").toLowerCase()
-        const headers = rawHeaders.map((h, i) => ({ key: sanitize(h) || `col_${i}`, label: h }))
+        const hiddenPreviewHeaders = new Set(["row_cell_id"])
+        const headers = rawHeaders
+            .map((h, i) => ({ sourceIndex: i, key: sanitize(h) || `col_${i}`, label: h }))
+            .filter((h) => !hiddenPreviewHeaders.has(h.label.toLowerCase()))
 
         const dataLines = lines.slice(1, 21)
         const rows = dataLines.map((line, idx) => {
             const cells = splitCsvLine(line)
             const obj: any = { id: idx }
-            headers.forEach((h, i) => {
-                obj[h.key] = (cells[i] ?? "").toString()
+            headers.forEach((h) => {
+                obj[h.key] = (cells[h.sourceIndex] ?? "").toString()
             })
             return obj as Record<string, string>
         })
