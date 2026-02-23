@@ -67,7 +67,6 @@ export default function Solicitantes() {
             }
 
             const { data, error } = await query;
-            console.log(data);
             if (error) throw error;
             return data;
         },

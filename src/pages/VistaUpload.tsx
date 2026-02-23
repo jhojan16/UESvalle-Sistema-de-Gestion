@@ -125,8 +125,6 @@ export default function CargaMasivaVista() {
         });
         return;
       }
-      console.log("ENV URL:", import.meta.env.VITE_SUPABASE_URL);
-
       const res = await fetch(`${supabaseUrl}/functions/v1/${endpoint}`, {
         method: "POST",
         headers: {
@@ -137,9 +135,6 @@ export default function CargaMasivaVista() {
       });
 
       const text = await res.text();
-
-      console.log("FUNCTION STATUS:", res.status);
-      console.log("FUNCTION BODY:", text);
 
       if (!res.ok) {
         setStatus({

@@ -1607,6 +1607,27 @@ export type Database = {
     Functions: {
       actualizar_lat_long: { Args: never; Returns: undefined }
       confirmar_carga_mapas: { Args: { p_payload: Json }; Returns: Json }
+      dashboard_irca_por_municipio: {
+        Args: never
+        Returns: {
+          name: string
+          promedio: number
+        }[]
+      }
+      dashboard_prestadores_por_departamento: {
+        Args: never
+        Returns: {
+          name: string
+          value: number
+        }[]
+      }
+      dashboard_top_municipios: {
+        Args: { p_limit?: number }
+        Returns: {
+          name: string
+          value: number
+        }[]
+      }
       limpiar_y_convertir_coord: {
         Args: { coord_text: string }
         Returns: number

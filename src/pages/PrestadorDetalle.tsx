@@ -127,8 +127,6 @@ export default function PrestadorDetalle() {
         },
         enabled: !!prestadorId,
     });
-    console.log(reporte);
-
     // Muestreos con laboratorio y solicitante
     const { data: muestreos = [] } = useQuery({
         queryKey: ['muestra', prestadorId],

@@ -1,3 +1,4 @@
+import { lazy, Suspense } from "react";
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -6,21 +7,28 @@ import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { AuthProvider } from "./contexts/AuthContext";
 import { ProtectedRoute } from "./components/ProtectedRoute";
 import { Layout } from "./components/Layout";
-import Login from "./pages/Login";
-import Dashboard from "./pages/Dashboard";
-import Prestadores from "./pages/Prestadores";
-import NotFound from "./pages/NotFound";
-import Muestras from "./pages/Muestras";
-import Tecnico from "./pages/Tecnico";
-import InspeccionStagingResolver from "./pages/InsercionIndividual";
-import PrestadorDetalle from "./pages/PrestadorDetalle";
-import Solicitantes from "./pages/Solicitantes";
-import VistaExportar from "./pages/VistaExportar";
-import MapaPuntosCaptacion from "./pages/MapaRiesgo"
-import InspeccionesView from "@/pages/Inspeccion";
-import CargaMasivaVista from "@/pages/VistaUpload"
+
+const Login = lazy(() => import("./pages/Login"));
+const Dashboard = lazy(() => import("./pages/Dashboard"));
+const Prestadores = lazy(() => import("./pages/Prestadores"));
+const NotFound = lazy(() => import("./pages/NotFound"));
+const Muestras = lazy(() => import("./pages/Muestras"));
+const Tecnico = lazy(() => import("./pages/Tecnico"));
+const InspeccionStagingResolver = lazy(() => import("./pages/InsercionIndividual"));
+const PrestadorDetalle = lazy(() => import("./pages/PrestadorDetalle"));
+const Solicitantes = lazy(() => import("./pages/Solicitantes"));
+const VistaExportar = lazy(() => import("./pages/VistaExportar"));
+const MapaPuntosCaptacion = lazy(() => import("./pages/MapaRiesgo"));
+const InspeccionesView = lazy(() => import("./pages/Inspeccion"));
+const CargaMasivaVista = lazy(() => import("./pages/VistaUpload"));
 
 const queryClient = new QueryClient();
+
+const RouteLoader = () => (
+  <div className="flex h-screen items-center justify-center">
+    <div className="h-8 w-8 animate-spin rounded-full border-4 border-primary border-t-transparent"></div>
+  </div>
+);
 
 const App = () => (
   <QueryClientProvider client={queryClient}>
@@ -29,122 +37,124 @@ const App = () => (
       <Sonner />
       <BrowserRouter>
         <AuthProvider>
-          <Routes>
-            <Route path="/" element={<Navigate to="/login" replace />} />
-            <Route path="/login" element={<Login />} />
-            <Route
-              path="/dashboard"
-              element={
-                <ProtectedRoute>
-                  <Layout>
-                    <Dashboard />
-                  </Layout>
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/prestadores"
-              element={
-                <ProtectedRoute>
-                  <Layout>
-                    <Prestadores />
-                  </Layout>
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/prestadores/:id"
-              element={
-                <ProtectedRoute>
-                  <Layout>
-                    <PrestadorDetalle />
-                  </Layout>
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/inspeccion/InsercionIndividual"
-              element={
-                <ProtectedRoute>
-                  <Layout>
-                    <InspeccionStagingResolver />
-                  </Layout>
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/muestras"
-              element={
-                <ProtectedRoute>
-                  <Layout>
-                    <Muestras/>
-                  </Layout>
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/solicitantes"
-              element={
-                <ProtectedRoute>
-                  <Layout>
-                    <Solicitantes/>
-                  </Layout>
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/tecnicos"
-              element={
-                <ProtectedRoute>
-                  <Layout>
-                    <Tecnico /> 
-                  </Layout>
-                </ProtectedRoute>
-              }
-            />
-            
-            <Route
-              path="/mapa"
-              element={
-                <ProtectedRoute>
-                  <Layout>  
-                    <MapaPuntosCaptacion />
-                  </Layout>
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/inspeccion"
-              element={
-                <ProtectedRoute>
-                  <Layout>  
-                    <InspeccionesView />
-                  </Layout>
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/exportar"
-              element={
-                <ProtectedRoute>
-                  <Layout>
-                    <VistaExportar/>
-                  </Layout>
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/Subir"
-              element={
-                <ProtectedRoute>
-                  <Layout>
-                    <CargaMasivaVista/>
-                  </Layout>
-                </ProtectedRoute>
-              }
-            />
-            <Route path="*" element={<NotFound />} />
-          </Routes>
+          <Suspense fallback={<RouteLoader />}>
+            <Routes>
+              <Route path="/" element={<Navigate to="/login" replace />} />
+              <Route path="/login" element={<Login />} />
+              <Route
+                path="/dashboard"
+                element={
+                  <ProtectedRoute>
+                    <Layout>
+                      <Dashboard />
+                    </Layout>
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/prestadores"
+                element={
+                  <ProtectedRoute>
+                    <Layout>
+                      <Prestadores />
+                    </Layout>
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/prestadores/:id"
+                element={
+                  <ProtectedRoute>
+                    <Layout>
+                      <PrestadorDetalle />
+                    </Layout>
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/inspeccion/InsercionIndividual"
+                element={
+                  <ProtectedRoute>
+                    <Layout>
+                      <InspeccionStagingResolver />
+                    </Layout>
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/muestras"
+                element={
+                  <ProtectedRoute>
+                    <Layout>
+                      <Muestras />
+                    </Layout>
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/solicitantes"
+                element={
+                  <ProtectedRoute>
+                    <Layout>
+                      <Solicitantes />
+                    </Layout>
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/tecnicos"
+                element={
+                  <ProtectedRoute>
+                    <Layout>
+                      <Tecnico />
+                    </Layout>
+                  </ProtectedRoute>
+                }
+              />
+
+              <Route
+                path="/mapa"
+                element={
+                  <ProtectedRoute>
+                    <Layout>
+                      <MapaPuntosCaptacion />
+                    </Layout>
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/inspeccion"
+                element={
+                  <ProtectedRoute>
+                    <Layout>
+                      <InspeccionesView />
+                    </Layout>
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/exportar"
+                element={
+                  <ProtectedRoute>
+                    <Layout>
+                      <VistaExportar />
+                    </Layout>
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/Subir"
+                element={
+                  <ProtectedRoute>
+                    <Layout>
+                      <CargaMasivaVista />
+                    </Layout>
+                  </ProtectedRoute>
+                }
+              />
+              <Route path="*" element={<NotFound />} />
+            </Routes>
+          </Suspense>
         </AuthProvider>
       </BrowserRouter>
     </TooltipProvider>

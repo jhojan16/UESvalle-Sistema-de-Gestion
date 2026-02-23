@@ -39,8 +39,6 @@ export default function MapaPuntosCaptacion() {
                     .order('id_mapa', { ascending: true });
 
                 if (error) throw error;
-                console.log(data);
-
                 setPuntos(data as unknown as MapaRiesgoCompleto[]);
 
             } catch (error) {

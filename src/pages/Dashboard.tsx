@@ -15,6 +15,21 @@ import {
   PieChart, Pie, Cell, ResponsiveContainer, Legend, Tooltip
 } from 'recharts';
 
+type DashboardIrcaRow = {
+  name: string | null;
+  promedio: number | string | null;
+};
+
+type DashboardCountRow = {
+  name: string | null;
+  value: number | string | null;
+};
+
+const toSafeNumber = (value: number | string | null | undefined) => {
+  const n = typeof value === 'string' ? Number(value) : value;
+  return Number.isFinite(n as number) ? Number(n) : 0;
+};
+
 // Paleta de colores para los gráficos
 const COLORS = [
   '#3b82f6', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6',
@@ -48,36 +63,14 @@ export default function Dashboard() {
   const { data: ircaData, isLoading: isLoadingIrca } = useQuery({
     queryKey: ['irca-promedio-region'],
     queryFn: async () => {
-      const { data, error } = await supabase
-        .from('muestra')
-        .select(`
-        irca,
-        punto_muestreo:id_muestreo (
-          municipio
-        )
-      `)
-        .not('irca', 'is', null); // Solo muestras con IRCA calculado
+      const { data, error } = await supabase.rpc('dashboard_irca_por_municipio');
 
       if (error) throw error;
 
-      // Agrupar y promediar por municipio
-      const agrupado: Record<string, { total: number; count: number }> = {};
-
-      data?.forEach((item: any) => {
-        const municipio = item.punto_muestreo?.municipio || 'No definido';
-        if (!agrupado[municipio]) {
-          agrupado[municipio] = { total: 0, count: 0 };
-        }
-        agrupado[municipio].total += item.irca;
-        agrupado[municipio].count += 1;
-      });
-
-      return Object.entries(agrupado)
-        .map(([name, stats]) => ({
-          name,
-          promedio: Number((stats.total / stats.count).toFixed(2))
-        }))
-        .sort((a, b) => b.promedio - a.promedio); // Ordenar de mayor a menor riesgo
+      return ((data ?? []) as DashboardIrcaRow[]).map((row) => ({
+        name: row.name || 'No definido',
+        promedio: Number(toSafeNumber(row.promedio).toFixed(2)),
+      }));
     },
   });
 
@@ -86,49 +79,20 @@ export default function Dashboard() {
   const { data: ubicacionesData, isLoading: isLoadingUbicaciones } = useQuery({
     queryKey: ['prestadores-ubicaciones'],
     queryFn: async () => {
-      const { data, error } = await supabase
-        .from('prestador')
-        .select(`
-          id_prestador,
-          nombre,
-          ubicacion:id_ubicacion (
-            departamento,
-            municipio
-          )
-        `);
-
-      if (error) throw error;
-
-      // Agrupar por departamento
-      const porDepartamento: Record<string, number> = {};
-      const porMunicipio: Record<string, number> = {};
-
-      data?.forEach((prestador: any) => {
-        const ubicacion = prestador.ubicacion;
-        if (ubicacion) {
-          // Contar por departamento
-          const dept = ubicacion.departamento || 'Sin departamento';
-          porDepartamento[dept] = (porDepartamento[dept] || 0) + 1;
-
-          // Contar por municipio
-          const mun = ubicacion.municipio || 'Sin municipio';
-          porMunicipio[mun] = (porMunicipio[mun] || 0) + 1;
-        } else {
-          porDepartamento['Sin ubicación'] = (porDepartamento['Sin ubicación'] || 0) + 1;
-          porMunicipio['Sin ubicación'] = (porMunicipio['Sin ubicación'] || 0) + 1;
-        }
-      });
-
-      // Convertir a array para los gráficos
-      const departamentos = Object.entries(porDepartamento)
-        .map(([name, value]) => ({ name, value }))
-        .sort((a, b) => b.value - a.value);
-
-      // Top 10 municipios
-      const municipios = Object.entries(porMunicipio)
-        .map(([name, value]) => ({ name, value }))
-        .sort((a, b) => b.value - a.value)
-        .slice(0, 10);
+      const [{ data: departamentosRaw, error: depErr }, { data: municipiosRaw, error: munErr }] = await Promise.all([
+        supabase.rpc('dashboard_prestadores_por_departamento'),
+        supabase.rpc('dashboard_top_municipios', { p_limit: 10 }),
+      ]);
+      if (depErr) throw depErr;
+      if (munErr) throw munErr;
+      const departamentos = ((departamentosRaw ?? []) as DashboardCountRow[]).map((row) => ({
+        name: row.name || 'Sin ubicacion',
+        value: toSafeNumber(row.value),
+      }));
+      const municipios = ((municipiosRaw ?? []) as DashboardCountRow[]).map((row) => ({
+        name: row.name || 'Sin ubicacion',
+        value: toSafeNumber(row.value),
+      }));
 
       return { departamentos, municipios };
     },
@@ -426,3 +390,4 @@ export default function Dashboard() {
     </Box>
   );
 }
+
