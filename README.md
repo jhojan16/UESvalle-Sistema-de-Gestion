@@ -1,362 +1,148 @@
-# 🌊 UES Valle - Sistema de Gestión
+# UES Valle - Sistema de Gestion
 
-Sistema administrativo integral para la gestión de prestadores de servicios de acueducto y alcantarillado del Valle del Cauca. Proporciona herramientas para administrar inspecciones, muestras, laboratorios, técnicos y mapas de riesgo con interfaz moderna y responsiva.
+![Logo UES Valle](public/ues.png)
 
----
+Aplicacion web para la gestion administrativa y operativa de prestadores de servicios de acueducto y alcantarillado.
 
-## 📋 Tabla de Contenidos
+## 1. Proposito del repositorio
 
-- [Características](#características)
-- [Tecnologías Utilizadas](#tecnologías-utilizadas)
-- [Requisitos Previos](#requisitos-previos)
-- [Instalación](#instalación)
-- [Scripts Disponibles](#scripts-disponibles)
-- [Estructura del Proyecto](#estructura-del-proyecto)
-- [Configuración](#configuración)
-- [Uso](#uso)
-- [Despliegue](#despliegue)
+Este repositorio contiene el frontend del sistema de gestion de UES Valle, desarrollado como SPA (Single Page Application). El sistema integra autenticacion, consulta de datos, operaciones CRUD, carga masiva de archivos CSV y exportacion de informacion.
 
----
+## 2. Documentacion de entrega
 
-## ✨ Características
+Para documentacion detallada de arquitectura, operacion y anexos:
 
-### Módulos Principales
+- Manual tecnico y funcional: `docs/arquitectura_y_manual.md`
+- Diagramas: `docs/diagramas.md`
+- Estructura de carpetas: `docs/estructura_carpetas.txt`
+- Manual en formato texto para cliente: `docs/manual_cliente.txt`
+- Inventario de imagenes del proyecto: `docs/imagenes_proyecto.txt`
 
-- **Dashboard** - Panel de control con estadísticas y gráficos
-- **Gestión de Prestadores** - CRUD de prestadores de servicios
-- **Inspecciones Sanitarias** - Registro y seguimiento de inspecciones
-- **Mapa de Riesgo** - Visualización geográfica de puntos de captación
-- **Muestras y Muestreos** - Análisis de calidad de agua
-- **Laboratorios** - Administración de laboratorios certificados
-- **Técnicos** - Gestión del personal técnico
-- **Solicitantes** - Registro de entidades solicitantes
-- **Reportes** - Generación y exportación de reportes
-- **Autenticación** - Sistema seguro de usuarios con Supabase
+## 3. Alcance funcional actual
 
-### Funcionalidades Destacadas
+Modulos accesibles desde menu lateral:
 
-✅ Interfaz responsiva y moderna  
-✅ Autenticación segura basada en roles  
-✅ Visualización de datos en mapas interactivos  
-✅ Gráficos y estadísticas en tiempo real  
-✅ Exportación de datos a CSV y Excel  
-✅ Búsqueda y filtrado avanzado  
-✅ Validación de formularios robusta  
+| Ruta | Modulo | Objetivo |
+|---|---|---|
+| `/dashboard` | Dashboard | Indicadores generales y graficos de soporte |
+| `/prestadores` | Prestadores | CRUD de prestadores y acceso a detalle |
+| `/prestadores/:id` | Detalle de prestador | Vista consolidada de inspecciones, muestras y mapas |
+| `/tecnicos` | Tecnicos | CRUD de tecnicos y asociacion a laboratorio/ubicacion |
+| `/solicitantes` | Solicitantes | CRUD de solicitantes y relacion con ubicacion |
+| `/muestras` | Muestras | Consulta, filtros exactos y detalle analitico |
+| `/inspeccion` | Inspeccion sanitaria | Busqueda, paginacion y detalle por inspeccion |
+| `/inspeccion/InsercionIndividual` | Resolver duplicados | Resolucion manual de staging de inspecciones |
+| `/mapa` | Mapa de riesgo | Mapa interactivo y panel tecnico de relaciones |
+| `/exportar` | Exportacion | Vista previa y descarga CSV |
+| `/subir` | Carga masiva | Carga CSV y procesamiento por funciones remotas |
+| `/login` | Autenticacion | Inicio de sesion y registro de usuarios |
 
----
+Rutas tecnicas adicionales:
 
-## 🛠️ Tecnologías Utilizadas
+- `*` -> pagina `NotFound`
+- `/` -> redireccion a `/login`
 
-### Frontend
+## 4. Stack tecnologico
 
-| Tecnología | Versión | Descripción |
-|-----------|---------|------------|
-| **React** | 18.3.1 | Librería UI |
-| **TypeScript** | 5.8.3 | Tipado estático |
-| **Vite** | 5.4.19 | Bundler y dev server |
-| **Tailwind CSS** | 3.4.17 | Estilos utilitarios |
-| **Material-UI (MUI)** | 7.3.6 | Componentes UI avanzados |
-| **Shadcn/ui** | Latest | Componentes accesibles |
+- React 18 + TypeScript
+- Vite
+- Material UI + Tailwind CSS + utilidades de componentes UI
+- TanStack React Query
+- Supabase (Auth, PostgREST, Storage, Functions)
+- React Router
+- DataGrid (MUI X)
+- Recharts (dashboard)
+- React Leaflet (mapas)
 
-### Estado y API
+## 5. Requisitos
 
-| Librería | Versión | Uso |
-|----------|---------|-----|
-| **React Query** | 5.90.6 | Gestión de estado y caché |
-| **Supabase JS** | 2.77.0 | Backend BaaS |
-| **React Hook Form** | 7.61.1 | Gestión de formularios |
-| **Zod** | 3.25.76 | Validación de esquemas |
+- Node.js 18 o superior
+- npm 8 o superior
+- Acceso a un proyecto Supabase configurado para este sistema
 
-### Mapas y Visualización
+## 6. Instalacion local
 
-| Librería | Versión | Uso |
-|----------|---------|-----|
-| **Leaflet** | 1.9.4 | Mapas interactivos |
-| **React Leaflet** | 4.2.1 | Integración React |
-| **Recharts** | 2.15.4 | Gráficos y charts |
+1. Clonar el repositorio.
+2. Instalar dependencias.
+3. Crear archivo de configuracion local a partir de `.env.example`.
+4. Completar credenciales en el archivo local de entorno.
+5. Ejecutar servidor de desarrollo.
 
-### Utilidades
-
-- **React Router** 6.30.1 - Navegación SPA
-- **Sonner** 1.7.4 - Notificaciones toast
-- **date-fns** 3.6.0 - Manejo de fechas
-- **file-saver** 2.0.5 - Descarga de archivos
-- **xlsx** 0.18.5 - Generación de Excel
-- **Emotion** 11.14.0 - CSS-in-JS
-
----
-
-## 📦 Requisitos Previos
-
-Antes de comenzar, asegúrate de tener instalado:
-
-- **Node.js** ≥ 18.x ([Descargar](https://nodejs.org/))
-- **Bun** o **npm** (gestor de paquetes)
-- **Git** para clonar el repositorio
-
-Verifica las versiones:
+Comandos:
 
 ```bash
-node --version    # v18.x o superior
-npm --version     # v8.x o superior
-```
-
----
-
-## 💻 Instalación
-
-### 1. Clonar el Repositorio
-
-```bash
-git clone https://github.com/usuario/UESvalle-Sistema-de-Gestion.git
+git clone <url-del-repositorio>
 cd UESvalle-Sistema-de-Gestion
-```
-
-### 2. Instalar Dependencias
-
-**Con npm:**
-```bash
 npm install
-```
-
-**Con Bun:**
-```bash
-bun install
-```
-
-### 3. Configurar Variables de Entorno
-
-Crea un archivo `.env` en la raíz del proyecto:
-
-```env
-VITE_SUPABASE_URL=https://kuxhhmcrhuqfnskjpyrh.supabase.co
-VITE_SUPABASE_PROJECT_ID=kuxhhmcrhuqfnskjpyrh
-VITE_SUPABASE_PUBLISHABLE_KEY=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
-```
-
-> **Nota:** Obtén estas variables de tu proyecto Supabase en el panel de administración.
-
-### 4. Iniciar el Servidor de Desarrollo
-
-```bash
 npm run dev
 ```
 
-La aplicación estará disponible en: **http://localhost:8080**
+Servidor local por defecto:
 
----
+- `http://localhost:8080`
 
-## 📜 Scripts Disponibles
+## 7. Politica de seguridad para credenciales
 
-```bash
-# Desarrollo
-npm run dev              # Inicia servidor de desarrollo con HMR
+Por politica de seguridad de entrega a cliente:
 
-# Producción
-npm run build            # Build optimizado para producción
-npm run build:dev        # Build en modo desarrollo
+- Este README no publica nombres ni valores de variables de entorno.
+- No se deben versionar secretos o llaves en el repositorio.
+- Toda configuracion sensible debe mantenerse fuera de documentos publicos.
 
-# Herramientas
-npm run lint             # Ejecuta ESLint
-npm run preview          # Preview del build de producción
-```
-
----
-
-## 📁 Estructura del Proyecto
-
-```
-src/
-├── components/           # Componentes reutilizables
-│   ├── ui/              # Componentes de Shadcn/ui
-│   ├── AppSidebar.tsx   # Navegación lateral
-│   ├── Layout.tsx       # Layout principal
-│   └── ProtectedRoute.tsx # Rutas protegidas
-│
-├── pages/               # Páginas principales
-│   ├── Dashboard.tsx    # Panel de control
-│   ├── Prestadores.tsx  # Gestión de prestadores
-│   ├── Inspeccion.tsx   # Inspecciones sanitarias
-│   ├── MapaRiesgo.tsx   # Mapa de riesgo geográfico
-│   ├── Muestras.tsx     # Análisis de muestras
-│   ├── Laboratorio.tsx  # Gestión de laboratorios
-│   ├── Tecnico.tsx      # Registro técnico
-│   ├── Solicitantes.tsx # Gestión de solicitantes
-│   ├── Reportes.tsx     # Reportes y estadísticas
-│   └── Login.tsx        # Autenticación
-│
-├── contexts/            # Context API
-│   └── AuthContext.tsx  # Contexto de autenticación
-│
-├── hooks/               # Hooks personalizados
-│   ├── use-toast.ts
-│   └── use-mobile.tsx
-│
-├── integrations/        # Integraciones externas
-│   └── supabase/
-│       ├── client.ts    # Cliente Supabase
-│       └── types.ts     # Tipos Supabase
-│
-├── lib/                 # Utilidades
-│   └── utils.ts
-│
-├── theme/               # Temas Material-UI
-│   └── muiTheme.ts
-│
-├── App.tsx              # Componente principal
-└── index.css            # Estilos globales
-```
-
----
-
-## ⚙️ Configuración
-
-### Supabase
-
-1. Crea un proyecto en [Supabase](https://supabase.com)
-2. Copia las credenciales a `.env`
-3. Ejecuta las migraciones:
+## 8. Scripts disponibles
 
 ```bash
-supabase migration up
+npm run dev        # Desarrollo
+npm run build      # Build produccion
+npm run build:dev  # Build modo desarrollo
+npm run preview    # Previsualizar build
+npm run lint       # Linter
 ```
 
-### Tailwind CSS
+## 9. Estructura de proyecto (resumen)
 
-Configuración en `tailwind.config.ts`:
-- Variables de color institucionales (azul y verde)
-- Sistema de diseño completo
-- Extensiones personalizadas
+- `src/` codigo fuente de aplicacion
+- `src/pages/` modulos/paginas de negocio
+- `src/components/` layout, sidebar, proteccion de rutas y UI
+- `src/contexts/` contexto de autenticacion
+- `src/integrations/supabase/` cliente y tipos de base de datos
+- `public/templates/` plantillas CSV para carga masiva
+- `docs/` documentacion funcional, tecnica y anexos de entrega
+- `supabase/migrations/` snapshot de esquema para referencia
 
-### Material-UI
+Estructura completa:
 
-Tema personalizado en `theme/muiTheme.ts`:
-- Paleta de colores institucional
-- Tipografía personalizada
-- Componentes con estilos propios
+- Ver `docs/estructura_carpetas.txt`
 
----
+## 10. Despliegue
 
-## 🚀 Uso
+El proyecto incluye `vercel.json` con rewrite para SPA.
 
-### Flujo de Autenticación
+Flujo sugerido:
 
-1. Accede a `/login`
-2. Inicia sesión o crea nueva cuenta
-3. Serás redirigido al Dashboard
+1. Conectar repositorio en Vercel.
+2. Configurar secretos y parametros de entorno en la plataforma.
+3. Ejecutar build y validar navegacion por rutas privadas/publicas.
 
-### Módulos Principales
+## 11. Notas de operacion
 
-#### Dashboard
-- Estadísticas generales
-- Gráficos de distribución
-- Visualización de ubicaciones
+- Todas las rutas de negocio requieren sesion activa.
+- El modulo de carga masiva requiere que el usuario este autenticado y tenga permisos sobre Storage/Functions.
+- La exportacion utiliza una funcion remota y descarga CSV desde el navegador.
 
-#### Prestadores
-- Crear/editar/eliminar prestadores
-- Ver detalles completos
-- Acceso a muestras e inspecciones relacionadas
+## 12. Modulos implementados pero no expuestos en menu principal
 
-#### Mapa de Riesgo
-- Visualización interactiva de Leaflet
-- Panel lateral con detalles
-- Información de características y resoluciones
+Existen paginas en el codigo que actualmente no estan enlazadas en rutas visibles del `App.tsx`:
 
-#### Reportes
-- Gráficos por estado
-- Filtrado dinámico
-- Exportación de datos
+- `src/pages/Laboratorio.tsx`
+- `src/pages/Reportes.tsx`
 
-### Búsqueda y Filtrado
+Estas piezas pueden documentarse como funcionalidad tecnica disponible para futura publicacion.
 
-Todos los módulos incluyen:
-- Búsqueda por texto en tiempo real
-- Paginación (25 filas por página)
-- Filtrado avanzado
-- Ordenamiento
+## 13. Soporte y mantenimiento
 
----
+Para cambios futuros se recomienda:
 
-## 📦 Despliegue
-
-### Vercel (Recomendado)
-
-El proyecto está configurado para Vercel:
-
-```bash
-# Conexiona tu repositorio en Vercel
-# Las variables de entorno se configuran en el panel
-# Vercel desplegará automáticamente en cada push
-```
-
-### Configuración de Variables
-
-En el panel de Vercel, añade:
-```
-VITE_SUPABASE_URL=...
-VITE_SUPABASE_PROJECT_ID=...
-VITE_SUPABASE_PUBLISHABLE_KEY=...
-```
-
-### Build Manual
-
-```bash
-npm run build
-# Los archivos estáticos estarán en ./dist
-```
-
----
-
-## 🔐 Seguridad
-
-- ✅ Autenticación con Supabase Auth
-- ✅ Rutas protegidas con verificación de sesión
-- ✅ Validación de formularios con Zod
-- ✅ Variables sensibles en `.env` (no versionadas)
-- ✅ CORS configurado en Supabase
-
----
-
-## 🤝 Contribución
-
-1. Fork el proyecto
-2. Crea una rama (`git checkout -b feature/AmazingFeature`)
-3. Commit cambios (`git commit -m 'Add AmazingFeature'`)
-4. Push a la rama (`git push origin feature/AmazingFeature`)
-5. Abre un Pull Request
-
----
-
-## 📝 Licencia
-
-Este proyecto es privado. Todos los derechos reservados.
-
----
-
-## 📞 Contacto
-
-Para preguntas o soporte, contacta a:
-- **Email:** [jespinosam116gmail.com]
-- **Documentación:** Consulta los comentarios en el código
-
----
-
-## 🔄 Versionado
-
-- **Versión Actual:** 0.0.0 (Desarrollo)
-- **Última Actualización:** Diciembre 2025
-- **Node.js:** 18.x o superior
-- **npm:** 8.x o superior
-
----
-
-## 📚 Recursos Útiles
-
-- [Documentación React](https://react.dev)
-- [Documentación Vite](https://vitejs.dev)
-- [Documentación Supabase](https://supabase.com/docs)
-- [Documentación Tailwind](https://tailwindcss.com/docs)
-- [Documentación Material-UI](https://mui.com/material-ui/getting-started/)
-- [Documentación React Query](https://tanstack.com/query/latest)
-
-
+1. Mantener sincronizados los tipos de Supabase con el esquema real.
+2. Versionar cambios en documentacion junto con cambios funcionales.
+3. Validar manualmente los flujos criticos: login, CRUD principal, carga masiva y exportacion.

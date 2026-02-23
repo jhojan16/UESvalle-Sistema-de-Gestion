@@ -1,95 +1,182 @@
 # Diagramas - UES Valle
 
-Referencias visuales para arquitectura y flujos clave. Los diagramas están en Mermaid; puedes visualizarlos en VS Code (extensión Mermaid) o en https://mermaid.live.
+Diagramas en Mermaid para arquitectura, navegacion y flujos operativos.
+
+> Puedes visualizarlos en VS Code (extension Mermaid) o en https://mermaid.live
+
+---
 
 ## 1) Arquitectura general
+
 ```mermaid
 flowchart LR
-  subgraph Cliente
-    UI[React + Vite SPA]
-    Router[React Router\nRutas públicas/privadas]
-    Layout[Layout + Sidebar\nMUI + Shadcn]
-    Pages[Pages:\nDashboard, Prestadores,\nMuestras, Inspección,\nMapa, Exportar, Subir]
-    State[React Query\nCaché de datos]
+  subgraph Frontend[Frontend SPA]
+    A[React + TypeScript]
+    B[React Router]
+    C[ProtectedRoute]
+    D[Layout + Sidebar]
+    E[Paginas de negocio]
+    F[React Query]
   end
 
-  subgraph Supabase
-    Auth[Auth\nSesiones JWT]
-    Postgrest[PostgREST\nTablas y vistas]
-    Edge[Edge Functions\nexport_csv_full,\nmuestra_insert,\nsuper-handler,\nmapaRiesgo]
-    Storage[Storage\nBucket imports]
-    DB[(Postgres\nTablas: prestador,\ninspeccion, muestra,\nmapa_riesgo, anexos,\nstaging, etc.)]
+  subgraph Supabase[Supabase]
+    G[Auth]
+    H[PostgREST]
+    I[Functions]
+    J[Storage bucket imports]
+    K[(Postgres)]
   end
 
-  UI --> Router --> Layout --> Pages --> State
-  State --> Postgrest
-  State --> Edge
-  Edge --> Storage
-  Postgrest --> DB
-  Storage --> Edge
-  UI --> Auth
-  Auth --> Postgrest
+  A --> B --> C --> D --> E --> F
+  F --> H --> K
+  E --> G
+  E --> I
+  E --> J
+  I --> J
+  I --> K
 ```
 
-## 2) Flujo de autenticación
+---
+
+## 2) Mapa de rutas
+
+```mermaid
+flowchart TD
+  R0[/] --> R1[/login]
+
+  R1 --> R2[/dashboard]
+  R2 --> R3[/prestadores]
+  R3 --> R4[/prestadores/:id]
+
+  R2 --> R5[/tecnicos]
+  R2 --> R6[/solicitantes]
+  R2 --> R7[/muestras]
+  R2 --> R8[/inspeccion]
+  R8 --> R9[/inspeccion/InsercionIndividual]
+  R2 --> R10[/mapa]
+  R2 --> R11[/exportar]
+  R2 --> R12[/subir]
+
+  R2 --> R404[*]
+```
+
+---
+
+## 3) Flujo de autenticacion
+
 ```mermaid
 sequenceDiagram
   participant U as Usuario
-  participant SPA as React (Login page)
-  participant Auth as Supabase Auth
-  participant Router as ProtectedRoute
+  participant UI as Login
+  participant AUTH as Supabase Auth
+  participant CTX as AuthContext
+  participant ROUTE as ProtectedRoute
 
-  U->>SPA: Ingresa correo/contraseña o registro
-  SPA->>Auth: signIn / signUp
-  Auth-->>SPA: session + user (JWT)
-  SPA->>Router: guarda sesión (localStorage)
-  Router->>SPA: permite rutas privadas si hay sesión
-  U->>SPA: Navega módulo (dashboard, etc.)
+  U->>UI: Envia credenciales
+  UI->>AUTH: signIn/signUp
+  AUTH-->>CTX: session + user
+  CTX-->>UI: estado autenticado
+  UI->>ROUTE: navegar a ruta privada
+  ROUTE-->>UI: permite render si user existe
 ```
 
-## 3) Flujo de carga masiva
+---
+
+## 4) Flujo CRUD de prestadores
+
 ```mermaid
 sequenceDiagram
   participant U as Usuario
-  participant SPA as React (/subir)
-  participant Storage as Supabase Storage (bucket imports)
-  participant Edge as Edge Function (muestra_insert / super-handler / mapaRiesgo)
+  participant UI as Prestadores
+  participant DB as Supabase DB
+  participant Q as React Query
+
+  U->>UI: Crear prestador
+  UI->>DB: insert ubicacion
+  UI->>DB: insert prestador (id_ubicacion)
+  DB-->>UI: OK
+  UI->>Q: invalidateQueries(prestadores)
+  Q-->>UI: recarga tabla
+
+  U->>UI: Editar prestador
+  UI->>DB: update ubicacion
+  UI->>DB: update prestador
+  DB-->>UI: OK
+
+  U->>UI: Eliminar prestador
+  UI->>DB: delete prestador
+  UI->>DB: delete ubicacion asociada
+  DB-->>UI: OK
+```
+
+---
+
+## 5) Flujo de carga masiva CSV
+
+```mermaid
+sequenceDiagram
+  participant U as Usuario
+  participant UI as VistaUpload
+  participant S as Storage imports
+  participant F as Edge Function
   participant DB as Postgres
 
-  U->>SPA: Selecciona tipo y archivo CSV
-  SPA->>Storage: upload file path tmp/<user>/<id>-file.csv
-  SPA->>Edge: POST /functions/v1/<endpoint> { path }
-  Edge->>Storage: lee CSV
-  Edge->>DB: inserta datos (tablas finales o staging)
-  Edge-->>SPA: mensaje de éxito/error
-  SPA-->>U: muestra estado (toast/alerta)
+  U->>UI: Selecciona tipo y archivo CSV
+  UI->>S: upload tmp/<user>/<id>-archivo.csv
+  UI->>F: POST path del archivo
+  F->>S: lee archivo
+  F->>DB: procesa e inserta datos
+  F-->>UI: respuesta de estado
+  UI-->>U: mensaje de exito/error
 ```
 
-## 4) Flujo de exportación CSV
+---
+
+## 6) Flujo de exportacion
+
 ```mermaid
 sequenceDiagram
   participant U as Usuario
-  participant SPA as React (/exportar)
-  participant Edge as Edge Function (export_csv_full)
+  participant UI as VistaExportar
+  participant F as Function export_csv_full
   participant DB as Postgres
 
-  U->>SPA: Clic "Descargar CSV Completo" o "Ver vista previa"
-  SPA->>Edge: invoke export_csv_full (preview=true opcional)
-  Edge->>DB: consulta tablas/vistas
-  Edge-->>SPA: CSV (completo o primeras filas)
-  SPA-->>U: descarga archivo o muestra DataGrid
+  U->>UI: Selecciona tipo
+  U->>UI: Cargar vista previa o descargar
+  UI->>F: POST {tipo, preview}
+  F->>DB: consulta dataset
+  F-->>UI: contenido CSV
+  UI-->>U: DataGrid preview o archivo descargado
 ```
 
-## 5) Flujo de resolución de duplicados (Inserción Individual)
+---
+
+## 7) Flujo de resolucion de duplicados (inspeccion staging)
+
 ```mermaid
 flowchart LR
-  Staging[inspeccion_staging\n registros duplicados por NIT]
-  UI[UI InsercionIndividual\nDataGrid editable]
-  Prest[prestador\n(catálogo por NIT)]
-  Final[inspeccion\n(tabla final)]
+  A[inspeccion_staging_nits_duplicados] --> B[UI InsercionIndividual]
+  C[prestador] --> B
 
-  Staging --> UI
-  Prest --> UI
-  UI -->|asigna id_prestador\npor cada fila lista| Final
-  UI -->|marca processed=true\ny elimina staging| Staging
+  B --> D{Fila lista?}
+  D -- No --> E[Permanece pendiente]
+  D -- Si --> F[Insert en inspeccion]
+  F --> G[Update processed=true en staging]
+  G --> H[Delete filas staging procesadas]
+```
+
+---
+
+## 8) Flujo de consulta en mapa de riesgo
+
+```mermaid
+flowchart TD
+  A[MapaRiesgo.tsx] --> B[Consulta mapa_riesgo con relaciones]
+  B --> C[Render de marcadores Leaflet]
+  C --> D[Click en marcador]
+  D --> E[Panel de detalle]
+  E --> F[Prestador]
+  E --> G[Punto de captacion]
+  E --> H[Anexos y anexos2]
+  E --> I[Seguimiento, riesgo, seguridad]
 ```
