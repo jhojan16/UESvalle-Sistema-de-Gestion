@@ -47,7 +47,7 @@ export default function ExportarVista() {
     const [errorMsg, setErrorMsg] = useState<string>("")
 
     const fnUrl = useMemo(() => {
-        const base = (import.meta as any).env?.VITE_SUPABASE_URL
+        const base = import.meta.env.VITE_SUPABASE_URL
         return base ? `${String(base).replace(/\/$/, "")}/functions/v1/export_csv_full` : ""
     }, [])
 

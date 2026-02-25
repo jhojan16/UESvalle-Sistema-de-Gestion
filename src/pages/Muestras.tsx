@@ -218,7 +218,7 @@ export default function VistaAnalisisMuestras() {
       headerName: "Fecha Toma",
       flex: 1,
       minWidth: 130,
-      renderCell: (p) => (p.value ? new Date(p.value).toLocaleDateString("es-CO") : "-"),
+      renderCell: (p) => (p.value ?? "-"),
     },
     { field: "tipo_muestra", headerName: "Tipo muestra", flex: 1, minWidth: 140 },
     { field: "irca", headerName: "IRCA", flex: 0.5, minWidth: 90 },

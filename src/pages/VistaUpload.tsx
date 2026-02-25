@@ -37,10 +37,7 @@ const makeId = () => `${Date.now()}-${Math.random().toString(16).slice(2)}`;
 const sanitize = (name: string) => name.replace(/[^\w.\-]+/g, "_");
 
 const getEnvSupabaseUrl = () => {
-  const v = (import.meta as any)?.env?.VITE_SUPABASE_URL;
-  return typeof v === "string" ? v : "";
-  
-
+  return import.meta.env.VITE_SUPABASE_URL ?? "";
 };
 
 export default function CargaMasivaVista() {
