@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import {
   Box,
@@ -43,16 +43,22 @@ const getEnvSupabaseUrl = () => {
 export default function CargaMasivaVista() {
   const [importType, setImportType] = useState<ImportType>("mapa_riesgo");
   const [file, setFile] = useState<File | null>(null);
+  const fileInputRef = useRef<HTMLInputElement | null>(null);
   const [loading, setLoading] = useState(false);
   const [status, setStatus] = useState<{
     type: "success" | "error";
     msg: string;
   } | null>(null);
 
+  const clearSelectedFile = () => {
+    setFile(null);
+    if (fileInputRef.current) fileInputRef.current.value = "";
+  };
+
   const handleTypeChange = (_: undefined, newType: ImportType | null) => {
     if (newType) {
       setImportType(newType);
-      setFile(null);
+      clearSelectedFile();
       setStatus(null);
     }
   };
@@ -102,53 +108,78 @@ export default function CargaMasivaVista() {
       const safeName = sanitize(file.name || "archivo.csv");
       const path = `tmp/${userId}/${id}-${safeName}`;
 
+      // 1) Subir archivo una sola vez
       const { error: upErr } = await supabase.storage
         .from(bucket)
         .upload(path, file, { contentType: "text/csv", upsert: false });
 
       if (upErr) {
-        setStatus({
-          type: "error",
-          msg: `Error subiendo a Storage: ${upErr.message}`,
-        });
+        setStatus({ type: "error", msg: `Error subiendo a Storage: ${upErr.message}` });
         return;
       }
 
       const supabaseUrl = getEnvSupabaseUrl();
       if (!supabaseUrl) {
-        setStatus({
-          type: "error",
-          msg: "Falta VITE_SUPABASE_URL en tus variables de entorno.",
-        });
-        return;
-      }
-      const res = await fetch(`${supabaseUrl}/functions/v1/${endpoint}`, {
-        method: "POST",
-        headers: {
-          Authorization: `Bearer ${token}`,
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ path }),
-      });
-
-      const text = await res.text();
-
-      if (!res.ok) {
-        setStatus({
-          type: "error",
-          msg: `Error Function (${res.status}): ${text || "Sin body"}`,
-        });
+        setStatus({ type: "error", msg: "Falta VITE_SUPABASE_URL en tus variables de entorno." });
         return;
       }
 
-      const json = text ? JSON.parse(text) : null;
+      // 2) Llamar la función y reintentar si devuelve "running"
+      let batch_id: string | null = null;
+      const maxCalls = 60; // límite para no quedar en loop infinito
 
+      for (let attempt = 0; attempt < maxCalls; attempt++) {
+        const res = await fetch(`${supabaseUrl}/functions/v1/${endpoint}`, {
+          method: "POST",
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(batch_id ? { path, batch_id } : { path }),
+        });
+
+        const text = await res.text();
+
+        if (!res.ok) {
+          setStatus({
+            type: "error",
+            msg: `Error Function (${res.status}): ${text || "Sin body"}`,
+          });
+          return;
+        }
+
+        const json = text ? JSON.parse(text) : null;
+
+        // Si la función dice "running", guardamos batch_id y seguimos
+        if (json?.status === "running") {
+          batch_id = json.batch_id;
+
+          // Opcional: mostrar progreso/estado
+          setStatus({
+            type: "success",
+            msg: `Procesando... restantes: ${json.remaining ?? "?"} (batch ${batch_id})`,
+          });
+
+          // Pequeña pausa para no saturar
+          await new Promise((r) => setTimeout(r, 400));
+          continue;
+        }
+
+        // Si terminó
+        setStatus({
+          type: "success",
+          msg: json?.message || "Archivo procesado correctamente.",
+        });
+
+        clearSelectedFile();
+        return;
+      }
+
+      // Si llega aquí, no terminó en maxCalls
       setStatus({
-        type: "success",
-        msg: json?.message || "Archivo procesado correctamente.",
+        type: "error",
+        msg: "El proceso está tardando demasiado. Intenta nuevamente (se reanuda con el batch_id).",
       });
-
-      setFile(null);
     } catch (error: any) {
       setStatus({
         type: "error",
@@ -259,9 +290,14 @@ export default function CargaMasivaVista() {
 
             <Box component="label" sx={{ cursor: "pointer" }}>
               <input
+                ref={fileInputRef}
                 type="file"
                 hidden
                 accept=".csv"
+                onClick={(e) => {
+                  // Permite volver a seleccionar exactamente el mismo archivo.
+                  e.currentTarget.value = "";
+                }}
                 onChange={handleFileChange}
                 disabled={loading}
               />
@@ -308,7 +344,7 @@ export default function CargaMasivaVista() {
                       color="error"
                       onClick={(e) => {
                         e.preventDefault();
-                        setFile(null);
+                        clearSelectedFile();
                       }}
                     >
                       Cambiar archivo
