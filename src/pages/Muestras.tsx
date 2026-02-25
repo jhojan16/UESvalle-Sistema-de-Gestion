@@ -1,5 +1,5 @@
-import { useMemo, useState } from "react";
-import { useQuery } from "@tanstack/react-query";
+import { useMemo, useRef, useState } from "react";
+import { keepPreviousData, useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import {
   Box,
@@ -127,7 +127,7 @@ export default function VistaAnalisisMuestras() {
 
   const isSearchMode = appliedFiltro !== null && appliedValue.trim().length > 0;
 
-  const { data: listado, isLoading: loadingListado } = useQuery({
+  const { data: listado, isLoading: loadingListado, isFetching: fetchingListado } = useQuery({
     queryKey: ["muestras_listado", paginationModel.page, paginationModel.pageSize],
     enabled: !isSearchMode,
     queryFn: async () => {
@@ -146,7 +146,7 @@ export default function VistaAnalisisMuestras() {
     staleTime: 60 * 1000,
     gcTime: 30 * 60 * 1000,
     refetchOnWindowFocus: false,
-    keepPreviousData: true as any,
+    placeholderData: keepPreviousData,
   });
 
   const { data: searchResult, isLoading: loadingSearch } = useQuery({
@@ -201,7 +201,7 @@ export default function VistaAnalisisMuestras() {
     return listado?.rows ?? [];
   }, [isSearchMode, searchResult?.rows, listado?.rows]);
 
-  const loadingMain = isSearchMode ? loadingSearch : loadingListado;
+  const loadingMain = isSearchMode ? loadingSearch : loadingListado || fetchingListado;
 
   const columns: GridColDef[] = [
     {
@@ -293,7 +293,11 @@ export default function VistaAnalisisMuestras() {
     return "Fecha toma";
   }, [filtro]);
 
-  const totalNormal = listado?.count ?? 0;
+  const totalNormalRef = useRef(0);
+  const totalNormal = useMemo(() => {
+    if (typeof listado?.count === "number") totalNormalRef.current = listado.count;
+    return totalNormalRef.current;
+  }, [listado?.count]);
 
   return (
     <Box>
@@ -356,10 +360,10 @@ export default function VistaAnalisisMuestras() {
           paginationModel={paginationModel}
           onPaginationModelChange={(m) => {
             if (isSearchMode) {
-              setPaginationModel((p) => ({ ...p, page: m.page, pageSize: p.pageSize }));
+              setPaginationModel((p) => ({ ...p, page: m.page, pageSize: m.pageSize }));
               return;
             }
-            setPaginationModel(m);
+            setPaginationModel((p) => (p.page === m.page && p.pageSize === m.pageSize ? p : m));
           }}
           pageSizeOptions={[25, 50, 100]}
           disableRowSelectionOnClick
