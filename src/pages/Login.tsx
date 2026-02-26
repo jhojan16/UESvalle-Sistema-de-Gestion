@@ -1,20 +1,27 @@
-import { useState, useEffect } from 'react';
+﻿import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
-import { 
-  Box, 
-  Card, 
-  CardContent, 
-  TextField, 
-  Button, 
-  Typography, 
-  Tabs, 
+import {
+  Box,
+  Card,
+  CardContent,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogTitle,
+  TextField,
+  Button,
+  Typography,
+  Tabs,
   Tab,
   Avatar,
-  Container
+  Container,
+  IconButton,
+  InputAdornment,
 } from '@mui/material';
-import { Building2 } from 'lucide-react';
+import { Building2, Eye, EyeOff } from 'lucide-react';
 import { toast } from 'sonner';
+import { supabase } from '@/integrations/supabase/client';
 
 interface TabPanelProps {
   children?: React.ReactNode;
@@ -25,11 +32,7 @@ interface TabPanelProps {
 function TabPanel(props: TabPanelProps) {
   const { children, value, index, ...other } = props;
   return (
-    <div
-      role="tabpanel"
-      hidden={value !== index}
-      {...other}
-    >
+    <div role="tabpanel" hidden={value !== index} {...other}>
       {value === index && <Box sx={{ pt: 3 }}>{children}</Box>}
     </div>
   );
@@ -41,6 +44,11 @@ export default function Login() {
   const [nombre, setNombre] = useState('');
   const [loading, setLoading] = useState(false);
   const [tabValue, setTabValue] = useState(0);
+  const [showSignInPassword, setShowSignInPassword] = useState(false);
+  const [showSignUpPassword, setShowSignUpPassword] = useState(false);
+  const [resetDialogOpen, setResetDialogOpen] = useState(false);
+  const [resetEmail, setResetEmail] = useState('');
+  const [sendingReset, setSendingReset] = useState(false);
   const { signIn, signUp, user } = useAuth();
   const navigate = useNavigate();
 
@@ -55,8 +63,8 @@ export default function Login() {
     setLoading(true);
     const { error } = await signIn(email, password);
     if (error) {
-      toast.error('Error al iniciar sesión', {
-        description: error.message
+      toast.error('Error al iniciar sesion', {
+        description: error.message,
       });
     } else {
       toast.success('Bienvenido a UES Valle');
@@ -74,12 +82,36 @@ export default function Login() {
     const { error } = await signUp(email, password, nombre);
     if (error) {
       toast.error('Error al registrarse', {
-        description: error.message
+        description: error.message,
       });
     } else {
       toast.success('Cuenta creada exitosamente');
     }
     setLoading(false);
+  };
+
+  const handleSendPasswordReset = async () => {
+    if (!resetEmail.trim()) {
+      toast.error('El correo es obligatorio');
+      return;
+    }
+
+    setSendingReset(true);
+    const redirectTo = `${window.location.origin}/reset-password`;
+    const { error } = await supabase.auth.resetPasswordForEmail(resetEmail.trim(), {
+      redirectTo,
+    });
+
+    if (error) {
+      toast.error('No se pudo enviar el correo de recuperación', {
+        description: error.message,
+      });
+    } else {
+      toast.success('Te enviamos un correo para restablecer la contraseña');
+      setResetDialogOpen(false);
+      setResetEmail('');
+    }
+    setSendingReset(false);
   };
 
   return (
@@ -110,7 +142,7 @@ export default function Login() {
                 UES Valle
               </Typography>
               <Typography variant="body2" color="text.secondary">
-                Sistema de Gestión Administrativa
+                Sistema de Gestion Administrativa
               </Typography>
             </Box>
 
@@ -120,14 +152,14 @@ export default function Login() {
               variant="fullWidth"
               sx={{ mb: 3 }}
             >
-              <Tab label="Iniciar Sesión" />
+              <Tab label="Iniciar Sesion" />
               <Tab label="Registrarse" />
             </Tabs>
 
             <TabPanel value={tabValue} index={0}>
               <Box component="form" onSubmit={handleSignIn} sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
                 <TextField
-                  label="Correo Electrónico"
+                  label="Correo Electronico"
                   type="email"
                   fullWidth
                   required
@@ -137,11 +169,24 @@ export default function Login() {
                 />
                 <TextField
                   label="Contraseña"
-                  type="password"
+                  type={showSignInPassword ? 'text' : 'password'}
                   fullWidth
                   required
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
+                  InputProps={{
+                    endAdornment: (
+                      <InputAdornment position="end">
+                        <IconButton
+                          edge="end"
+                          onClick={() => setShowSignInPassword((prev) => !prev)}
+                          aria-label={showSignInPassword ? 'Ocultar contraseña' : 'Mostrar contraseña'}
+                        >
+                          {showSignInPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+                        </IconButton>
+                      </InputAdornment>
+                    ),
+                  }}
                 />
                 <Button
                   type="submit"
@@ -150,7 +195,15 @@ export default function Login() {
                   fullWidth
                   disabled={loading}
                 >
-                  {loading ? 'Iniciando...' : 'Iniciar Sesión'}
+                  {loading ? 'Iniciando...' : 'Iniciar Sesion'}
+                </Button>
+                <Button
+                  type="button"
+                  variant="text"
+                  onClick={() => setResetDialogOpen(true)}
+                  sx={{ alignSelf: 'center' }}
+                >
+                  ¿Olvidaste tu contraseña?
                 </Button>
               </Box>
             </TabPanel>
@@ -164,10 +217,10 @@ export default function Login() {
                   required
                   value={nombre}
                   onChange={(e) => setNombre(e.target.value)}
-                  placeholder="Juan Pérez"
+                  placeholder="Juan Perez"
                 />
                 <TextField
-                  label="Correo Electrónico"
+                  label="Correo Electronico"
                   type="email"
                   fullWidth
                   required
@@ -177,12 +230,25 @@ export default function Login() {
                 />
                 <TextField
                   label="Contraseña"
-                  type="password"
+                  type={showSignUpPassword ? 'text' : 'password'}
                   fullWidth
                   required
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   inputProps={{ minLength: 6 }}
+                  InputProps={{
+                    endAdornment: (
+                      <InputAdornment position="end">
+                        <IconButton
+                          edge="end"
+                          onClick={() => setShowSignUpPassword((prev) => !prev)}
+                          aria-label={showSignUpPassword ? 'Ocultar contraseña' : 'Mostrar contraseña'}
+                        >
+                          {showSignUpPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+                        </IconButton>
+                      </InputAdornment>
+                    ),
+                  }}
                 />
                 <Button
                   type="submit"
@@ -198,6 +264,33 @@ export default function Login() {
           </CardContent>
         </Card>
       </Box>
+
+      <Dialog open={resetDialogOpen} onClose={() => !sendingReset && setResetDialogOpen(false)} fullWidth maxWidth="xs">
+        <DialogTitle>Recuperar contraseña</DialogTitle>
+        <DialogContent>
+          <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
+            Ingresa tu correo para enviarte el enlace de recuperación.
+          </Typography>
+          <TextField
+            label="Correo Electronico"
+            type="email"
+            fullWidth
+            required
+            value={resetEmail}
+            onChange={(e) => setResetEmail(e.target.value)}
+            disabled={sendingReset}
+          />
+        </DialogContent>
+        <DialogActions sx={{ px: 3, pb: 2 }}>
+          <Button onClick={() => setResetDialogOpen(false)} disabled={sendingReset}>
+            Cancelar
+          </Button>
+          <Button variant="contained" onClick={handleSendPasswordReset} disabled={sendingReset}>
+            {sendingReset ? 'Enviando...' : 'Enviar enlace'}
+          </Button>
+        </DialogActions>
+      </Dialog>
     </Container>
   );
 }
+

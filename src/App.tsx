@@ -10,7 +10,9 @@ import { Layout } from "./components/Layout";
 import { AppLoader } from "./components/AppLoader";
 
 const Login = lazy(() => import("./pages/Login"));
+const ResetPassword = lazy(() => import("./pages/ResetPassword"));
 const Dashboard = lazy(() => import("./pages/Dashboard"));
+const Perfil = lazy(() => import("./pages/Perfil"));
 const Prestadores = lazy(() => import("./pages/Prestadores"));
 const NotFound = lazy(() => import("./pages/NotFound"));
 const Muestras = lazy(() => import("./pages/Muestras"));
@@ -22,6 +24,7 @@ const VistaExportar = lazy(() => import("./pages/VistaExportar"));
 const MapaPuntosCaptacion = lazy(() => import("./pages/MapaRiesgo"));
 const InspeccionesView = lazy(() => import("./pages/Inspeccion"));
 const CargaMasivaVista = lazy(() => import("./pages/VistaUpload"));
+const AdminUsuarios = lazy(() => import("./pages/AdminUsuarios"));
 
 const queryClient = new QueryClient();
 
@@ -36,12 +39,23 @@ const App = () => (
             <Routes>
               <Route path="/" element={<Navigate to="/login" replace />} />
               <Route path="/login" element={<Login />} />
+              <Route path="/reset-password" element={<ResetPassword />} />
               <Route
                 path="/dashboard"
                 element={
                   <ProtectedRoute>
                     <Layout>
                       <Dashboard />
+                    </Layout>
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/perfil"
+                element={
+                  <ProtectedRoute>
+                    <Layout>
+                      <Perfil />
                     </Layout>
                   </ProtectedRoute>
                 }
@@ -138,11 +152,21 @@ const App = () => (
                 }
               />
               <Route
-                path="/Subir"
+                path="/subir"
                 element={
-                  <ProtectedRoute>
+                  <ProtectedRoute requireAdmin>
                     <Layout>
                       <CargaMasivaVista />
+                    </Layout>
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/admin/usuarios"
+                element={
+                  <ProtectedRoute requireAdmin>
+                    <Layout>
+                      <AdminUsuarios />
                     </Layout>
                   </ProtectedRoute>
                 }

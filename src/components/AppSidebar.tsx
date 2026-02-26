@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { type ComponentType, useMemo } from 'react';
 import { NavLink, useLocation } from 'react-router-dom';
 import {
   Drawer,
@@ -28,20 +28,10 @@ import {
   ChevronLeft,
   ArrowBigDownDash,
   FolderUp,
+  UserCircle2,
+  ShieldCheck,
 } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
-
-const menuItems = [
-  { title: 'Dashboard', url: '/dashboard', icon: Home },
-  { title: 'Prestadores', url: '/prestadores', icon: Users },
-  { title: 'Técnicos', url: '/tecnicos', icon: UserCog },
-  { title: 'Solicitantes', url: '/solicitantes', icon: ClipboardList },
-  { title: 'Muestras', url: '/muestras', icon: FileText },
-  { title: 'Inspeccion Sanitaria', url: '/inspeccion', icon: FlaskConical },
-  { title: 'Mapa de riesgo', url: '/mapa', icon: MapPin },
-  { title: 'Exportar', url: '/exportar', icon: ArrowBigDownDash },
-  { title: 'Subir', url: '/subir', icon: FolderUp },
-];
 
 const drawerWidth = 260;
 const collapsedWidth = 72;
@@ -51,9 +41,37 @@ interface AppSidebarProps {
   onToggle: () => void;
 }
 
+interface MenuItemConfig {
+  title: string;
+  url: string;
+  icon: ComponentType<{ size?: number }>;
+}
+
+const commonMenuItems: MenuItemConfig[] = [
+  { title: 'Dashboard', url: '/dashboard', icon: Home },
+  { title: 'Perfil', url: '/perfil', icon: UserCircle2 },
+  { title: 'Prestadores', url: '/prestadores', icon: Users },
+  { title: 'Técnicos', url: '/tecnicos', icon: UserCog },
+  { title: 'Solicitantes', url: '/solicitantes', icon: ClipboardList },
+  { title: 'Muestras', url: '/muestras', icon: FileText },
+  { title: 'Inspeccion Sanitaria', url: '/inspeccion', icon: FlaskConical },
+  { title: 'Mapa de riesgo', url: '/mapa', icon: MapPin },
+  { title: 'Exportar', url: '/exportar', icon: ArrowBigDownDash },
+];
+
+const adminMenuItems: MenuItemConfig[] = [
+  { title: 'Subir', url: '/subir', icon: FolderUp },
+  { title: 'Admin Usuarios', url: '/admin/usuarios', icon: ShieldCheck },
+];
+
 export function AppSidebar({ open, onToggle }: AppSidebarProps) {
-  const { signOut } = useAuth();
+  const { signOut, isAdmin } = useAuth();
   const location = useLocation();
+
+  const menuItems = useMemo(
+    () => (isAdmin ? [...commonMenuItems, ...adminMenuItems] : commonMenuItems),
+    [isAdmin]
+  );
 
   return (
     <Drawer
@@ -76,33 +94,38 @@ export function AppSidebar({ open, onToggle }: AppSidebarProps) {
         },
       }}
     >
-      {/* Header */}
-      <Box sx={{ 
-        p: open ? 2 : 0,
-        display: 'flex', 
-        alignItems: 'center', 
-        justifyContent: 'center',
-        minWidth: 0,
-        height: '64px',
-        flexShrink: 0,
-        position: 'relative',
-      }}>
+      <Box
+        sx={{
+          p: open ? 2 : 0,
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          minWidth: 0,
+          height: '64px',
+          flexShrink: 0,
+          position: 'relative',
+        }}
+      >
         {open ? (
           <>
-            <Avatar sx={{ 
-              bgcolor: 'primary.main', 
-              flexShrink: 0,
-              width: 40,
-              height: 40,
-            }}>
+            <Avatar
+              sx={{
+                bgcolor: 'primary.main',
+                flexShrink: 0,
+                width: 40,
+                height: 40,
+              }}
+            >
               <Building2 size={20} />
             </Avatar>
-            <Box sx={{ 
-              flex: 1, 
-              minWidth: 0,
-              overflow: 'hidden',
-              ml: 2,
-            }}>
+            <Box
+              sx={{
+                flex: 1,
+                minWidth: 0,
+                overflow: 'hidden',
+                ml: 2,
+              }}
+            >
               <Typography variant="subtitle2" fontWeight="bold" noWrap>
                 UES Valle
               </Typography>
@@ -111,21 +134,17 @@ export function AppSidebar({ open, onToggle }: AppSidebarProps) {
               </Typography>
             </Box>
             <Tooltip title="Contraer menú" arrow>
-              <IconButton 
-                onClick={onToggle} 
-                size="small"
-                sx={{ flexShrink: 0 }}
-              >
+              <IconButton onClick={onToggle} size="small" sx={{ flexShrink: 0 }}>
                 <ChevronLeft size={20} />
               </IconButton>
             </Tooltip>
           </>
         ) : (
           <Tooltip title="Expandir menú" arrow>
-            <IconButton 
-              onClick={onToggle} 
+            <IconButton
+              onClick={onToggle}
               size="small"
-              sx={{ 
+              sx={{
                 width: '100%',
                 height: '100%',
                 display: 'flex',
@@ -142,32 +161,33 @@ export function AppSidebar({ open, onToggle }: AppSidebarProps) {
 
       <Divider sx={{ flexShrink: 0 }} />
 
-      {/* Menu Items - Lista centrada cuando está contraído */}
-      <List sx={{ 
-        flex: 1, 
-        py: 2, 
-        overflowX: 'hidden',
-        overflowY: 'auto',
-        display: 'flex',
-        flexDirection: 'column',
-        alignItems: open ? 'stretch' : 'center',
-        px: open ? 1 : 0,
-      }}>
+      <List
+        sx={{
+          flex: 1,
+          py: 2,
+          overflowX: 'hidden',
+          overflowY: 'auto',
+          display: 'flex',
+          flexDirection: 'column',
+          alignItems: open ? 'stretch' : 'center',
+          px: open ? 1 : 0,
+        }}
+      >
         {menuItems.map((item) => {
           const IconComponent = item.icon;
           const isActive = location.pathname === item.url;
           return (
-            <ListItem 
-              key={item.title} 
-              disablePadding 
-              sx={{ 
+            <ListItem
+              key={item.title}
+              disablePadding
+              sx={{
                 px: open ? 1 : 0,
                 width: open ? 'auto' : '100%',
                 display: 'flex',
                 justifyContent: 'center',
               }}
             >
-              <Tooltip title={!open ? item.title : ""} placement="right" arrow>
+              <Tooltip title={!open ? item.title : ''} placement="right" arrow>
                 <ListItemButton
                   component={NavLink}
                   to={item.url}
@@ -199,11 +219,11 @@ export function AppSidebar({ open, onToggle }: AppSidebarProps) {
                     <IconComponent size={20} />
                   </ListItemIcon>
                   {open && (
-                    <ListItemText 
-                      primary={item.title} 
-                      primaryTypographyProps={{ 
+                    <ListItemText
+                      primary={item.title}
+                      primaryTypographyProps={{
                         noWrap: true,
-                      }} 
+                      }}
                     />
                   )}
                 </ListItemButton>
@@ -215,14 +235,15 @@ export function AppSidebar({ open, onToggle }: AppSidebarProps) {
 
       <Divider sx={{ flexShrink: 0 }} />
 
-      {/* Logout Button - También centrado cuando está contraído */}
-      <Box sx={{ 
-        p: open ? 1 : 0,
-        display: 'flex',
-        justifyContent: 'center',
-        flexShrink: 0,
-      }}>
-        <Tooltip title={!open ? "Cerrar Sesión" : ""} placement="right" arrow>
+      <Box
+        sx={{
+          p: open ? 1 : 0,
+          display: 'flex',
+          justifyContent: 'center',
+          flexShrink: 0,
+        }}
+      >
+        <Tooltip title={!open ? 'Cerrar Sesión' : ''} placement="right" arrow>
           <ListItemButton
             onClick={signOut}
             sx={{
@@ -244,8 +265,8 @@ export function AppSidebar({ open, onToggle }: AppSidebarProps) {
               <LogOut size={20} />
             </ListItemIcon>
             {open && (
-              <ListItemText 
-                primary="Cerrar Sesión" 
+              <ListItemText
+                primary="Cerrar Sesión"
                 primaryTypographyProps={{ noWrap: true }}
               />
             )}
@@ -255,3 +276,4 @@ export function AppSidebar({ open, onToggle }: AppSidebarProps) {
     </Drawer>
   );
 }
+
