@@ -1632,6 +1632,43 @@ export type Database = {
           value: number
         }[]
       }
+      dashboard_kpis_resumen: {
+        Args: { p_anio?: number; p_municipio?: string }
+        Returns: {
+          scope: string
+          muestras_total: number
+          inspecciones_total: number
+          mapas_total: number
+          irca_promedio: number
+          iraba_promedio: number
+        }[]
+      }
+      dashboard_kpis_por_municipio: {
+        Args: { p_anio?: number }
+        Returns: {
+          municipio: string
+          muestras_total: number
+          inspecciones_total: number
+          mapas_total: number
+          irca_promedio: number
+          iraba_promedio: number
+        }[]
+      }
+      dashboard_kpis_tendencia_mensual: {
+        Args: { p_anio?: number; p_municipio?: string }
+        Returns: {
+          mes: number
+          muestras_total: number
+          inspecciones_total: number
+          mapas_total: number
+        }[]
+      }
+      dashboard_kpis_anios_disponibles: {
+        Args: Record<PropertyKey, never>
+        Returns: {
+          anio: number
+        }[]
+      }
       limpiar_y_convertir_coord: {
         Args: { coord_text: string }
         Returns: number
