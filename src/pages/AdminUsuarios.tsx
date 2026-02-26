@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import {
   Alert,
@@ -16,7 +16,7 @@ import {
   Typography,
 } from '@mui/material';
 import { DataGrid, GridActionsCellItem, GridColDef } from '@mui/x-data-grid';
-import { Edit, Search, ShieldCheck, Users } from 'lucide-react';
+import { Edit, Search, ShieldCheck, User, Users } from 'lucide-react';
 import { toast } from 'sonner';
 import { supabase } from '@/integrations/supabase/client';
 import { AppLoader } from '@/components/AppLoader';
@@ -40,6 +40,7 @@ export default function AdminUsuarios() {
   const queryClient = useQueryClient();
   const { user, refreshRole } = useAuth();
 
+  const [searchInput, setSearchInput] = useState('');
   const [search, setSearch] = useState('');
   const [dialogOpen, setDialogOpen] = useState(false);
   const [editingProfile, setEditingProfile] = useState<ProfileRow | null>(null);
@@ -108,6 +109,21 @@ export default function AdminUsuarios() {
     setEditingProfile(profile);
     setNewRole(profile.rol?.toLowerCase() === 'administrador' ? 'administrador' : 'usuario');
     setDialogOpen(true);
+  };
+
+  useEffect(() => {
+    if (!searchInput.trim() && search) {
+      setSearch('');
+    }
+  }, [searchInput, search]);
+
+  const handleSearch = () => {
+    setSearch(searchInput.trim());
+  };
+
+  const handleClearSearch = () => {
+    setSearchInput('');
+    setSearch('');
   };
 
   const handleSaveRole = () => {
@@ -215,9 +231,12 @@ export default function AdminUsuarios() {
         </Paper>
 
         <Paper sx={{ p: 2.5 }}>
-          <Typography variant="body2" color="text.secondary">
-            Usuarios estandar
-          </Typography>
+          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
+            <User size={20} />
+            <Typography variant="body2" color="text.secondary">
+              Usuarios estandar
+            </Typography>
+          </Box>
           <Typography variant="h5" fontWeight="bold" sx={{ mt: 1 }}>
             {stats.usuarios}
           </Typography>
@@ -226,19 +245,37 @@ export default function AdminUsuarios() {
 
       <Paper sx={{ p: 3 }}>
         <Box sx={{ mb: 3 }}>
-          <TextField
-            fullWidth
-            placeholder="Buscar por nombre o correo..."
-            value={search}
-            onChange={(event) => setSearch(event.target.value)}
-            InputProps={{
-              startAdornment: (
-                <InputAdornment position="start">
-                  <Search size={20} />
-                </InputAdornment>
-              ),
-            }}
-          />
+          <Box sx={{ display: 'flex', gap: 1.5, alignItems: 'stretch' }}>
+            <TextField
+              fullWidth
+              placeholder="Buscar por nombre o correo..."
+              value={searchInput}
+              onChange={(event) => setSearchInput(event.target.value)}
+              onKeyDown={(event) => {
+                if (event.key === 'Enter') {
+                  event.preventDefault();
+                  handleSearch();
+                }
+              }}
+              InputProps={{
+                startAdornment: (
+                  <InputAdornment position="start">
+                    <Search size={20} />
+                  </InputAdornment>
+                ),
+              }}
+            />
+            <Button variant="contained" onClick={handleSearch} startIcon={<Search size={18} />}>
+              Buscar
+            </Button>
+            <Button
+              variant="outlined"
+              onClick={handleClearSearch}
+              disabled={!searchInput && !search}
+            >
+              Limpiar
+            </Button>
+          </Box>
         </Box>
 
         <DataGrid
