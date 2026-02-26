@@ -1605,6 +1605,10 @@ export type Database = {
       }
     }
     Functions: {
+      admin_delete_user_account: {
+        Args: { p_user_id: string }
+        Returns: Json
+      }
       actualizar_lat_long: { Args: never; Returns: undefined }
       confirmar_carga_mapas: { Args: { p_payload: Json }; Returns: Json }
       dashboard_irca_por_municipio: {

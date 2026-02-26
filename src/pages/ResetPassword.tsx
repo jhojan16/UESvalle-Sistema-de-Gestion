@@ -1,7 +1,6 @@
 import { useEffect, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
-  Alert,
   Box,
   Button,
   Card,
@@ -25,6 +24,15 @@ const PASSWORD_POLICY = {
   hasNumber: /\d/,
 };
 
+const isSamePasswordError = (error: unknown) => {
+  const message = error instanceof Error ? error.message.toLowerCase() : '';
+  return (
+    message.includes('new password should be different') ||
+    message.includes('must be different from the old password') ||
+    message.includes('same password')
+  );
+};
+
 export default function ResetPassword() {
   const navigate = useNavigate();
 
@@ -32,8 +40,11 @@ export default function ResetPassword() {
   const [hasSession, setHasSession] = useState(false);
   const [saving, setSaving] = useState(false);
 
+  const [email, setEmail] = useState('');
+  const [currentPassword, setCurrentPassword] = useState('');
   const [newPassword, setNewPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
+  const [showCurrentPassword, setShowCurrentPassword] = useState(false);
   const [showNewPassword, setShowNewPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
@@ -65,62 +76,78 @@ export default function ResetPassword() {
   const passwordsMatch = confirmPassword.length > 0 && newPassword === confirmPassword;
 
   useEffect(() => {
-    let mounted = true;
-
     supabase.auth.getSession().then(({ data: { session } }) => {
-      if (!mounted) return;
       setHasSession(!!session);
       setCheckingSession(false);
     });
-
-    const {
-      data: { subscription },
-    } = supabase.auth.onAuthStateChange((_event, session) => {
-      if (!mounted) return;
-      setHasSession(!!session);
-      setCheckingSession(false);
-    });
-
-    return () => {
-      mounted = false;
-      subscription.unsubscribe();
-    };
   }, []);
 
   const handleUpdatePassword = async () => {
     if (!newPassword) {
-      toast.error('La nueva contraseÒa es obligatoria');
+      toast.error('La nueva contrase√±a es obligatoria');
       return;
     }
 
     if (!passwordsMatch) {
-      toast.error('Las contraseÒas no coinciden');
+      toast.error('Las contrase√±as no coinciden');
       return;
     }
 
     if (!allRequirementsMet) {
-      toast.error('verifica los requisitos de la contraseÒa');
+      toast.error('verifica los requisitos de la contrase√±a');
+      return;
+    }
+
+    if (!hasSession && (!email.trim() || !currentPassword)) {
+      toast.error('Correo y contrase√±a actual son obligatorios');
+      return;
+    }
+
+    if (!hasSession && currentPassword === newPassword) {
+      toast.error('No se puede usar la misma contrase√±a');
       return;
     }
 
     setSaving(true);
+
+    if (!hasSession) {
+      const { error: signInError } = await supabase.auth.signInWithPassword({
+        email: email.trim(),
+        password: currentPassword,
+      });
+
+      if (signInError) {
+        toast.error('No fue posible validar tu cuenta', {
+          description: 'Verifica tu correo y contrase√±a actual.',
+        });
+        setSaving(false);
+        return;
+      }
+    }
+
     const { error } = await supabase.auth.updateUser({ password: newPassword });
 
     if (error) {
-      toast.error('No se pudo restablecer la contraseÒa', {
-        description: 'verifica los requisitos de la contraseÒa',
+      if (isSamePasswordError(error)) {
+        toast.error('No se puede usar la misma contrase√±a');
+        setSaving(false);
+        return;
+      }
+
+      toast.error('No se pudo restablecer la contrase√±a', {
+        description: 'verifica los requisitos de la contrase√±a',
       });
       setSaving(false);
       return;
     }
 
     await supabase.auth.signOut();
-    toast.success('ContraseÒa actualizada. Inicia sesiÛn con tu nueva contraseÒa.');
+    toast.success('Contrase√±a actualizada. Inicia sesi√≥n con tu nueva contrase√±a.');
     navigate('/login', { replace: true });
   };
 
   if (checkingSession) {
-    return <AppLoader fullScreen message="Validando enlace de recuperaciÛn..." />;
+    return <AppLoader fullScreen message="Cargando formulario..." />;
   }
 
   return (
@@ -151,34 +178,67 @@ export default function ResetPassword() {
                 <KeyRound size={30} color="white" />
               </Box>
               <Typography variant="h5" component="h1" fontWeight="bold" gutterBottom>
-                Restablecer contraseÒa
+                Restablecer contrase√±a
               </Typography>
               <Typography variant="body2" color="text.secondary" textAlign="center">
-                Define tu nueva contraseÒa para continuar en la plataforma.
+                {hasSession
+                  ? 'Define tu nueva contrase√±a para continuar en la plataforma.'
+                  : 'Ingresa tu correo y contrase√±a actual para definir una nueva contrase√±a.'}
               </Typography>
             </Box>
 
-            {!hasSession ? (
-              <Alert severity="warning" sx={{ mb: 2 }}>
-                El enlace de recuperaciÛn no es v·lido o expirÛ. Solicita uno nuevo desde inicio de sesiÛn.
-              </Alert>
-            ) : null}
-
             <Box sx={{ display: 'grid', gap: 2 }}>
+              {!hasSession ? (
+                <>
+                  <TextField
+                    label="Correo Electronico"
+                    type="email"
+                    fullWidth
+                    required
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    disabled={saving}
+                  />
+
+                  <TextField
+                    label="Contrase√±a actual"
+                    type={showCurrentPassword ? 'text' : 'password'}
+                    fullWidth
+                    required
+                    value={currentPassword}
+                    onChange={(e) => setCurrentPassword(e.target.value)}
+                    disabled={saving}
+                    InputProps={{
+                      endAdornment: (
+                        <InputAdornment position="end">
+                          <IconButton
+                            edge="end"
+                            onClick={() => setShowCurrentPassword((prev) => !prev)}
+                            aria-label={showCurrentPassword ? 'Ocultar contrase√±a' : 'Mostrar contrase√±a'}
+                          >
+                            {showCurrentPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+                          </IconButton>
+                        </InputAdornment>
+                      ),
+                    }}
+                  />
+                </>
+              ) : null}
+
               <TextField
-                label="Nueva contraseÒa"
+                label="Nueva contrase√±a"
                 type={showNewPassword ? 'text' : 'password'}
                 fullWidth
                 value={newPassword}
                 onChange={(e) => setNewPassword(e.target.value)}
-                disabled={saving || !hasSession}
+                disabled={saving}
                 InputProps={{
                   endAdornment: (
                     <InputAdornment position="end">
                       <IconButton
                         edge="end"
                         onClick={() => setShowNewPassword((prev) => !prev)}
-                        aria-label={showNewPassword ? 'Ocultar contraseÒa' : 'Mostrar contraseÒa'}
+                        aria-label={showNewPassword ? 'Ocultar contrase√±a' : 'Mostrar contrase√±a'}
                       >
                         {showNewPassword ? <EyeOff size={18} /> : <Eye size={18} />}
                       </IconButton>
@@ -188,16 +248,16 @@ export default function ResetPassword() {
               />
 
               <TextField
-                label="Confirmar contraseÒa"
+                label="Confirmar contrase√±a"
                 type={showConfirmPassword ? 'text' : 'password'}
                 fullWidth
                 value={confirmPassword}
                 onChange={(e) => setConfirmPassword(e.target.value)}
-                disabled={saving || !hasSession}
+                disabled={saving}
                 error={confirmPassword.length > 0 && !passwordsMatch}
                 helperText={
                   confirmPassword.length > 0 && !passwordsMatch
-                    ? 'Las contraseÒas no coinciden'
+                    ? 'Las contrase√±as no coinciden'
                     : ' '
                 }
                 InputProps={{
@@ -206,7 +266,7 @@ export default function ResetPassword() {
                       <IconButton
                         edge="end"
                         onClick={() => setShowConfirmPassword((prev) => !prev)}
-                        aria-label={showConfirmPassword ? 'Ocultar contraseÒa' : 'Mostrar contraseÒa'}
+                        aria-label={showConfirmPassword ? 'Ocultar contrase√±a' : 'Mostrar contrase√±a'}
                       >
                         {showConfirmPassword ? <EyeOff size={18} /> : <Eye size={18} />}
                       </IconButton>
@@ -218,7 +278,7 @@ export default function ResetPassword() {
               <Box sx={{ mt: -0.5 }}>
                 <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 1 }}>
                   <Typography variant="caption" color="text.secondary">
-                    Requisitos de contraseÒa
+                    Requisitos de contrase√±a
                   </Typography>
                   <Typography variant="caption" color={allRequirementsMet ? 'success.main' : 'text.secondary'}>
                     {completed}/{requirements.length} cumplidos
@@ -259,14 +319,14 @@ export default function ResetPassword() {
                   onClick={handleUpdatePassword}
                   disabled={
                     saving ||
-                    !hasSession ||
+                    (!hasSession && (!email.trim() || !currentPassword)) ||
                     !newPassword ||
                     !confirmPassword ||
                     !allRequirementsMet ||
                     !passwordsMatch
                   }
                 >
-                  {saving ? 'Actualizando...' : 'Guardar nueva contraseÒa'}
+                  {saving ? 'Actualizando...' : 'Guardar nueva contrase√±a'}
                 </Button>
               </Box>
             </Box>

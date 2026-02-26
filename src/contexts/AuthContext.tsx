@@ -126,9 +126,19 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   };
 
   const signOut = async () => {
-    await supabase.auth.signOut();
-    setRole(null);
-    navigate('/login');
+    setLoading(true);
+    try {
+      const { error } = await supabase.auth.signOut();
+      if (error) {
+        console.error('Error cerrando sesion:', error.message);
+      }
+    } finally {
+      setSession(null);
+      setUser(null);
+      setRole(null);
+      setLoading(false);
+      navigate('/login', { replace: true });
+    }
   };
 
   return (

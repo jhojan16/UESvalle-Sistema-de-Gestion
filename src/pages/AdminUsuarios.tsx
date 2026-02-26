@@ -16,7 +16,7 @@ import {
   Typography,
 } from '@mui/material';
 import { DataGrid, GridActionsCellItem, GridColDef } from '@mui/x-data-grid';
-import { Edit, Search, ShieldCheck, User, Users } from 'lucide-react';
+import { Edit, Search, ShieldCheck, Trash2, User, Users } from 'lucide-react';
 import { toast } from 'sonner';
 import { supabase } from '@/integrations/supabase/client';
 import { AppLoader } from '@/components/AppLoader';
@@ -45,6 +45,8 @@ export default function AdminUsuarios() {
   const [dialogOpen, setDialogOpen] = useState(false);
   const [editingProfile, setEditingProfile] = useState<ProfileRow | null>(null);
   const [newRole, setNewRole] = useState<UserRole>('usuario');
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const [deletingProfile, setDeletingProfile] = useState<ProfileRow | null>(null);
 
   const { data: profiles, isLoading, error } = useQuery({
     queryKey: ['admin-usuarios', search],
@@ -93,6 +95,27 @@ export default function AdminUsuarios() {
     },
   });
 
+  const deleteUserMutation = useMutation({
+    mutationFn: async (userId: string) => {
+      const { error: deleteError } = await supabase.rpc('admin_delete_user_account', {
+        p_user_id: userId,
+      });
+      if (deleteError) throw deleteError;
+    },
+    onSuccess: async () => {
+      await queryClient.invalidateQueries({ queryKey: ['admin-usuarios'] });
+      toast.success('Cuenta eliminada correctamente');
+      setDeleteDialogOpen(false);
+      setDeletingProfile(null);
+    },
+    onError: (mutationError: unknown) => {
+      const message = mutationError instanceof Error ? mutationError.message : 'Error inesperado';
+      toast.error('No se pudo eliminar la cuenta', {
+        description: message,
+      });
+    },
+  });
+
   const rows = useMemo(() => profiles ?? [], [profiles]);
 
   const stats = useMemo(() => {
@@ -124,6 +147,16 @@ export default function AdminUsuarios() {
   const handleClearSearch = () => {
     setSearchInput('');
     setSearch('');
+  };
+
+  const openDeleteDialog = (profile: ProfileRow) => {
+    setDeletingProfile(profile);
+    setDeleteDialogOpen(true);
+  };
+
+  const handleDeleteUser = () => {
+    if (!deletingProfile) return;
+    deleteUserMutation.mutate(deletingProfile.id);
   };
 
   const handleSaveRole = () => {
@@ -177,6 +210,12 @@ export default function AdminUsuarios() {
           icon={<Edit size={18} />}
           label="Cambiar rol"
           onClick={() => openRoleDialog(params.row)}
+        />,
+        <GridActionsCellItem
+          icon={<Trash2 size={18} />}
+          label="Eliminar cuenta"
+          disabled={params.row.id === user?.id}
+          onClick={() => openDeleteDialog(params.row)}
         />,
       ],
     },
@@ -329,6 +368,36 @@ export default function AdminUsuarios() {
           </Button>
           <Button variant="contained" onClick={handleSaveRole} disabled={updateRoleMutation.isPending}>
             {updateRoleMutation.isPending ? 'Guardando...' : 'Guardar'}
+          </Button>
+        </DialogActions>
+      </Dialog>
+
+      <Dialog
+        open={deleteDialogOpen}
+        onClose={() => !deleteUserMutation.isPending && setDeleteDialogOpen(false)}
+        maxWidth="xs"
+        fullWidth
+      >
+        <DialogTitle>Eliminar cuenta</DialogTitle>
+        <DialogContent>
+          <Typography variant="body2" color="text.secondary">
+            Esta accion eliminara el acceso del usuario al sistema.
+          </Typography>
+          <Typography variant="body2" sx={{ mt: 1.5 }}>
+            Usuario: {deletingProfile?.nombre || deletingProfile?.email || deletingProfile?.id}
+          </Typography>
+        </DialogContent>
+        <DialogActions sx={{ px: 3, pb: 2 }}>
+          <Button onClick={() => setDeleteDialogOpen(false)} disabled={deleteUserMutation.isPending}>
+            Cancelar
+          </Button>
+          <Button
+            color="error"
+            variant="contained"
+            onClick={handleDeleteUser}
+            disabled={deleteUserMutation.isPending}
+          >
+            {deleteUserMutation.isPending ? 'Eliminando...' : 'Eliminar'}
           </Button>
         </DialogActions>
       </Dialog>

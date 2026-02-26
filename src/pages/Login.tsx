@@ -1,14 +1,10 @@
-﻿import { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import {
   Box,
   Card,
   CardContent,
-  Dialog,
-  DialogActions,
-  DialogContent,
-  DialogTitle,
   TextField,
   Button,
   Typography,
@@ -21,7 +17,6 @@ import {
 } from '@mui/material';
 import { Building2, Eye, EyeOff } from 'lucide-react';
 import { toast } from 'sonner';
-import { supabase } from '@/integrations/supabase/client';
 
 interface TabPanelProps {
   children?: React.ReactNode;
@@ -46,9 +41,6 @@ export default function Login() {
   const [tabValue, setTabValue] = useState(0);
   const [showSignInPassword, setShowSignInPassword] = useState(false);
   const [showSignUpPassword, setShowSignUpPassword] = useState(false);
-  const [resetDialogOpen, setResetDialogOpen] = useState(false);
-  const [resetEmail, setResetEmail] = useState('');
-  const [sendingReset, setSendingReset] = useState(false);
   const { signIn, signUp, user } = useAuth();
   const navigate = useNavigate();
 
@@ -88,30 +80,6 @@ export default function Login() {
       toast.success('Cuenta creada exitosamente');
     }
     setLoading(false);
-  };
-
-  const handleSendPasswordReset = async () => {
-    if (!resetEmail.trim()) {
-      toast.error('El correo es obligatorio');
-      return;
-    }
-
-    setSendingReset(true);
-    const redirectTo = `${window.location.origin}/reset-password`;
-    const { error } = await supabase.auth.resetPasswordForEmail(resetEmail.trim(), {
-      redirectTo,
-    });
-
-    if (error) {
-      toast.error('No se pudo enviar el correo de recuperación', {
-        description: error.message,
-      });
-    } else {
-      toast.success('Te enviamos un correo para restablecer la contraseña');
-      setResetDialogOpen(false);
-      setResetEmail('');
-    }
-    setSendingReset(false);
   };
 
   return (
@@ -200,7 +168,7 @@ export default function Login() {
                 <Button
                   type="button"
                   variant="text"
-                  onClick={() => setResetDialogOpen(true)}
+                  onClick={() => navigate('/reset-password')}
                   sx={{ alignSelf: 'center' }}
                 >
                   ¿Olvidaste tu contraseña?
@@ -264,32 +232,6 @@ export default function Login() {
           </CardContent>
         </Card>
       </Box>
-
-      <Dialog open={resetDialogOpen} onClose={() => !sendingReset && setResetDialogOpen(false)} fullWidth maxWidth="xs">
-        <DialogTitle>Recuperar contraseña</DialogTitle>
-        <DialogContent>
-          <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
-            Ingresa tu correo para enviarte el enlace de recuperación.
-          </Typography>
-          <TextField
-            label="Correo Electronico"
-            type="email"
-            fullWidth
-            required
-            value={resetEmail}
-            onChange={(e) => setResetEmail(e.target.value)}
-            disabled={sendingReset}
-          />
-        </DialogContent>
-        <DialogActions sx={{ px: 3, pb: 2 }}>
-          <Button onClick={() => setResetDialogOpen(false)} disabled={sendingReset}>
-            Cancelar
-          </Button>
-          <Button variant="contained" onClick={handleSendPasswordReset} disabled={sendingReset}>
-            {sendingReset ? 'Enviando...' : 'Enviar enlace'}
-          </Button>
-        </DialogActions>
-      </Dialog>
     </Container>
   );
 }

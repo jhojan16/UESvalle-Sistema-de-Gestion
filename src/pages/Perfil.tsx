@@ -41,6 +41,15 @@ const PASSWORD_POLICY = {
   hasNumber: /\d/,
 };
 
+const isSamePasswordError = (error: unknown) => {
+  const message = error instanceof Error ? error.message.toLowerCase() : '';
+  return (
+    message.includes('new password should be different') ||
+    message.includes('must be different from the old password') ||
+    message.includes('same password')
+  );
+};
+
 export default function Perfil() {
   const qc = useQueryClient();
   const { user, loading: loadingAuth } = useAuth();
@@ -173,7 +182,12 @@ export default function Perfil() {
       setShowConfirmPassword(false);
       toast.success('Contraseña actualizada correctamente');
     },
-    onError: () => {
+    onError: (mutationError: unknown) => {
+      if (isSamePasswordError(mutationError)) {
+        toast.error('No se puede usar la misma contraseña');
+        return;
+      }
+
       toast.error('No se pudo actualizar la contraseña', {
         description: 'verifica los requisitos de la contraseña',
       });
