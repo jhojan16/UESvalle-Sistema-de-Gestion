@@ -299,30 +299,17 @@ export default function Dashboard() {
 
   const kpiCards = [
     {
-      title: 'Muestras (filtro)',
-      value: kpiResumen?.muestras_total ?? 0,
-      color: '#10b981',
-    },
-    {
-      title: 'Inspecciones (filtro)',
-      value: kpiResumen?.inspecciones_total ?? 0,
-      color: '#6b7280',
-    },
-    {
-      title: 'Mapas de riesgo (filtro)',
-      value: kpiResumen?.mapas_total ?? 0,
-      color: '#f59e0b',
-    },
-    {
       title: 'IRCA promedio',
       value: kpiResumen?.irca_promedio ?? 0,
       color: '#3b82f6',
       suffix: '%',
+      icon: FlaskConical,
     },
     {
       title: 'IRABA promedio',
       value: kpiResumen?.iraba_promedio ?? 0,
       color: '#8b5cf6',
+      icon: Building2,
     },
   ];
 
@@ -378,6 +365,17 @@ export default function Dashboard() {
         <Typography variant="body1" color="text.secondary">
           Vista general del sistema
         </Typography>
+        <Card sx={{ width: '100%', mt: 3 }}>
+          <CardContent>
+            <Typography variant="h6" component="h2" gutterBottom>
+              Bienvenido a UES Valle
+            </Typography>
+            <Typography variant="body2" color="text.secondary">
+              Sistema de gestion administrativa para la supervision y control de prestadores de
+              servicios de acueducto y alcantarillado en el Valle del Cauca.
+            </Typography>
+          </CardContent>
+        </Card>
       </Box>
 
       <Box
@@ -424,7 +422,7 @@ export default function Dashboard() {
           <Box
             sx={{
               display: 'grid',
-              gridTemplateColumns: { xs: '1fr', md: '220px 320px auto' },
+              gridTemplateColumns: { xs: '1fr', md: '220px minmax(260px, 1fr) auto' },
               gap: 2,
               alignItems: 'center',
             }}
@@ -470,10 +468,15 @@ export default function Dashboard() {
             </FormControl>
 
             <Button
+              size="small"
               variant="outlined"
               onClick={() => {
                 setSelectedYear('ALL');
                 setSelectedMunicipio('ALL');
+              }}
+              sx={{
+                justifySelf: { xs: 'stretch', md: 'start' },
+                minWidth: { xs: 'auto', md: 120 },
               }}
             >
               Restablecer
@@ -485,30 +488,36 @@ export default function Dashboard() {
       <Box
         sx={{
           display: 'grid',
-          gridTemplateColumns: { xs: '1fr', sm: 'repeat(2, 1fr)', lg: 'repeat(5, 1fr)' },
+          gridTemplateColumns: { xs: '1fr', sm: 'repeat(2, 1fr)' },
           gap: 2,
           mb: 4,
         }}
       >
-        {kpiCards.map((card) => (
-          <Card key={card.title}>
-            <CardContent>
-              <Typography variant="caption" color="text.secondary">
-                {card.title}
-              </Typography>
-              {isLoadingKpiResumen ? (
-                <Box sx={{ mt: 1.5 }}>
-                  <CircularProgress size={18} />
+        {kpiCards.map((card) => {
+          const IconComponent = card.icon;
+          return (
+            <Card key={card.title}>
+              <CardContent>
+                <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', mb: 1.5 }}>
+                  <Typography variant="caption" sx={{ color: '#111827' }}>
+                    {card.title}
+                  </Typography>
+                  <IconComponent size={20} color={card.color} />
                 </Box>
-              ) : (
-                <Typography variant="h5" fontWeight="bold" sx={{ mt: 1 }} color={card.color}>
-                  {toSafeNumber(card.value).toLocaleString()}
-                  {card.suffix || ''}
-                </Typography>
-              )}
-            </CardContent>
-          </Card>
-        ))}
+                {isLoadingKpiResumen ? (
+                  <Box sx={{ mt: 1.5 }}>
+                    <CircularProgress size={18} />
+                  </Box>
+                ) : (
+                  <Typography variant="h5" fontWeight="bold" sx={{ mt: 1, color: '#111827' }}>
+                    {toSafeNumber(card.value).toLocaleString()}
+                    {card.suffix || ''}
+                  </Typography>
+                )}
+              </CardContent>
+            </Card>
+          );
+        })}
       </Box>
 
       <Grid container spacing={3} sx={{ mb: 4 }}>
@@ -581,18 +590,6 @@ export default function Dashboard() {
       </Grid>
 
       <Grid container spacing={3} sx={{ mb: 4 }}>
-        <Card sx={{ width: '100%' }}>
-          <CardContent>
-            <Typography variant="h6" component="h2" gutterBottom>
-              Bienvenido a UES Valle
-            </Typography>
-            <Typography variant="body2" color="text.secondary">
-              Sistema de gestion administrativa para la supervision y control de prestadores de
-              servicios de acueducto y alcantarillado en el Valle del Cauca.
-            </Typography>
-          </CardContent>
-        </Card>
-
         <Grid size={{ xs: 12, md: 6 }}>
           <Card>
             <CardContent>
