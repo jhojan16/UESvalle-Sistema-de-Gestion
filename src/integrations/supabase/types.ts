@@ -1609,6 +1609,10 @@ export type Database = {
         Args: { p_user_id: string }
         Returns: Json
       }
+      admin_update_user_role: {
+        Args: { p_role: string; p_user_id: string }
+        Returns: Json
+      }
       actualizar_lat_long: { Args: never; Returns: undefined }
       confirmar_carga_mapas: { Args: { p_payload: Json }; Returns: Json }
       dashboard_irca_por_municipio: {

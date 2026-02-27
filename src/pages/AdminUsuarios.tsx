@@ -71,10 +71,10 @@ export default function AdminUsuarios() {
 
   const updateRoleMutation = useMutation({
     mutationFn: async ({ userId, role }: { userId: string; role: UserRole }) => {
-      const { error: updateError } = await supabase
-        .from('profiles')
-        .update({ rol: role, updated_at: new Date().toISOString() })
-        .eq('id', userId);
+      const { error: updateError } = await supabase.rpc('admin_update_user_role', {
+        p_user_id: userId,
+        p_role: role,
+      });
 
       if (updateError) throw updateError;
     },
