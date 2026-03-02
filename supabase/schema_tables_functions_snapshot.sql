@@ -1,6 +1,10 @@
--- WARNING: This schema is for context only and is not meant to be run.
--- Table order and constraints may not be valid for execution.
+﻿-- Snapshot local de tablas y funciones (fuente: migraciones del repositorio)
+-- Generado: 2026-03-02 11:04:01
+-- Nota: este archivo no garantiza estado remoto de Supabase; refleja el codigo local.
 
+-- ======================
+-- TABLES
+-- ======================
 CREATE TABLE public.analisis_muestra (
   id_analisis_muestra bigint GENERATED ALWAYS AS IDENTITY NOT NULL,
   tipo_analisis character varying,
@@ -14,6 +18,7 @@ CREATE TABLE public.analisis_muestra (
   CONSTRAINT analisis_muestra_pkey PRIMARY KEY (id_analisis_muestra),
   CONSTRAINT analisis_muestra_id_muestra_fkey FOREIGN KEY (id_muestra) REFERENCES public.muestra(id_muestra)
 );
+
 CREATE TABLE public.anexo (
   id_reporte1 bigint NOT NULL DEFAULT nextval('anexo_id_reporte1_seq'::regclass),
   inspeccion_ocular character varying,
@@ -29,6 +34,7 @@ CREATE TABLE public.anexo (
   CONSTRAINT anexo_pkey PRIMARY KEY (id_reporte1),
   CONSTRAINT anexo_id_mapa_fkey FOREIGN KEY (id_mapa) REFERENCES public.mapa_riesgo(id_mapa)
 );
+
 CREATE TABLE public.anexo2 (
   id_reporte2 bigint NOT NULL DEFAULT nextval('anexo2_id_reporte_seq'::regclass),
   consecutivo_mapa_riesgo character varying,
@@ -37,6 +43,7 @@ CREATE TABLE public.anexo2 (
   CONSTRAINT anexo2_pkey PRIMARY KEY (id_reporte2),
   CONSTRAINT anexo2_id_mapa_fkey FOREIGN KEY (id_mapa) REFERENCES public.mapa_riesgo(id_mapa)
 );
+
 CREATE TABLE public.bocatoma (
   id_bocatoma bigint NOT NULL DEFAULT nextval('bocatoma_id_bocatoma_seq'::regclass),
   fecha character varying,
@@ -49,6 +56,7 @@ CREATE TABLE public.bocatoma (
   CONSTRAINT bocatoma_pkey PRIMARY KEY (id_bocatoma),
   CONSTRAINT bocatoma_id_reporte2_fkey FOREIGN KEY (id_reporte2) REFERENCES public.anexo2(id_reporte2)
 );
+
 CREATE TABLE public.caracteristica_priorizada (
   id_caracteristica bigint NOT NULL DEFAULT nextval('caracteristica_priorizada_id_caracteristica_seq'::regclass),
   actividad_contaminante character varying,
@@ -61,6 +69,7 @@ CREATE TABLE public.caracteristica_priorizada (
   CONSTRAINT caracteristica_priorizada_pkey PRIMARY KEY (id_caracteristica),
   CONSTRAINT caracteristica_priorizada_id_reporte1_fkey FOREIGN KEY (id_reporte1) REFERENCES public.anexo(id_reporte1)
 );
+
 CREATE TABLE public.documento_fuente (
   id_documento bigint NOT NULL DEFAULT nextval('documento_fuente_id_documento_seq'::regclass),
   fuente_info character varying,
@@ -72,6 +81,7 @@ CREATE TABLE public.documento_fuente (
   CONSTRAINT documento_fuente_pkey PRIMARY KEY (id_documento),
   CONSTRAINT documento_fuente_id_reporte1_fkey FOREIGN KEY (id_reporte1) REFERENCES public.anexo(id_reporte1)
 );
+
 CREATE TABLE public.entidad_participante (
   id_entidad bigint NOT NULL DEFAULT nextval('entidad_participante_id_entidad_seq'::regclass),
   entidad character varying,
@@ -81,6 +91,7 @@ CREATE TABLE public.entidad_participante (
   CONSTRAINT entidad_participante_pkey PRIMARY KEY (id_entidad),
   CONSTRAINT entidad_participante_id_reporte1_fkey FOREIGN KEY (id_reporte1) REFERENCES public.anexo(id_reporte1)
 );
+
 CREATE TABLE public.fuente (
   id_fuente bigint NOT NULL DEFAULT nextval('fuente_id_fuente_seq'::regclass),
   nombre text NOT NULL,
@@ -90,6 +101,7 @@ CREATE TABLE public.fuente (
   CONSTRAINT fuente_pkey PRIMARY KEY (id_fuente),
   CONSTRAINT fuente_id_ubicacion_fkey FOREIGN KEY (id_ubicacion) REFERENCES public.ubicacion(id_ubicacion)
 );
+
 CREATE TABLE public.inspeccion (
   id_inspeccion bigint GENERATED ALWAYS AS IDENTITY NOT NULL,
   id_inspeccion_sivicap bigint,
@@ -113,6 +125,7 @@ CREATE TABLE public.inspeccion (
   CONSTRAINT inspeccion_pkey PRIMARY KEY (id_inspeccion),
   CONSTRAINT inspeccion_id_prestador_fkey FOREIGN KEY (id_prestador) REFERENCES public.prestador(id_prestador)
 );
+
 CREATE TABLE public.inspeccion_staging (
   id_inspeccion_sivicap text,
   fecha_inspeccion text,
@@ -135,6 +148,7 @@ CREATE TABLE public.inspeccion_staging (
   processed boolean DEFAULT false,
   created_at timestamp with time zone DEFAULT now()
 );
+
 CREATE TABLE public.laboratorio (
   id_laboratorio bigint NOT NULL DEFAULT nextval('laboratorio_id_laboratorio_seq'::regclass),
   nombre text NOT NULL,
@@ -145,6 +159,7 @@ CREATE TABLE public.laboratorio (
   CONSTRAINT laboratorio_pkey PRIMARY KEY (id_laboratorio),
   CONSTRAINT laboratorio_id_ubicacion_lab_fkey FOREIGN KEY (id_ubicacion_lab) REFERENCES public.ubicacion_laboratorio(id_ubicacion_lab)
 );
+
 CREATE TABLE public.mapa_riesgo (
   id_mapa bigint NOT NULL,
   id_prestador bigint,
@@ -153,6 +168,7 @@ CREATE TABLE public.mapa_riesgo (
   CONSTRAINT mapa_riesgo_id_punto_captacion_fkey FOREIGN KEY (id_punto_captacion) REFERENCES public.punto_captacion(id_punto_captacion),
   CONSTRAINT mapa_riesgo_id_prestador_fkey FOREIGN KEY (id_prestador) REFERENCES public.prestador(id_prestador)
 );
+
 CREATE TABLE public.mapa_riesgo_staging (
   id_staging bigint GENERATED ALWAYS AS IDENTITY NOT NULL,
   nit text,
@@ -228,6 +244,7 @@ CREATE TABLE public.mapa_riesgo_staging (
   created_at timestamp with time zone DEFAULT now(),
   CONSTRAINT mapa_riesgo_staging_pkey PRIMARY KEY (id_staging)
 );
+
 CREATE TABLE public.muestra (
   id_muestra bigint GENERATED ALWAYS AS IDENTITY NOT NULL,
   muestra_no text NOT NULL,
@@ -256,6 +273,7 @@ CREATE TABLE public.muestra (
   CONSTRAINT muestra_id_laboratorio_fkey FOREIGN KEY (id_laboratorio) REFERENCES public.laboratorio(id_laboratorio),
   CONSTRAINT muestra_id_muestreo_fkey FOREIGN KEY (id_muestreo) REFERENCES public.punto_muestreo(id_muestreo)
 );
+
 CREATE TABLE public.muestra_staging (
   id_staging bigint NOT NULL DEFAULT nextval('muestra_staging_id_staging_seq'::regclass),
   nit text,
@@ -297,6 +315,7 @@ CREATE TABLE public.muestra_staging (
   created_at timestamp with time zone DEFAULT now(),
   CONSTRAINT muestra_staging_pkey PRIMARY KEY (id_staging)
 );
+
 CREATE TABLE public.prestador (
   id_prestador bigint NOT NULL,
   nit text,
@@ -311,6 +330,7 @@ CREATE TABLE public.prestador (
   CONSTRAINT prestador_pkey PRIMARY KEY (id_prestador),
   CONSTRAINT prestador_id_ubicacion_fkey FOREIGN KEY (id_ubicacion) REFERENCES public.ubicacion(id_ubicacion)
 );
+
 CREATE TABLE public.profiles (
   id uuid NOT NULL,
   nombre text,
@@ -321,6 +341,7 @@ CREATE TABLE public.profiles (
   CONSTRAINT profiles_pkey PRIMARY KEY (id),
   CONSTRAINT profiles_id_fkey FOREIGN KEY (id) REFERENCES auth.users(id)
 );
+
 CREATE TABLE public.punto_captacion (
   id_punto_captacion bigint GENERATED ALWAYS AS IDENTITY NOT NULL,
   tipo_captacion character varying NOT NULL,
@@ -333,6 +354,7 @@ CREATE TABLE public.punto_captacion (
   longitud numeric,
   CONSTRAINT punto_captacion_pkey PRIMARY KEY (id_punto_captacion)
 );
+
 CREATE TABLE public.punto_muestreo (
   id_muestreo bigint GENERATED ALWAYS AS IDENTITY NOT NULL,
   codigo character varying,
@@ -346,6 +368,7 @@ CREATE TABLE public.punto_muestreo (
   direccion character varying,
   CONSTRAINT punto_muestreo_pkey PRIMARY KEY (id_muestreo)
 );
+
 CREATE TABLE public.red (
   id_red bigint NOT NULL DEFAULT nextval('red_id_red_seq'::regclass),
   fecha character varying,
@@ -360,6 +383,7 @@ CREATE TABLE public.red (
   CONSTRAINT red_pkey PRIMARY KEY (id_red),
   CONSTRAINT red_id_reporte2_fkey FOREIGN KEY (id_reporte2) REFERENCES public.anexo2(id_reporte2)
 );
+
 CREATE TABLE public.representante (
   id_representante bigint NOT NULL DEFAULT nextval('representante_id_representante_seq'::regclass),
   nombre text NOT NULL,
@@ -369,6 +393,7 @@ CREATE TABLE public.representante (
   CONSTRAINT representante_pkey PRIMARY KEY (id_representante),
   CONSTRAINT representante_id_prestador_fkey FOREIGN KEY (id_prestador) REFERENCES public.prestador(id_prestador)
 );
+
 CREATE TABLE public.resolucion (
   id_resolucion bigint NOT NULL DEFAULT nextval('resolucion_id_resolucion_seq'::regclass),
   numero_resolucion character varying,
@@ -378,6 +403,7 @@ CREATE TABLE public.resolucion (
   CONSTRAINT resolucion_pkey PRIMARY KEY (id_resolucion),
   CONSTRAINT resolucion_id_reporte2_fkey FOREIGN KEY (id_reporte2) REFERENCES public.anexo2(id_reporte2)
 );
+
 CREATE TABLE public.riesgo (
   id_riesgo bigint NOT NULL DEFAULT nextval('riesgo_id_riesgo_seq'::regclass),
   actividad character varying,
@@ -389,6 +415,7 @@ CREATE TABLE public.riesgo (
   CONSTRAINT riesgo_pkey PRIMARY KEY (id_riesgo),
   CONSTRAINT riesgo_id_reporte3_fkey FOREIGN KEY (id_reporte3) REFERENCES public.seguimiento(id_reporte3)
 );
+
 CREATE TABLE public.seguimiento (
   id_reporte3 bigint NOT NULL DEFAULT nextval('seguimiento_id_reporte3_seq'::regclass),
   consecutivo_mapa_riesgo character varying,
@@ -398,6 +425,7 @@ CREATE TABLE public.seguimiento (
   CONSTRAINT seguimiento_pkey PRIMARY KEY (id_reporte3),
   CONSTRAINT seguimiento_id_mapa_fkey FOREIGN KEY (id_mapa) REFERENCES public.mapa_riesgo(id_mapa)
 );
+
 CREATE TABLE public.seguimiento_caracteristica (
   id_caracteristica bigint NOT NULL DEFAULT nextval('caracteristica_id_caracteristica_seq'::regclass),
   caracteristica_seguimiento character varying,
@@ -409,6 +437,7 @@ CREATE TABLE public.seguimiento_caracteristica (
   CONSTRAINT seguimiento_caracteristica_pkey PRIMARY KEY (id_caracteristica),
   CONSTRAINT seguimiento_caracteristica_id_reporte3_fkey FOREIGN KEY (id_reporte3) REFERENCES public.seguimiento(id_reporte3)
 );
+
 CREATE TABLE public.seguimiento_inspeccion (
   id_inspeccion bigint NOT NULL DEFAULT nextval('seguimiento_inspeccion_id_inspeccion_seq'::regclass),
   nombre_archivo character varying,
@@ -418,6 +447,7 @@ CREATE TABLE public.seguimiento_inspeccion (
   CONSTRAINT seguimiento_inspeccion_pkey PRIMARY KEY (id_inspeccion),
   CONSTRAINT seguimiento_inspeccion_id_reporte3_fkey FOREIGN KEY (id_reporte3) REFERENCES public.seguimiento(id_reporte3)
 );
+
 CREATE TABLE public.seguridad (
   id_seguridad bigint NOT NULL DEFAULT nextval('seguridad_id_seguridad_seq'::regclass),
   medida character varying,
@@ -427,6 +457,7 @@ CREATE TABLE public.seguridad (
   CONSTRAINT seguridad_pkey PRIMARY KEY (id_seguridad),
   CONSTRAINT seguridad_id_reporte3_fkey FOREIGN KEY (id_reporte3) REFERENCES public.seguimiento(id_reporte3)
 );
+
 CREATE TABLE public.solicitante (
   id_solicitante bigint NOT NULL DEFAULT nextval('solicitante_id_solicitante_seq'::regclass),
   nombre text NOT NULL,
@@ -435,6 +466,7 @@ CREATE TABLE public.solicitante (
   CONSTRAINT solicitante_pkey PRIMARY KEY (id_solicitante),
   CONSTRAINT solicitante_id_ubicacion_sol_fkey FOREIGN KEY (id_ubicacion_sol) REFERENCES public.ubicacion_solicitante(id_ubicacion_sol)
 );
+
 CREATE TABLE public.tecnico (
   id_tecnico bigint NOT NULL DEFAULT nextval('tecnico_id_tecnico_seq'::regclass),
   identificacion bigint,
@@ -448,6 +480,7 @@ CREATE TABLE public.tecnico (
   CONSTRAINT tecnico_id_ubicacion_tec_fkey FOREIGN KEY (id_ubicacion_tec) REFERENCES public.ubicacion_tecnico(id_ubicacion_tec),
   CONSTRAINT tecnico_id_laboratorio_fkey FOREIGN KEY (id_laboratorio) REFERENCES public.laboratorio(id_laboratorio)
 );
+
 CREATE TABLE public.ubicacion (
   id_ubicacion bigint NOT NULL DEFAULT nextval('ubicacion_id_ubicacion_seq'::regclass),
   departamento text NOT NULL,
@@ -455,6 +488,7 @@ CREATE TABLE public.ubicacion (
   vereda text,
   CONSTRAINT ubicacion_pkey PRIMARY KEY (id_ubicacion)
 );
+
 CREATE TABLE public.ubicacion_laboratorio (
   id_ubicacion_lab bigint NOT NULL DEFAULT nextval('ubicacion_laboratorio_id_ubicacion_lab_seq'::regclass),
   departamento text NOT NULL,
@@ -462,12 +496,14 @@ CREATE TABLE public.ubicacion_laboratorio (
   direccion text,
   CONSTRAINT ubicacion_laboratorio_pkey PRIMARY KEY (id_ubicacion_lab)
 );
+
 CREATE TABLE public.ubicacion_solicitante (
   id_ubicacion_sol bigint NOT NULL DEFAULT nextval('ubicacion_solicitante_id_ubicacion_sol_seq'::regclass),
   departamento text NOT NULL,
   municipio text NOT NULL,
   CONSTRAINT ubicacion_solicitante_pkey PRIMARY KEY (id_ubicacion_sol)
 );
+
 CREATE TABLE public.ubicacion_tecnico (
   id_ubicacion_tec bigint NOT NULL DEFAULT nextval('ubicacion_tecnico_id_ubicacion_tec_seq'::regclass),
   departamento text NOT NULL,
@@ -475,3 +511,375 @@ CREATE TABLE public.ubicacion_tecnico (
   direccion text,
   CONSTRAINT ubicacion_tecnico_pkey PRIMARY KEY (id_ubicacion_tec)
 );
+
+-- ======================
+-- FUNCTIONS (ultima definicion por nombre)
+-- ======================
+create or replace function public.admin_delete_user_account(p_user_id uuid)
+returns json
+language plpgsql
+security definer
+set search_path = public, auth
+as $$
+declare
+  v_exists boolean;
+begin
+  if p_user_id is null then
+    raise exception 'El id de usuario es obligatorio';
+  end if;
+
+  if not public.current_user_is_admin() then
+    raise exception 'No tienes permisos para eliminar cuentas';
+  end if;
+
+  if p_user_id = auth.uid() then
+    raise exception 'No puedes eliminar tu propia cuenta';
+  end if;
+
+  select exists(select 1 from auth.users u where u.id = p_user_id) into v_exists;
+  if not v_exists then
+    raise exception 'La cuenta no existe';
+  end if;
+
+  delete from public.profiles where id = p_user_id;
+  delete from auth.users where id = p_user_id;
+
+  return json_build_object('success', true, 'id', p_user_id);
+end;
+$$;
+
+create or replace function public.admin_update_user_role(
+  p_user_id uuid,
+  p_role text
+)
+returns json
+language plpgsql
+security definer
+set search_path = public
+as $$
+declare
+  v_role text;
+begin
+  if p_user_id is null then
+    raise exception 'El id de usuario es obligatorio';
+  end if;
+
+  v_role := lower(trim(coalesce(p_role, '')));
+
+  if v_role = '' then
+    raise exception 'El rol es obligatorio';
+  end if;
+
+  if v_role not in ('usuario', 'administrador', 'admin') then
+    raise exception 'Rol no permitido';
+  end if;
+
+  if not public.current_user_is_admin() then
+    raise exception 'No tienes permisos para cambiar roles';
+  end if;
+
+  if not exists (
+    select 1
+    from public.profiles p
+    where p.id = p_user_id
+  ) then
+    raise exception 'El perfil no existe';
+  end if;
+
+  update public.profiles
+  set
+    rol = case when v_role = 'admin' then 'administrador' else v_role end,
+    updated_at = now()
+  where id = p_user_id;
+
+  return json_build_object(
+    'success', true,
+    'id', p_user_id,
+    'rol', case when v_role = 'admin' then 'administrador' else v_role end
+  );
+end;
+$$;
+
+create or replace function public.current_user_is_admin()
+returns boolean
+language sql
+stable
+security definer
+set search_path = public
+as $$
+  select exists (
+    select 1
+    from public.profiles p
+    where p.id = auth.uid()
+      and lower(trim(coalesce(p.rol, ''))) in ('administrador', 'admin')
+  );
+$$;
+
+create or replace function public.dashboard_kpis_anios_disponibles()
+returns table (
+  anio integer
+)
+language sql
+stable
+security definer
+set search_path = public
+as $$
+  with years as (
+    select anio from public.vw_kpi_muestras_base where anio is not null
+    union
+    select anio from public.vw_kpi_inspeccion_base where anio is not null
+    union
+    select anio from public.vw_kpi_mapa_riesgo_base where anio is not null
+  )
+  select y.anio
+  from years y
+  order by y.anio desc;
+$$;
+
+create or replace function public.dashboard_kpis_por_municipio(
+  p_anio integer default null
+)
+returns table (
+  municipio text,
+  muestras_total bigint,
+  inspecciones_total bigint,
+  mapas_total bigint,
+  irca_promedio numeric(10,2),
+  iraba_promedio numeric(10,2)
+)
+language sql
+stable
+security definer
+set search_path = public
+as $$
+with m as (
+  select
+    vm.municipio,
+    count(*)::bigint as muestras_total,
+    coalesce(round(avg(vm.irca)::numeric, 2), 0)::numeric(10,2) as irca_promedio
+  from public.vw_kpi_muestras_base vm
+  where p_anio is null or vm.anio = p_anio
+  group by vm.municipio
+),
+i as (
+  select
+    vi.municipio,
+    count(*)::bigint as inspecciones_total,
+    coalesce(round(avg(vi.iraba_inspeccion)::numeric, 2), 0)::numeric(10,2) as iraba_promedio
+  from public.vw_kpi_inspeccion_base vi
+  where p_anio is null or vi.anio = p_anio
+  group by vi.municipio
+),
+r as (
+  select
+    vr.municipio,
+    count(*)::bigint as mapas_total
+  from public.vw_kpi_mapa_riesgo_base vr
+  where p_anio is null or vr.anio = p_anio
+  group by vr.municipio
+),
+keys as (
+  select municipio from m
+  union
+  select municipio from i
+  union
+  select municipio from r
+)
+select
+  k.municipio,
+  coalesce(m.muestras_total, 0)::bigint as muestras_total,
+  coalesce(i.inspecciones_total, 0)::bigint as inspecciones_total,
+  coalesce(r.mapas_total, 0)::bigint as mapas_total,
+  coalesce(m.irca_promedio, 0)::numeric(10,2) as irca_promedio,
+  coalesce(i.iraba_promedio, 0)::numeric(10,2) as iraba_promedio
+from keys k
+left join m on m.municipio = k.municipio
+left join i on i.municipio = k.municipio
+left join r on r.municipio = k.municipio
+order by muestras_total desc, inspecciones_total desc, mapas_total desc, k.municipio;
+$$;
+
+create or replace function public.dashboard_kpis_resumen(
+  p_anio integer default null,
+  p_municipio text default null
+)
+returns table (
+  scope text,
+  muestras_total bigint,
+  inspecciones_total bigint,
+  mapas_total bigint,
+  irca_promedio numeric(10,2),
+  iraba_promedio numeric(10,2)
+)
+language sql
+stable
+security definer
+set search_path = public
+as $$
+with parametros as (
+  select
+    p_anio as anio,
+    nullif(public.normalize_municipio_kpi(p_municipio), 'SIN_MUNICIPIO') as municipio
+),
+m as (
+  select vm.*
+  from public.vw_kpi_muestras_base vm
+  cross join parametros p
+  where (p.anio is null or vm.anio = p.anio)
+    and (p.municipio is null or vm.municipio = p.municipio)
+),
+i as (
+  select vi.*
+  from public.vw_kpi_inspeccion_base vi
+  cross join parametros p
+  where (p.anio is null or vi.anio = p.anio)
+    and (p.municipio is null or vi.municipio = p.municipio)
+),
+r as (
+  select vr.*
+  from public.vw_kpi_mapa_riesgo_base vr
+  cross join parametros p
+  where (p.anio is null or vr.anio = p.anio)
+    and (p.municipio is null or vr.municipio = p.municipio)
+)
+select
+  'RESUMEN'::text as scope,
+  (select count(*)::bigint from m) as muestras_total,
+  (select count(*)::bigint from i) as inspecciones_total,
+  (select count(*)::bigint from r) as mapas_total,
+  coalesce((select round(avg(m.irca)::numeric, 2) from m where m.irca is not null), 0)::numeric(10,2) as irca_promedio,
+  coalesce((select round(avg(i.iraba_inspeccion)::numeric, 2) from i where i.iraba_inspeccion is not null), 0)::numeric(10,2) as iraba_promedio;
+$$;
+
+create or replace function public.dashboard_kpis_tendencia_mensual(
+  p_anio integer default null,
+  p_municipio text default null
+)
+returns table (
+  mes integer,
+  muestras_total bigint,
+  inspecciones_total bigint,
+  mapas_total bigint
+)
+language sql
+stable
+security definer
+set search_path = public
+as $$
+with parametros as (
+  select
+    coalesce(p_anio, extract(year from current_date)::int) as anio,
+    nullif(public.normalize_municipio_kpi(p_municipio), 'SIN_MUNICIPIO') as municipio
+),
+meses as (
+  select generate_series(1, 12)::int as mes
+),
+m as (
+  select
+    extract(month from vm.fecha_evento)::int as mes,
+    count(*)::bigint as total
+  from public.vw_kpi_muestras_base vm
+  cross join parametros p
+  where vm.anio = p.anio
+    and (p.municipio is null or vm.municipio = p.municipio)
+  group by extract(month from vm.fecha_evento)::int
+),
+i as (
+  select
+    extract(month from vi.fecha_evento)::int as mes,
+    count(*)::bigint as total
+  from public.vw_kpi_inspeccion_base vi
+  cross join parametros p
+  where vi.anio = p.anio
+    and (p.municipio is null or vi.municipio = p.municipio)
+  group by extract(month from vi.fecha_evento)::int
+),
+r as (
+  select
+    extract(month from vr.fecha_evento)::int as mes,
+    count(*)::bigint as total
+  from public.vw_kpi_mapa_riesgo_base vr
+  cross join parametros p
+  where vr.anio = p.anio
+    and (p.municipio is null or vr.municipio = p.municipio)
+  group by extract(month from vr.fecha_evento)::int
+)
+select
+  meses.mes,
+  coalesce(m.total, 0)::bigint as muestras_total,
+  coalesce(i.total, 0)::bigint as inspecciones_total,
+  coalesce(r.total, 0)::bigint as mapas_total
+from meses
+left join m on m.mes = meses.mes
+left join i on i.mes = meses.mes
+left join r on r.mes = meses.mes
+order by meses.mes;
+$$;
+
+create or replace function public.normalize_municipio_kpi(p_value text)
+returns text
+language sql
+immutable
+set search_path = public
+as $$
+  with norm as (
+    select btrim(
+      regexp_replace(
+        regexp_replace(
+          upper(btrim(coalesce(p_value, ''))),
+          '^\s*[0-9]+\s*-\s*',
+          ''
+        ),
+        '\s+',
+        ' ',
+        'g'
+      )
+    ) as value
+  )
+  select case when n.value = '' then 'SIN_MUNICIPIO' else n.value end
+  from norm n;
+$$;
+
+create or replace function public.parse_fecha_safe(p_fecha text)
+returns date
+language plpgsql
+immutable
+as $$
+declare
+  v_fecha text;
+begin
+  v_fecha := nullif(trim(p_fecha), '');
+
+  if v_fecha is null then
+    return null;
+  end if;
+
+  -- Keep only date part when datetime arrives (e.g. 2025-01-31 10:20:30 or 2025-01-31T10:20:30)
+  if strpos(v_fecha, 'T') > 0 then
+    v_fecha := split_part(v_fecha, 'T', 1);
+  elsif strpos(v_fecha, ' ') > 0 then
+    v_fecha := split_part(v_fecha, ' ', 1);
+  end if;
+
+  if v_fecha ~ '^[0-9]{4}-[0-9]{2}-[0-9]{2}$' then
+    return to_date(v_fecha, 'YYYY-MM-DD');
+  elsif v_fecha ~ '^[0-9]{4}/[0-9]{2}/[0-9]{2}$' then
+    return to_date(v_fecha, 'YYYY/MM/DD');
+  elsif v_fecha ~ '^[0-9]{2}/[0-9]{2}/[0-9]{4}$' then
+    return to_date(v_fecha, 'DD/MM/YYYY');
+  elsif v_fecha ~ '^[0-9]{2}-[0-9]{2}-[0-9]{4}$' then
+    return to_date(v_fecha, 'DD-MM-YYYY');
+  elsif v_fecha ~ '^[0-9]{8}$' then
+    return to_date(v_fecha, 'YYYYMMDD');
+  elsif v_fecha ~ '^[0-9]{2}/[0-9]{2}/[0-9]{2}$' then
+    return to_date(v_fecha, 'DD/MM/YY');
+  end if;
+
+  return null;
+exception
+  when others then
+    return null;
+end;
+$$;
+
+
