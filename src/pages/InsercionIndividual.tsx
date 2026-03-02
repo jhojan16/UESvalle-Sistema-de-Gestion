@@ -208,6 +208,7 @@ export default function InspeccionStagingResolver() {
             type: "actions",
             getActions: (params) => [
                 <GridActionsCellItem
+                    key={`delete-${String((params.row as any).id_staging)}`}
                     icon={<DeleteIcon />}
                     label="Eliminar"
                     onClick={() => {

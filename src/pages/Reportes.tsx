@@ -26,13 +26,41 @@
     ResponsiveContainer,
     } from 'recharts';
 
-    const COLORS = [
-    '#3b82f6', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6',
-    '#ec4899', '#14b8a6', '#f97316', '#06b6d4', '#84cc16',
-    '#6366f1', '#a855f7', '#d946ef', '#0ea5e9', '#22c55e'
-    ];
+     const COLORS = [
+     '#3b82f6', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6',
+     '#ec4899', '#14b8a6', '#f97316', '#06b6d4', '#84cc16',
+     '#6366f1', '#a855f7', '#d946ef', '#0ea5e9', '#22c55e'
+     ];
 
-    export default function ReportesPorEstado() {
+    const ReportesCustomTooltip = ({
+      active,
+      payload,
+      total,
+    }: {
+      active?: boolean;
+      payload?: Array<{ name?: string; value?: number }>;
+      total: number;
+    }) => {
+      if (active && payload && payload.length) {
+        const item = payload[0];
+        const name = item.name ?? 'Sin estado';
+        const value = item.value ?? 0;
+        const percent = total > 0 ? ((value / total) * 100).toFixed(1) : '0.0';
+        return (
+          <Paper sx={{ p: 1.5, bgcolor: 'background.paper', border: '1px solid', borderColor: 'divider' }}>
+            <Typography variant="body2" fontWeight="bold">
+              {name}
+            </Typography>
+            <Typography variant="caption" color="text.secondary">
+              {value} reportes ({percent}%)
+            </Typography>
+          </Paper>
+        );
+      }
+      return null;
+    };
+
+     export default function ReportesPorEstado() {
     const [selectedEstado, setSelectedEstado] = useState('Todos');
 
     // 🔹 Consultar reportes desde Supabase
@@ -68,25 +96,6 @@
     }));
 
     const total = dataPie.reduce((acc, item) => acc + item.value, 0);
-
-    // 🔹 Tooltip personalizado
-    const CustomTooltip = ({ active, payload }: any) => {
-        if (active && payload && payload.length) {
-        const { name, value } = payload[0];
-        const percent = ((value / total) * 100).toFixed(1);
-        return (
-            <Paper sx={{ p: 1.5, bgcolor: 'background.paper', border: '1px solid', borderColor: 'divider' }}>
-            <Typography variant="body2" fontWeight="bold">
-                {name}
-            </Typography>
-            <Typography variant="caption" color="text.secondary">
-                {value} reportes ({percent}%)
-            </Typography>
-            </Paper>
-        );
-        }
-        return null;
-    };
 
     // 🔹 Filtrar por estado seleccionado
     const estados = ['Todos', ...Object.keys(agrupados)];
@@ -125,10 +134,10 @@
                         label={({ name, value }) => `${name} (${((value / total) * 100).toFixed(1)}%)`}
                     >
                         {dataPie.map((entry, index) => (
-                        <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                        <Cell key={`estado-${entry.name}`} fill={COLORS[index % COLORS.length]} />
                         ))}
                     </Pie>
-                    <Tooltip content={<CustomTooltip />} />
+                    <Tooltip content={<ReportesCustomTooltip total={total} />} />
                     <Legend
                         verticalAlign="bottom"
                         height={36}

@@ -1,4 +1,4 @@
-﻿import { useEffect, useMemo, useState } from 'react';
+import { useMemo, useState } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import {
   Alert,
@@ -114,18 +114,15 @@ export default function Perfil() {
     };
   }, [profile, user?.email, user?.user_metadata?.nombre]);
 
-  const [formData, setFormData] = useState<ProfileForm>(initialForm);
-
-  useEffect(() => {
-    setFormData(initialForm);
-  }, [initialForm]);
+  const [formData, setFormData] = useState<ProfileForm | null>(null);
+  const resolvedFormData = formData ?? initialForm;
 
   const hasChanges = useMemo(() => {
     return (
-      formData.nombre.trim() !== initialForm.nombre.trim() ||
-      formData.email.trim() !== initialForm.email.trim()
+      resolvedFormData.nombre.trim() !== initialForm.nombre.trim() ||
+      resolvedFormData.email.trim() !== initialForm.email.trim()
     );
-  }, [formData, initialForm]);
+  }, [resolvedFormData, initialForm]);
 
   const saveMutation = useMutation({
     mutationFn: async (payload: ProfileForm) => {
@@ -148,6 +145,7 @@ export default function Perfil() {
     },
     onSuccess: async () => {
       await qc.invalidateQueries({ queryKey: ['perfil', user?.id] });
+      setFormData(null);
       toast.success('Perfil actualizado correctamente');
     },
     onError: (mutationError: unknown) => {
@@ -160,12 +158,12 @@ export default function Perfil() {
   });
 
   const handleSave = () => {
-    if (!formData.email.trim()) {
+    if (!resolvedFormData.email.trim()) {
       toast.error('El correo es obligatorio');
       return;
     }
 
-    saveMutation.mutate(formData);
+    saveMutation.mutate(resolvedFormData);
   };
 
   const passwordMutation = useMutation({
@@ -276,7 +274,7 @@ export default function Perfil() {
 
             <Box>
               <Typography variant="h6" fontWeight="bold">
-                {formData.nombre.trim() || 'Usuario'}
+                {resolvedFormData.nombre.trim() || 'Usuario'}
               </Typography>
               <Typography variant="body2" color="text.secondary" sx={{ wordBreak: 'break-word' }}>
                 {user.email}
@@ -310,8 +308,10 @@ export default function Perfil() {
             <TextField
               label="Nombre"
               fullWidth
-              value={formData.nombre}
-              onChange={(e) => setFormData((prev) => ({ ...prev, nombre: e.target.value }))}
+              value={resolvedFormData.nombre}
+              onChange={(e) =>
+                setFormData((prev) => ({ ...(prev ?? initialForm), nombre: e.target.value }))
+              }
               disabled={saveMutation.isPending}
             />
 
@@ -320,8 +320,10 @@ export default function Perfil() {
               type="email"
               fullWidth
               required
-              value={formData.email}
-              onChange={(e) => setFormData((prev) => ({ ...prev, email: e.target.value }))}
+              value={resolvedFormData.email}
+              onChange={(e) =>
+                setFormData((prev) => ({ ...(prev ?? initialForm), email: e.target.value }))
+              }
               disabled={saveMutation.isPending}
             />
 
@@ -331,7 +333,7 @@ export default function Perfil() {
           <Box sx={{ display: 'flex', justifyContent: 'flex-end', gap: 1.5, mt: 3 }}>
             <Button
               variant="outlined"
-              onClick={() => setFormData(initialForm)}
+              onClick={() => setFormData(null)}
               disabled={saveMutation.isPending || !hasChanges}
             >
               Cancelar

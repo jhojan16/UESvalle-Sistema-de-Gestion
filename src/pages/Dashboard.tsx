@@ -101,6 +101,27 @@ type PieTooltipPayload = {
   };
 };
 
+const DashboardCustomTooltip = ({ active, payload }: { active?: boolean; payload?: PieTooltipPayload[] }) => {
+  if (active && payload && payload.length) {
+    const item = payload[0];
+    const value = item.value ?? 0;
+    const total = item.payload?.total ?? 0;
+    const percentage = total > 0 ? ((value / total) * 100).toFixed(1) : '0.0';
+
+    return (
+      <Paper sx={{ p: 1.5, bgcolor: 'background.paper', border: '1px solid', borderColor: 'divider' }}>
+        <Typography variant="body2" fontWeight="bold">
+          {item.name}
+        </Typography>
+        <Typography variant="caption" color="text.secondary">
+          {value} prestadores ({percentage}%)
+        </Typography>
+      </Paper>
+    );
+  }
+  return null;
+};
+
 export default function Dashboard() {
   const currentYear = new Date().getFullYear();
   const [selectedYear, setSelectedYear] = useState<number | 'ALL'>('ALL');
@@ -333,27 +354,6 @@ export default function Dashboard() {
         {`${(percent * 100).toFixed(0)}%`}
       </text>
     );
-  };
-
-  const CustomTooltip = ({ active, payload }: { active?: boolean; payload?: PieTooltipPayload[] }) => {
-    if (active && payload && payload.length) {
-      const item = payload[0];
-      const value = item.value ?? 0;
-      const total = item.payload?.total ?? 0;
-      const percentage = total > 0 ? ((value / total) * 100).toFixed(1) : '0.0';
-
-      return (
-        <Paper sx={{ p: 1.5, bgcolor: 'background.paper', border: '1px solid', borderColor: 'divider' }}>
-          <Typography variant="body2" fontWeight="bold">
-            {item.name}
-          </Typography>
-          <Typography variant="caption" color="text.secondary">
-            {value} prestadores ({percentage}%)
-          </Typography>
-        </Paper>
-      );
-    }
-    return null;
   };
 
   return (
@@ -621,10 +621,13 @@ export default function Dashboard() {
                       dataKey="value"
                     >
                       {ubicacionesData.departamentos.map((entry, index) => (
-                        <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                        <Cell
+                          key={`departamento-${entry.name ?? 'SIN_NOMBRE'}-${entry.value}`}
+                          fill={COLORS[index % COLORS.length]}
+                        />
                       ))}
                     </Pie>
-                    <Tooltip content={<CustomTooltip />} />
+                    <Tooltip content={<DashboardCustomTooltip />} />
                     <Legend
                       verticalAlign="bottom"
                       height={36}
@@ -674,10 +677,13 @@ export default function Dashboard() {
                       dataKey="value"
                     >
                       {ubicacionesData.municipios.map((entry, index) => (
-                        <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                        <Cell
+                          key={`municipio-${entry.name ?? 'SIN_NOMBRE'}-${entry.value}`}
+                          fill={COLORS[index % COLORS.length]}
+                        />
                       ))}
                     </Pie>
-                    <Tooltip content={<CustomTooltip />} />
+                    <Tooltip content={<DashboardCustomTooltip />} />
                     <Legend
                       verticalAlign="bottom"
                       height={150}
@@ -727,7 +733,7 @@ export default function Dashboard() {
                     >
                       {ircaData?.map((entry, index) => (
                         <Cell
-                          key={`cell-${index}`}
+                          key={`irca-${entry.name ?? 'SIN_NOMBRE'}-${entry.promedio}`}
                           fill={entry.promedio > 35 ? '#ef4444' : entry.promedio > 14 ? '#f59e0b' : '#10b981'}
                         />
                       ))}

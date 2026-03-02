@@ -190,11 +190,13 @@ export default function Solicitantes() {
             width: 100,
             getActions: (params) => [
                 <GridActionsCellItem
+                    key={`edit-${String(params.row.id_solicitante)}`}
                     icon={<Edit size={18} />}
                     label="Editar"
                     onClick={() => handleEdit(params.row)}
                 />,
                 <GridActionsCellItem
+                    key={`delete-${String(params.row.id_solicitante)}`}
                     icon={<Trash2 size={18} />}
                     label="Eliminar"
                     onClick={() => handleDelete(params.row.id_solicitante)}

@@ -229,6 +229,7 @@ export default function VistaAnalisisMuestras() {
       width: 110,
       getActions: (p) => [
         <GridActionsCellItem
+          key={`view-${String(p.row.id_muestra)}`}
           icon={<Eye size={20} />}
           label="Ver Detalles"
           onClick={() => {

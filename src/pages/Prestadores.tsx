@@ -222,16 +222,19 @@ export default function Prestadores() {
       flex: 0.2,
       getActions: (params) => [
         <GridActionsCellItem
+          key={`view-${String(params.row.id_prestador)}`}
           icon={<Eye size={18} />}
           label="Ver Detalle"
           onClick={() => navigate(`/prestadores/${params.row.id_prestador}`)}
         />,
         <GridActionsCellItem
+          key={`edit-${String(params.row.id_prestador)}`}
           icon={<Edit size={18} />}
           label="Editar"
           onClick={() => handleEdit(params.row)}
         />,
         <GridActionsCellItem
+          key={`delete-${String(params.row.id_prestador)}`}
           icon={<Trash2 size={18} />}
           label="Eliminar"
           onClick={() => {

@@ -200,11 +200,13 @@ export default function Tecnicos() {
       width: 100,
       getActions: (params) => [
         <GridActionsCellItem
+          key={`edit-${String(params.row.id_tecnico)}`}
           icon={<Edit size={18} />}
           label="Editar"
           onClick={() => handleEdit(params.row)}
         />,
         <GridActionsCellItem
+          key={`delete-${String(params.row.id_tecnico)}`}
           icon={<Trash2 size={18} />}
           label="Eliminar"
           onClick={() => confirmDelete(params.row.id_tecnico)}

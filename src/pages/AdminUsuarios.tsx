@@ -207,11 +207,13 @@ export default function AdminUsuarios() {
       flex: 0.2,
       getActions: (params) => [
         <GridActionsCellItem
+          key={`edit-${String(params.row.id)}`}
           icon={<Edit size={18} />}
           label="Cambiar rol"
           onClick={() => openRoleDialog(params.row)}
         />,
         <GridActionsCellItem
+          key={`delete-${String(params.row.id)}`}
           icon={<Trash2 size={18} />}
           label="Eliminar cuenta"
           disabled={params.row.id === user?.id}
