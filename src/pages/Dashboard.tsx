@@ -193,7 +193,7 @@ export default function Dashboard() {
     queryFn: async () => {
       const { data, error } = await supabase.rpc('dashboard_kpis_anios_disponibles');
       if (error) {
-        console.error('No se pudo obtener anios disponibles para KPI:', error.message);
+        console.error('No se pudo obtener años disponibles para KPI:', error.message);
         return [];
       }
 
@@ -428,11 +428,11 @@ export default function Dashboard() {
             }}
           >
             <FormControl fullWidth size="small">
-              <InputLabel id="kpi-year-label">Anio</InputLabel>
+              <InputLabel id="kpi-year-label">Año</InputLabel>
               <Select
                 labelId="kpi-year-label"
                 value={selectedYear}
-                label="Anio"
+                label="Año"
                 onChange={(event) => {
                   const value = event.target.value;
                   setSelectedYear(value === 'ALL' ? 'ALL' : Number(value));
@@ -531,7 +531,7 @@ export default function Dashboard() {
                 </Typography>
               </Box>
               <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
-                Comparativo de muestras, inspecciones y mapas de riesgo (anio seleccionado)
+                Comparativo de muestras, inspecciones y mapas de riesgo (año seleccionado)
               </Typography>
 
               {isLoadingKpisByMunicipio ? (
