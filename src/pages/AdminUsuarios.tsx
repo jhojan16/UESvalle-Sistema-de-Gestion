@@ -286,9 +286,17 @@ export default function AdminUsuarios() {
 
       <Paper sx={{ p: 3 }}>
         <Box sx={{ mb: 3 }}>
-          <Box sx={{ display: 'flex', gap: 1.5, alignItems: 'stretch' }}>
+          <Box
+            sx={{
+              display: 'flex',
+              flexWrap: 'nowrap',
+              gap: 1.5,
+              alignItems: 'center',
+            }}
+          >
             <TextField
-              fullWidth
+              size="small"
+              sx={{ flex: '1 1 auto', minWidth: 0 }}
               placeholder="Buscar por nombre o correo..."
               value={searchInput}
               onChange={(event) => setSearchInput(event.target.value)}
@@ -301,18 +309,26 @@ export default function AdminUsuarios() {
               InputProps={{
                 startAdornment: (
                   <InputAdornment position="start">
-                    <Search size={20} />
+                    <Search size={18} />
                   </InputAdornment>
                 ),
               }}
             />
-            <Button variant="contained" onClick={handleSearch} startIcon={<Search size={18} />}>
+            <Button
+              variant="contained"
+              size="small"
+              onClick={handleSearch}
+              startIcon={<Search size={18} />}
+              sx={{ whiteSpace: 'nowrap', flexShrink: 0 }}
+            >
               Buscar
             </Button>
             <Button
               variant="outlined"
+              size="small"
               onClick={handleClearSearch}
               disabled={!searchInput && !search}
+              sx={{ whiteSpace: 'nowrap', flexShrink: 0 }}
             >
               Limpiar
             </Button>

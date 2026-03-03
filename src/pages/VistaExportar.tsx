@@ -11,7 +11,6 @@ import {
   MenuItem,
   Paper,
   Select,
-  Stack,
   TextField,
   Typography,
 } from "@mui/material";
@@ -79,6 +78,9 @@ export default function ExportarVista() {
     selectedPrestadores.length > 0 &&
     selectedPrestadores.length <= 10 &&
     !prestadorErrorMsg;
+
+  const selectionHint = selectionError || prestadorErrorMsg || `${selectedPrestadores.length}/10 seleccionados`;
+  const selectionHintIsError = Boolean(selectionError || prestadorErrorMsg);
 
   const getToken = async () => {
     const { data } = await supabase.auth.getSession();
@@ -247,80 +249,102 @@ export default function ExportarVista() {
       </Box>
 
       <Paper sx={{ p: 3, mb: 3 }}>
-        <Stack spacing={2}>
-          <Stack
-            direction={{ xs: "column", lg: "row" }}
-            spacing={2}
-            alignItems={{ xs: "stretch", lg: "flex-start" }}
+        <Box
+          sx={{
+            width: "100%",
+            display: "grid",
+            columnGap: 2,
+            rowGap: 1,
+            alignItems: "center",
+            gridTemplateColumns: { xs: "1fr", md: "220px minmax(320px, 1fr) auto" },
+          }}
+        >
+          <FormControl size="small" fullWidth sx={{ gridColumn: { xs: "1 / -1", md: "1 / 2" } }}>
+            <InputLabel>Tipo</InputLabel>
+            <Select
+              label="Tipo"
+              value={tipo}
+              onChange={(e) => setTipo(e.target.value as ExportTipo)}
+              disabled={loading}
+            >
+              <MenuItem value="muestra">Muestra</MenuItem>
+              <MenuItem value="inspeccion">Inspeccion</MenuItem>
+              <MenuItem value="mapa_riesgo">Mapa de riesgo</MenuItem>
+            </Select>
+          </FormControl>
+
+          <Autocomplete
+            multiple
+            size="small"
+            options={prestadores}
+            value={selectedPrestadores}
+            loading={loadingPrestadores}
+            filterSelectedOptions
+            isOptionEqualToValue={(a, b) => a.id_prestador === b.id_prestador}
+            getOptionLabel={(o) => `${o.nombre ?? "Sin nombre"} (${o.nit ?? "Sin NIT"})`}
+            onChange={(_, value) => {
+              if (value.length > 10) {
+                setSelectionError("Maximo 10 prestadores.");
+                setSelectedPrestadores(value.slice(0, 10));
+                return;
+              }
+
+              setSelectionError("");
+              setSelectedPrestadores(value);
+            }}
+            sx={{ minWidth: 0, gridColumn: { xs: "1 / -1", md: "2 / 3" } }}
+            renderInput={(params) => (
+              <TextField
+                {...params}
+                label="Prestadores (max. 10)"
+                placeholder="Buscar por nombre o NIT"
+                error={selectionHintIsError}
+              />
+            )}
+          />
+
+          <Box
+            sx={{
+              gridColumn: { xs: "1 / -1", md: "3 / 4" },
+              display: "grid",
+              gap: 1,
+              gridTemplateColumns: { xs: "1fr", sm: "1fr 1fr", md: "auto auto" },
+              alignItems: "center",
+              justifyContent: { md: "flex-start" },
+            }}
           >
-            <FormControl size="small" sx={{ minWidth: { lg: 220 }, maxWidth: { lg: 260 } }}>
-              <InputLabel>Tipo</InputLabel>
-              <Select
-                label="Tipo"
-                value={tipo}
-                onChange={(e) => setTipo(e.target.value as ExportTipo)}
-                disabled={loading}
-              >
-                <MenuItem value="muestra">Muestra</MenuItem>
-                <MenuItem value="inspeccion">Inspeccion</MenuItem>
-                <MenuItem value="mapa_riesgo">Mapa de riesgo</MenuItem>
-              </Select>
-            </FormControl>
+            <Button
+              variant="contained"
+              startIcon={<FileDown size={18} />}
+              onClick={handleDownload}
+              disabled={!canRunExport}
+              sx={{ whiteSpace: "nowrap" }}
+            >
+              Descargar CSV
+            </Button>
 
-            <Autocomplete
-              multiple
-              size="small"
-              options={prestadores}
-              value={selectedPrestadores}
-              loading={loadingPrestadores}
-              filterSelectedOptions
-              isOptionEqualToValue={(a, b) => a.id_prestador === b.id_prestador}
-              getOptionLabel={(o) => `${o.nombre ?? "Sin nombre"} (${o.nit ?? "Sin NIT"})`}
-              onChange={(_, value) => {
-                if (value.length > 10) {
-                  setSelectionError("Maximo 10 prestadores.");
-                  setSelectedPrestadores(value.slice(0, 10));
-                  return;
-                }
+            <Button
+              variant="outlined"
+              startIcon={<Eye size={18} />}
+              onClick={fetchPreview}
+              disabled={!canRunExport}
+              sx={{ whiteSpace: "nowrap" }}
+            >
+              Vista previa
+            </Button>
+          </Box>
 
-                setSelectionError("");
-                setSelectedPrestadores(value);
-              }}
-              sx={{ flex: 1, minWidth: { lg: 420 } }}
-              renderInput={(params) => (
-                <TextField
-                  {...params}
-                  label="Prestadores (max. 10)"
-                  placeholder="Buscar por nombre o NIT"
-                  error={Boolean(selectionError || prestadorErrorMsg)}
-                  helperText={selectionError || prestadorErrorMsg || `${selectedPrestadores.length}/10 seleccionados`}
-                />
-              )}
-            />
-
-            <Stack direction={{ xs: "row", lg: "column" }} spacing={1} sx={{ minWidth: { lg: 190 } }}>
-              <Button
-                variant="outlined"
-                startIcon={<Eye size={18} />}
-                onClick={fetchPreview}
-                disabled={!canRunExport}
-                fullWidth
-              >
-                Vista previa
-              </Button>
-
-              <Button
-                variant="contained"
-                startIcon={<FileDown size={18} />}
-                onClick={handleDownload}
-                disabled={!canRunExport}
-                fullWidth
-              >
-                Descargar CSV
-              </Button>
-            </Stack>
-          </Stack>
-        </Stack>
+          <Typography
+            variant="caption"
+            sx={{
+              gridColumn: { xs: "1 / -1", md: "2 / 3" },
+              px: 1.5,
+              color: selectionHintIsError ? "error.main" : "text.secondary",
+            }}
+          >
+            {selectionHint}
+          </Typography>
+        </Box>
       </Paper>
 
       {errorMsg ? (
