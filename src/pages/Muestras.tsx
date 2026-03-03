@@ -167,7 +167,7 @@ export default function VistaAnalisisMuestras() {
       }
 
       if (appliedFiltro === "fecha_toma") {
-        const { data, error } = await base.eq("fecha_toma", value);
+        const { data, error } = await base.ilike("fecha_toma", `${value}%`);
         if (error) throw error;
         return { rows: (data as MuestraRow[]) ?? [], count: (data ?? []).length };
       }
@@ -325,7 +325,7 @@ export default function VistaAnalisisMuestras() {
           <TextField
             sx={{ flex: 1, minWidth: 260 }}
             size="small"
-            placeholder={`Valor exacto para ${labelFiltro}...`}
+            placeholder={filtro === "fecha_toma" ? "Ej: 9/12/2025" : `Valor exacto para ${labelFiltro}...`}
             value={draft}
             onChange={(e) => setDraft(e.target.value)}
             onKeyDown={(e) => {

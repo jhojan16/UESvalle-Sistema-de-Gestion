@@ -203,7 +203,7 @@ export default function VistaInspeccionesCards() {
             }
 
             if (appliedFiltro === "fecha_inspeccion") {
-                const { data, error } = await base.eq("fecha_inspeccion", value);
+                const { data, error } = await base.ilike("fecha_inspeccion", `${value}%`);
                 if (error) throw error;
                 return { rows: ((data ?? []) as any[]).map(toRow), count: (data ?? []).length };
             }
@@ -327,7 +327,7 @@ export default function VistaInspeccionesCards() {
                     <TextField
                         sx={{ flex: 1, minWidth: 260 }}
                         size="small"
-                        placeholder={`Busqueda por ${labelFiltro}...`}
+                        placeholder={filtro === "fecha_inspeccion" ? "Ej: 9/12/2025 o 9/12/2025 9:53" : `Busqueda por ${labelFiltro}...`}
                         value={draft}
                         onChange={(e) => setDraft(e.target.value)}
                         onKeyDown={(e) => {
