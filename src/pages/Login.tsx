@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import {
@@ -14,9 +14,17 @@ import {
   Container,
   IconButton,
   InputAdornment,
+  LinearProgress,
 } from '@mui/material';
-import { Building2, Eye, EyeOff } from 'lucide-react';
+import { Building2, CheckCircle2, Circle, Eye, EyeOff } from 'lucide-react';
 import { toast } from 'sonner';
+
+const PASSWORD_POLICY = {
+  minLength: 8,
+  hasLowercase: /[a-z]/,
+  hasUppercase: /[A-Z]/,
+  hasNumber: /\d/,
+};
 
 interface TabPanelProps {
   children?: React.ReactNode;
@@ -34,15 +42,50 @@ function TabPanel(props: TabPanelProps) {
 }
 
 export default function Login() {
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
+  const [signInEmail, setSignInEmail] = useState('');
+  const [signInPassword, setSignInPassword] = useState('');
+
   const [nombre, setNombre] = useState('');
+  const [signUpEmail, setSignUpEmail] = useState('');
+  const [signUpPassword, setSignUpPassword] = useState('');
+  const [signUpConfirmPassword, setSignUpConfirmPassword] = useState('');
+
   const [loading, setLoading] = useState(false);
   const [tabValue, setTabValue] = useState(0);
   const [showSignInPassword, setShowSignInPassword] = useState(false);
   const [showSignUpPassword, setShowSignUpPassword] = useState(false);
+  const [showSignUpConfirmPassword, setShowSignUpConfirmPassword] = useState(false);
+
   const { signIn, signUp, user } = useAuth();
   const navigate = useNavigate();
+
+  const passwordRequirements = useMemo(
+    () => [
+      {
+        label: `Minimo ${PASSWORD_POLICY.minLength} caracteres`,
+        met: signUpPassword.length >= PASSWORD_POLICY.minLength,
+      },
+      {
+        label: 'Al menos 1 letra mayuscula',
+        met: PASSWORD_POLICY.hasUppercase.test(signUpPassword),
+      },
+      {
+        label: 'Al menos 1 letra minuscula',
+        met: PASSWORD_POLICY.hasLowercase.test(signUpPassword),
+      },
+      {
+        label: 'Al menos 1 numero',
+        met: PASSWORD_POLICY.hasNumber.test(signUpPassword),
+      },
+    ],
+    [signUpPassword]
+  );
+
+  const fulfilledRequirements = passwordRequirements.filter((rule) => rule.met).length;
+  const passwordStrength = (fulfilledRequirements / passwordRequirements.length) * 100;
+  const allPasswordRequirementsMet = fulfilledRequirements === passwordRequirements.length;
+  const passwordsMatch =
+    signUpConfirmPassword.length > 0 && signUpPassword === signUpConfirmPassword;
 
   useEffect(() => {
     if (user) {
@@ -53,7 +96,7 @@ export default function Login() {
   const handleSignIn = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
-    const { error } = await signIn(email, password);
+    const { error } = await signIn(signInEmail, signInPassword);
     if (error) {
       toast.error('Error al iniciar sesion', {
         description: error.message,
@@ -66,12 +109,24 @@ export default function Login() {
 
   const handleSignUp = async (e: React.FormEvent) => {
     e.preventDefault();
+
     if (!nombre.trim()) {
       toast.error('El nombre es requerido');
       return;
     }
+
+    if (!allPasswordRequirementsMet) {
+      toast.error('Verifica los requisitos de la contraseña');
+      return;
+    }
+
+    if (!passwordsMatch) {
+      toast.error('Las contraseñas no coinciden');
+      return;
+    }
+
     setLoading(true);
-    const { error } = await signUp(email, password, nombre);
+    const { error } = await signUp(signUpEmail, signUpPassword, nombre);
     if (error) {
       toast.error('Error al registrarse', {
         description: error.message,
@@ -125,14 +180,18 @@ export default function Login() {
             </Tabs>
 
             <TabPanel value={tabValue} index={0}>
-              <Box component="form" onSubmit={handleSignIn} sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+              <Box
+                component="form"
+                onSubmit={handleSignIn}
+                sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}
+              >
                 <TextField
                   label="Correo Electronico"
                   type="email"
                   fullWidth
                   required
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
+                  value={signInEmail}
+                  onChange={(e) => setSignInEmail(e.target.value)}
                   placeholder="usuario@ejemplo.com"
                 />
                 <TextField
@@ -140,15 +199,17 @@ export default function Login() {
                   type={showSignInPassword ? 'text' : 'password'}
                   fullWidth
                   required
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
+                  value={signInPassword}
+                  onChange={(e) => setSignInPassword(e.target.value)}
                   InputProps={{
                     endAdornment: (
                       <InputAdornment position="end">
                         <IconButton
                           edge="end"
                           onClick={() => setShowSignInPassword((prev) => !prev)}
-                          aria-label={showSignInPassword ? 'Ocultar contraseña' : 'Mostrar contraseña'}
+                          aria-label={
+                            showSignInPassword ? 'Ocultar contraseña' : 'Mostrar contraseña'
+                          }
                         >
                           {showSignInPassword ? <EyeOff size={18} /> : <Eye size={18} />}
                         </IconButton>
@@ -156,13 +217,7 @@ export default function Login() {
                     ),
                   }}
                 />
-                <Button
-                  type="submit"
-                  variant="contained"
-                  size="large"
-                  fullWidth
-                  disabled={loading}
-                >
+                <Button type="submit" variant="contained" size="large" fullWidth disabled={loading}>
                   {loading ? 'Iniciando...' : 'Iniciar Sesion'}
                 </Button>
                 <Button
@@ -171,13 +226,17 @@ export default function Login() {
                   onClick={() => navigate('/reset-password')}
                   sx={{ alignSelf: 'center' }}
                 >
-                  ¿Olvidaste tu contraseña?
+                  Olvidaste tu contraseña?
                 </Button>
               </Box>
             </TabPanel>
 
             <TabPanel value={tabValue} index={1}>
-              <Box component="form" onSubmit={handleSignUp} sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+              <Box
+                component="form"
+                onSubmit={handleSignUp}
+                sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}
+              >
                 <TextField
                   label="Nombre Completo"
                   type="text"
@@ -192,8 +251,8 @@ export default function Login() {
                   type="email"
                   fullWidth
                   required
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
+                  value={signUpEmail}
+                  onChange={(e) => setSignUpEmail(e.target.value)}
                   placeholder="usuario@ejemplo.com"
                 />
                 <TextField
@@ -201,16 +260,17 @@ export default function Login() {
                   type={showSignUpPassword ? 'text' : 'password'}
                   fullWidth
                   required
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  inputProps={{ minLength: 6 }}
+                  value={signUpPassword}
+                  onChange={(e) => setSignUpPassword(e.target.value)}
                   InputProps={{
                     endAdornment: (
                       <InputAdornment position="end">
                         <IconButton
                           edge="end"
                           onClick={() => setShowSignUpPassword((prev) => !prev)}
-                          aria-label={showSignUpPassword ? 'Ocultar contraseña' : 'Mostrar contraseña'}
+                          aria-label={
+                            showSignUpPassword ? 'Ocultar contraseña' : 'Mostrar contraseña'
+                          }
                         >
                           {showSignUpPassword ? <EyeOff size={18} /> : <Eye size={18} />}
                         </IconButton>
@@ -218,12 +278,97 @@ export default function Login() {
                     ),
                   }}
                 />
+                <TextField
+                  label="Confirmar contraseña"
+                  type={showSignUpConfirmPassword ? 'text' : 'password'}
+                  fullWidth
+                  required
+                  value={signUpConfirmPassword}
+                  onChange={(e) => setSignUpConfirmPassword(e.target.value)}
+                  error={signUpConfirmPassword.length > 0 && !passwordsMatch}
+                  helperText={
+                    signUpConfirmPassword.length > 0 && !passwordsMatch
+                      ? 'Las contraseñas no coinciden'
+                      : ' '
+                  }
+                  InputProps={{
+                    endAdornment: (
+                      <InputAdornment position="end">
+                        <IconButton
+                          edge="end"
+                          onClick={() => setShowSignUpConfirmPassword((prev) => !prev)}
+                          aria-label={
+                            showSignUpConfirmPassword
+                              ? 'Ocultar contraseña'
+                              : 'Mostrar contraseña'
+                          }
+                        >
+                          {showSignUpConfirmPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+                        </IconButton>
+                      </InputAdornment>
+                    ),
+                  }}
+                />
+
+                <Box sx={{ mt: -0.5 }}>
+                  <Box
+                    sx={{
+                      display: 'flex',
+                      justifyContent: 'space-between',
+                      alignItems: 'center',
+                      mb: 1,
+                    }}
+                  >
+                    <Typography variant="caption" color="text.secondary">
+                      Requisitos de contraseña
+                    </Typography>
+                    <Typography
+                      variant="caption"
+                      color={allPasswordRequirementsMet ? 'success.main' : 'text.secondary'}
+                    >
+                      {fulfilledRequirements}/{passwordRequirements.length} cumplidos
+                    </Typography>
+                  </Box>
+
+                  <LinearProgress
+                    variant="determinate"
+                    value={passwordStrength}
+                    color={allPasswordRequirementsMet ? 'success' : 'primary'}
+                    sx={{ height: 8, borderRadius: 999, mb: 1.25 }}
+                  />
+
+                  <Box sx={{ display: 'grid', gap: 0.75 }}>
+                    {passwordRequirements.map((rule) => (
+                      <Box
+                        key={rule.label}
+                        sx={{
+                          display: 'flex',
+                          alignItems: 'center',
+                          gap: 1,
+                          color: rule.met ? 'success.main' : 'text.secondary',
+                        }}
+                      >
+                        {rule.met ? <CheckCircle2 size={16} /> : <Circle size={16} />}
+                        <Typography variant="caption">{rule.label}</Typography>
+                      </Box>
+                    ))}
+                  </Box>
+                </Box>
+
                 <Button
                   type="submit"
                   variant="contained"
                   size="large"
                   fullWidth
-                  disabled={loading}
+                  disabled={
+                    loading ||
+                    !nombre.trim() ||
+                    !signUpEmail.trim() ||
+                    !signUpPassword ||
+                    !signUpConfirmPassword ||
+                    !allPasswordRequirementsMet ||
+                    !passwordsMatch
+                  }
                 >
                   {loading ? 'Registrando...' : 'Crear Cuenta'}
                 </Button>
@@ -235,4 +380,3 @@ export default function Login() {
     </Container>
   );
 }
-
