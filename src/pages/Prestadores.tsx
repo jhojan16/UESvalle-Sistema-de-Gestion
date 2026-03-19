@@ -17,12 +17,14 @@ import { DataGrid, GridColDef, GridActionsCellItem } from '@mui/x-data-grid';
 import { Plus, Search, Edit, Trash2, Eye } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'sonner';
-import { Prestador } from "@/integrations/supabase/index";
+import { Prestador } from '@/integrations/supabase/index';
 
 export default function Prestadores() {
   const [search, setSearch] = useState('');
   const [dialogOpen, setDialogOpen] = useState(false);
   const [editingPrestador, setEditingPrestador] = useState<Prestador | null>(null);
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const [prestadorToDelete, setPrestadorToDelete] = useState<Prestador | null>(null);
 
   const [formData, setFormData] = useState({
     nombre: '',
@@ -33,7 +35,6 @@ export default function Prestadores() {
     codigo_sistema: '' as string | number,
     codigo_anterior: '' as string | number,
     nombre_sistema: '',
-    // Campos de ubicación
     departamento: '',
     municipio: '',
     vereda: '',
@@ -45,10 +46,7 @@ export default function Prestadores() {
   const { data: prestadores, isLoading } = useQuery({
     queryKey: ['prestadores', search],
     queryFn: async () => {
-      let query = supabase
-        .from('prestador')
-        .select('*, ubicacion(*)')
-        .order('nombre');
+      let query = supabase.from('prestador').select('*, ubicacion(*)').order('nombre');
 
       if (search) {
         query = query.or(`nombre.ilike.%${search}%,nit.ilike.%${search}%`);
@@ -62,31 +60,33 @@ export default function Prestadores() {
 
   const createMutation = useMutation({
     mutationFn: async (data: typeof formData) => {
-      // 1. Crear Ubicación
       const { data: ubicacion, error: ubiError } = await supabase
         .from('ubicacion')
-        .insert([{
-          departamento: data.departamento,
-          municipio: data.municipio,
-          vereda: data.vereda || null
-        }])
+        .insert([
+          {
+            departamento: data.departamento,
+            municipio: data.municipio,
+            vereda: data.vereda || null,
+          },
+        ])
         .select()
         .single();
 
       if (ubiError) throw ubiError;
 
-      // 2. Crear Prestador
-      const { error: prestError } = await supabase.from('prestador').insert([{
-        nombre: data.nombre,
-        nit: data.nit,
-        direccion: data.direccion,
-        telefono: data.telefono,
-        id_autoridad_sanitaria: data.id_autoridad_sanitaria,
-        codigo_sistema: data.codigo_sistema ? Number(data.codigo_sistema) : null,
-        codigo_anterior: data.codigo_anterior ? Number(data.codigo_anterior) : null,
-        nombre_sistema: data.nombre_sistema,
-        id_ubicacion: ubicacion.id_ubicacion
-      }]);
+      const { error: prestError } = await supabase.from('prestador').insert([
+        {
+          nombre: data.nombre,
+          nit: data.nit,
+          direccion: data.direccion,
+          telefono: data.telefono,
+          id_autoridad_sanitaria: data.id_autoridad_sanitaria,
+          codigo_sistema: data.codigo_sistema ? Number(data.codigo_sistema) : null,
+          codigo_anterior: data.codigo_anterior ? Number(data.codigo_anterior) : null,
+          nombre_sistema: data.nombre_sistema,
+          id_ubicacion: ubicacion.id_ubicacion,
+        },
+      ]);
 
       if (prestError) throw prestError;
     },
@@ -99,20 +99,26 @@ export default function Prestadores() {
   });
 
   const updateMutation = useMutation({
-    mutationFn: async ({ id, id_ubicacion, data }: { id: number; id_ubicacion: number; data: typeof formData }) => {
-      // 1. Actualizar Ubicación
+    mutationFn: async ({
+      id,
+      id_ubicacion,
+      data,
+    }: {
+      id: number;
+      id_ubicacion: number;
+      data: typeof formData;
+    }) => {
       const { error: ubiError } = await supabase
         .from('ubicacion')
         .update({
           departamento: data.departamento,
           municipio: data.municipio,
-          vereda: data.vereda || null
+          vereda: data.vereda || null,
         })
         .eq('id_ubicacion', id_ubicacion);
 
       if (ubiError) throw ubiError;
 
-      // 2. Actualizar Prestador
       const { error: prestError } = await supabase
         .from('prestador')
         .update({
@@ -139,8 +145,6 @@ export default function Prestadores() {
 
   const deleteMutation = useMutation({
     mutationFn: async (prestador: Prestador) => {
-      // Nota: Debido a las FK, eliminamos el prestador. 
-      // Si la ubicación no se comparte, podrías eliminarla después.
       const { error } = await supabase
         .from('prestador')
         .delete()
@@ -154,6 +158,11 @@ export default function Prestadores() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['prestadores'] });
       toast.success('Registro eliminado');
+      setDeleteDialogOpen(false);
+      setPrestadorToDelete(null);
+    },
+    onError: (error) => {
+      toast.error('Error al eliminar prestador', { description: error.message });
     },
   });
 
@@ -180,7 +189,7 @@ export default function Prestadores() {
       updateMutation.mutate({
         id: editingPrestador.id_prestador,
         id_ubicacion: editingPrestador.id_ubicacion!,
-        data: formData
+        data: formData,
       });
     } else {
       createMutation.mutate(formData);
@@ -205,6 +214,22 @@ export default function Prestadores() {
     setDialogOpen(true);
   };
 
+  const openDeleteDialog = (prestador: Prestador) => {
+    setPrestadorToDelete(prestador);
+    setDeleteDialogOpen(true);
+  };
+
+  const closeDeleteDialog = () => {
+    if (deleteMutation.isPending) return;
+    setDeleteDialogOpen(false);
+    setPrestadorToDelete(null);
+  };
+
+  const handleConfirmDelete = () => {
+    if (!prestadorToDelete) return;
+    deleteMutation.mutate(prestadorToDelete);
+  };
+
   const columns: GridColDef[] = [
     { field: 'nombre', headerName: 'Nombre', flex: 0.4 },
     { field: 'nit', headerName: 'NIT', flex: 0.2 },
@@ -212,7 +237,7 @@ export default function Prestadores() {
       field: 'municipio',
       headerName: 'Municipio',
       flex: 0.2,
-      valueGetter: (params, row) => row.ubicacion?.municipio
+      valueGetter: (_, row) => row.ubicacion?.municipio,
     },
     { field: 'nombre_sistema', headerName: 'Sistema', flex: 0.3 },
     {
@@ -237,11 +262,7 @@ export default function Prestadores() {
           key={`delete-${String(params.row.id_prestador)}`}
           icon={<Trash2 size={18} />}
           label="Eliminar"
-          onClick={() => {
-            if (confirm('¿Eliminar prestador y su ubicación?')) {
-              deleteMutation.mutate(params.row);
-            }
-          }}
+          onClick={() => openDeleteDialog(params.row)}
         />,
       ],
     },
@@ -255,13 +276,16 @@ export default function Prestadores() {
             Prestadores
           </Typography>
           <Typography variant="body1" color="text.secondary">
-            Gestión de prestadores y su ubicación geográfica
+            Gestion de prestadores y su ubicacion geografica
           </Typography>
         </Box>
         <Button
           variant="contained"
           startIcon={<Plus size={20} />}
-          onClick={() => { resetForm(); setDialogOpen(true); }}
+          onClick={() => {
+            resetForm();
+            setDialogOpen(true);
+          }}
         >
           Nuevo Prestador
         </Button>
@@ -297,41 +321,161 @@ export default function Prestadores() {
 
       <Dialog
         open={dialogOpen}
-        onClose={() => { setDialogOpen(false); resetForm(); }}
+        onClose={() => {
+          setDialogOpen(false);
+          resetForm();
+        }}
         maxWidth="md"
         fullWidth
       >
-        <DialogTitle>
-          {editingPrestador ? 'Editar Prestador' : 'Nuevo Prestador'}
-        </DialogTitle>
+        <DialogTitle>{editingPrestador ? 'Editar Prestador' : 'Nuevo Prestador'}</DialogTitle>
         <form onSubmit={handleSubmit}>
           <DialogContent>
-            <Typography variant="subtitle2" color="primary" gutterBottom>Información General</Typography>
-            <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', sm: 'repeat(2, 1fr)' }, gap: 2, mb: 3 }}>
-              <TextField label="Nombre del Prestador" fullWidth required value={formData.nombre} onChange={(e) => setFormData({ ...formData, nombre: e.target.value })} />
-              <TextField label="NIT" fullWidth value={formData.nit} onChange={(e) => setFormData({ ...formData, nit: e.target.value })} />
-              <TextField label="Nombre del Sistema" fullWidth value={formData.nombre_sistema} onChange={(e) => setFormData({ ...formData, nombre_sistema: e.target.value })} />
-              <TextField label="ID Autoridad Sanitaria" fullWidth value={formData.id_autoridad_sanitaria} onChange={(e) => setFormData({ ...formData, id_autoridad_sanitaria: e.target.value })} />
-              <TextField label="Código Sistema" type="number" fullWidth value={formData.codigo_sistema} onChange={(e) => setFormData({ ...formData, codigo_sistema: e.target.value })} />
-              <TextField label="Código Anterior" type="number" fullWidth value={formData.codigo_anterior} onChange={(e) => setFormData({ ...formData, codigo_anterior: e.target.value })} />
-              <TextField label="Teléfono" fullWidth value={formData.telefono} onChange={(e) => setFormData({ ...formData, telefono: e.target.value })} />
-              <TextField label="Dirección" fullWidth value={formData.direccion} onChange={(e) => setFormData({ ...formData, direccion: e.target.value })} />
+            <Typography variant="subtitle2" color="primary" gutterBottom>
+              Informacion General
+            </Typography>
+            <Box
+              sx={{
+                display: 'grid',
+                gridTemplateColumns: { xs: '1fr', sm: 'repeat(2, 1fr)' },
+                gap: 2,
+                mb: 3,
+              }}
+            >
+              <TextField
+                label="Nombre del Prestador"
+                fullWidth
+                required
+                value={formData.nombre}
+                onChange={(e) => setFormData({ ...formData, nombre: e.target.value })}
+              />
+              <TextField
+                label="NIT"
+                fullWidth
+                value={formData.nit}
+                onChange={(e) => setFormData({ ...formData, nit: e.target.value })}
+              />
+              <TextField
+                label="Nombre del Sistema"
+                fullWidth
+                value={formData.nombre_sistema}
+                onChange={(e) => setFormData({ ...formData, nombre_sistema: e.target.value })}
+              />
+              <TextField
+                label="ID Autoridad Sanitaria"
+                fullWidth
+                value={formData.id_autoridad_sanitaria}
+                onChange={(e) =>
+                  setFormData({ ...formData, id_autoridad_sanitaria: e.target.value })
+                }
+              />
+              <TextField
+                label="Codigo Sistema"
+                type="number"
+                fullWidth
+                value={formData.codigo_sistema}
+                onChange={(e) => setFormData({ ...formData, codigo_sistema: e.target.value })}
+              />
+              <TextField
+                label="Codigo Anterior"
+                type="number"
+                fullWidth
+                value={formData.codigo_anterior}
+                onChange={(e) => setFormData({ ...formData, codigo_anterior: e.target.value })}
+              />
+              <TextField
+                label="Telefono"
+                fullWidth
+                value={formData.telefono}
+                onChange={(e) => setFormData({ ...formData, telefono: e.target.value })}
+              />
+              <TextField
+                label="Direccion"
+                fullWidth
+                value={formData.direccion}
+                onChange={(e) => setFormData({ ...formData, direccion: e.target.value })}
+              />
             </Box>
 
-            <Typography variant="subtitle2" color="primary" gutterBottom>Ubicación (Obligatoria)</Typography>
-            <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', sm: 'repeat(3, 1fr)' }, gap: 2 }}>
-              <TextField label="Departamento" required fullWidth value={formData.departamento} onChange={(e) => setFormData({ ...formData, departamento: e.target.value })} />
-              <TextField label="Municipio" required fullWidth value={formData.municipio} onChange={(e) => setFormData({ ...formData, municipio: e.target.value })} />
-              <TextField label="Vereda" fullWidth value={formData.vereda} onChange={(e) => setFormData({ ...formData, vereda: e.target.value })} />
+            <Typography variant="subtitle2" color="primary" gutterBottom>
+              Ubicacion (Obligatoria)
+            </Typography>
+            <Box
+              sx={{
+                display: 'grid',
+                gridTemplateColumns: { xs: '1fr', sm: 'repeat(3, 1fr)' },
+                gap: 2,
+              }}
+            >
+              <TextField
+                label="Departamento"
+                required
+                fullWidth
+                value={formData.departamento}
+                onChange={(e) => setFormData({ ...formData, departamento: e.target.value })}
+              />
+              <TextField
+                label="Municipio"
+                required
+                fullWidth
+                value={formData.municipio}
+                onChange={(e) => setFormData({ ...formData, municipio: e.target.value })}
+              />
+              <TextField
+                label="Vereda"
+                fullWidth
+                value={formData.vereda}
+                onChange={(e) => setFormData({ ...formData, vereda: e.target.value })}
+              />
             </Box>
           </DialogContent>
           <DialogActions sx={{ px: 3, pb: 2 }}>
-            <Button onClick={() => { setDialogOpen(false); resetForm(); }}>Cancelar</Button>
-            <Button type="submit" variant="contained" disabled={createMutation.isPending || updateMutation.isPending}>
+            <Button
+              onClick={() => {
+                setDialogOpen(false);
+                resetForm();
+              }}
+            >
+              Cancelar
+            </Button>
+            <Button
+              type="submit"
+              variant="contained"
+              disabled={createMutation.isPending || updateMutation.isPending}
+            >
               {editingPrestador ? 'Actualizar' : 'Crear'}
             </Button>
           </DialogActions>
         </form>
+      </Dialog>
+
+      <Dialog open={deleteDialogOpen} onClose={closeDeleteDialog} maxWidth="xs" fullWidth>
+        <DialogTitle>Confirmar eliminacion</DialogTitle>
+        <DialogContent>
+          <Typography>
+            Esta accion no se puede deshacer. El prestador y su ubicacion asociada seran eliminados
+            del sistema.
+          </Typography>
+          <Typography variant="body2" color="text.secondary" sx={{ mt: 1.5 }}>
+            Prestador:{' '}
+            {prestadorToDelete?.nombre ||
+              prestadorToDelete?.nit ||
+              prestadorToDelete?.id_prestador}
+          </Typography>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={closeDeleteDialog} disabled={deleteMutation.isPending}>
+            Cancelar
+          </Button>
+          <Button
+            color="error"
+            variant="contained"
+            onClick={handleConfirmDelete}
+            disabled={deleteMutation.isPending}
+          >
+            {deleteMutation.isPending ? 'Eliminando...' : 'Eliminar permanentemente'}
+          </Button>
+        </DialogActions>
       </Dialog>
     </Box>
   );
